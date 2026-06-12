@@ -1,0 +1,17 @@
+# env / secrets — never commit API keys
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+*.swp
+
+# scratch renders / audio (skills write into a separate studio/ repo, not here)
+*.mp4
+*.mp3
+*.wav
+/tmp/
+
+# python
+__pycache__/
+*.pyc
