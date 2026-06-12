@@ -43,17 +43,27 @@ def parse_ts(text):
 
 
 # ---------- speakers:/v1/speakers/list JSON → 可读音色表 ----------
+def find_speaker_list(node):
+    """递归找「元素是带 speakerId 的 dict」的列表,对 {code,data:{items:[...]}} 这类 envelope 免疫。"""
+    if isinstance(node, list):
+        if node and isinstance(node[0], dict) and ("speakerId" in node[0] or "id" in node[0]):
+            return node
+        for x in node:
+            r = find_speaker_list(x)
+            if r:
+                return r
+    elif isinstance(node, dict):
+        for v in node.values():
+            r = find_speaker_list(v)
+            if r:
+                return r
+    return None
+
+
 def speakers(a):
     raw = sys.stdin.read() if a.input == "-" else open(a.input, encoding="utf-8").read()
-    data = json.loads(raw)
-    items = None
-    if isinstance(data, list):
-        items = data
-    elif isinstance(data, dict):
-        for k in ("data", "speakers", "list", "result", "items"):
-            if isinstance(data.get(k), list):
-                items = data[k]; break
-    if items is None:
+    items = find_speaker_list(json.loads(raw))
+    if not items:
         print("speakers: no speaker list found in JSON", file=sys.stderr); sys.exit(1)
     for s in items:
         if not isinstance(s, dict):
