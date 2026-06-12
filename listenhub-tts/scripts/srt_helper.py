@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """SRT 帮手(纯标准库,无第三方依赖)。子命令:
 
+  speakers  <json|->                        ListenHub /v1/speakers/list 的 JSON → 可读音色表
   buildreq  <txt> <speakerId> [--model M]   口播文本 → 切句 → ListenHub /v1/speech 请求体
                                             {"scripts":[{content,speakerId}...]} (打到 stdout)
   normalize <raw_subtitle> <out.srt>        ListenHub 自带字幕(VTT/JSON/SRT 任一)→ 规整 SRT
@@ -39,6 +40,41 @@ def parse_ts(text):
         return v / 1000.0 if v > 10000 else v                # 大数当毫秒
     except ValueError:
         return 0.0
+
+
+# ---------- speakers:/v1/speakers/list JSON → 可读音色表 ----------
+def speakers(a):
+    raw = sys.stdin.read() if a.input == "-" else open(a.input, encoding="utf-8").read()
+    data = json.loads(raw)
+    items = None
+    if isinstance(data, list):
+        items = data
+    elif isinstance(data, dict):
+        for k in ("data", "speakers", "list", "result", "items"):
+            if isinstance(data.get(k), list):
+                items = data[k]; break
+    if items is None:
+        print("speakers: no speaker list found in JSON", file=sys.stderr); sys.exit(1)
+    for s in items:
+        if not isinstance(s, dict):
+            continue
+        sid = s.get("speakerId") or s.get("id") or "?"
+        name = s.get("name", "")
+        gender = s.get("gender", "")
+        prof = s.get("profile") or {}
+        styles = ",".join(prof.get("styles", []) or [])
+        scenes = ",".join(prof.get("scenes", []) or [])
+        accent = prof.get("accent", "")
+        dl = prof.get("descriptionLocalized") or {}
+        desc = dl.get("zh") or dl.get("en") or prof.get("description", "")
+        bits = [b for b in (gender, accent, styles, scenes) if b]
+        line = f"{sid}  ·  {name}"
+        if bits:
+            line += "  [" + " | ".join(bits) + "]"
+        if desc:
+            line += f"  — {desc}"
+        print(line)
+    print(f"\n{len(items)} speakers (复制上面的 speakerId 作脚本第 3 参)", file=sys.stderr)
 
 
 # ---------- buildreq:文本 → 切句 → /v1/speech 请求体 ----------
@@ -212,6 +248,8 @@ def correct(a):
 
 p = argparse.ArgumentParser()
 sub = p.add_subparsers(dest="cmd", required=True)
+
+sp = sub.add_parser("speakers"); sp.add_argument("input"); sp.set_defaults(fn=speakers)
 
 br = sub.add_parser("buildreq"); br.add_argument("input"); br.add_argument("speaker")
 br.add_argument("--model", default=""); br.set_defaults(fn=buildreq)

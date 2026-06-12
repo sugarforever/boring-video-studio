@@ -21,7 +21,7 @@ npx skills add sugarforever/boring-video-studio
 
 | Skill | 输入 → 输出 | 用途 |
 |---|---|---|
-| **`listenhub-tts`** | 口播文本 → `narration-full.mp3` + `narration.srt` | 上游:ListenHub 原生 `/v1/speech` 出音频 + **自带字幕**(首选,文字零识别错);云端 ASR(Groq/OpenAI Whisper)作 fallback + 文本级校正 |
+| **`listenhub-tts`** | 口播文本 → `narration-full.mp3` + `narration.srt` | 上游:选音色(ListenHub speakers)→ 原生 `/v1/speech` 出音频 + **自带字幕**(首选,文字零识别错);云端 ASR(Groq/OpenAI Whisper)作 fallback + 文本级校正 |
 | **`producing-video`** | 音频 + SRT → 4K MP4 | 下游:用 HyperFrames(HTML 即视频)按 SRT 时间轴搭合成、渲染成片 |
 
 两者组成完整链路:
