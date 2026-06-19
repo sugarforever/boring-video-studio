@@ -1,0 +1,66 @@
+<!doctype html>
+<!-- ===================================================================
+     BlockFrame cover · VERTICAL template
+     Use for:  cover-3x4.html  (1080×1440, mobile main)
+               cover-9x16.html (1080×1920, Shorts/full-screen)
+     Fill the «PLACEHOLDERS», then render with render-all-covers.sh.
+     Retarget ratio: change .cover{width/height} only (3:4 → 9:16 just
+     taller); nudge .hero top / .motif & .foot bottom to rebalance.
+     Fonts: local ./fonts/*.woff2 must sit next to this file.
+     ==================================================================== -->
+<html lang="zh-CN"><head><meta charset="utf-8" /><meta name="color-scheme" content="light">
+<style>
+@font-face{font-family:"Space Grotesk";src:url("fonts/space-grotesk-700.woff2") format("woff2");font-weight:700;font-display:block;}
+@font-face{font-family:"Noto Sans SC";src:url("fonts/noto-sans-sc-900.woff2") format("woff2");font-weight:900;font-display:block;}
+@font-face{font-family:"Noto Sans SC";src:url("fonts/noto-sans-sc-700.woff2") format("woff2");font-weight:700;font-display:block;}
+@font-face{font-family:"Noto Sans SC";src:url("fonts/noto-sans-sc-500.woff2") format("woff2");font-weight:500;font-display:block;}
+@font-face{font-family:"JetBrains Mono";src:url("fonts/jetbrains-mono-600.woff2") format("woff2");font-weight:600;font-display:block;}
+:root{--cream:#FFFDF5;--ink:#000;--ink2:#2A2A24;--pink:#FE90E8;--blue:#C0F7FE;--green:#99E885;--yellow:#F7CB46;--gold:#FFDC8B;
+--disp:"Space Grotesk","Noto Sans SC",sans-serif;--zh:"Noto Sans SC",sans-serif;--mono:"JetBrains Mono",monospace;}
+*{margin:0;padding:0;box-sizing:border-box;}html,body{background:#000;}
+/* ← 3:4 = 1080×1440 · 9:16 = 1080×1920 */
+.cover{position:relative;width:1080px;height:1440px;background:var(--cream);color:var(--ink);overflow:hidden;font-family:var(--zh);}
+.cover::before{content:"";position:absolute;inset:0;background-image:radial-gradient(var(--ink) 1.5px,transparent 1.5px);background-size:44px 44px;opacity:.05;}
+.frame{position:absolute;inset:30px;border:6px solid var(--ink);}
+.top{position:absolute;left:78px;right:78px;top:76px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-weight:600;font-size:25px;letter-spacing:.10em;text-transform:uppercase;}
+.top .pill{border:3px solid var(--ink);border-radius:999px;padding:8px 20px;}
+.hero{position:absolute;left:78px;right:78px;top:250px;}
+.kick{display:inline-block;background:var(--ink);color:var(--cream);font-weight:700;font-size:30px;letter-spacing:.05em;padding:10px 22px;margin-bottom:36px;}
+.t1{font-family:var(--disp);font-weight:700;font-size:188px;line-height:.9;letter-spacing:-.02em;}
+.t2{margin-top:28px;}
+.hl{display:inline-block;font-family:var(--zh);font-weight:900;font-size:128px;line-height:1.0;letter-spacing:.01em;
+  background:var(--green);border:7px solid var(--ink);box-shadow:18px 18px 0 var(--ink);padding:.06em .16em .14em;}
+.sub{margin-top:50px;font-weight:500;font-size:43px;line-height:1.35;color:var(--ink2);}
+.sub b{font-weight:700;color:var(--ink);}
+/* a small motif box — swap the rows for your episode's visual metaphor */
+.motif{position:absolute;left:78px;right:78px;bottom:240px;}
+.mbox{border:5px solid var(--ink);background:#FBF7EA;box-shadow:12px 12px 0 var(--ink);padding:22px 22px 20px;position:relative;}
+.mbox .lab{position:absolute;left:-5px;top:-40px;background:var(--ink);color:var(--cream);font-family:var(--mono);font-weight:600;font-size:22px;letter-spacing:.10em;padding:7px 14px;}
+.row{display:flex;align-items:baseline;gap:14px;border:4px solid var(--ink);background:#FFFEF8;padding:11px 16px;box-shadow:5px 5px 0 var(--ink);}
+.row + .row{margin-top:12px;}
+.row .n{font-family:var(--mono);font-weight:600;font-size:26px;min-width:120px;}
+.row .d{font-family:var(--zh);font-weight:500;font-size:24px;color:#4a473d;}
+.row.on{background:var(--yellow);}
+.foot{position:absolute;left:78px;right:78px;bottom:84px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-weight:600;font-size:24px;letter-spacing:.08em;text-transform:uppercase;}
+.foot .dot{display:inline-block;width:10px;height:10px;background:var(--ink);border-radius:50%;margin:0 12px;transform:translateY(-3px);}
+</style></head>
+<body>
+<div class="cover">
+  <div class="frame"></div>
+  <div class="top"><span class="pill">«BRAND»</span><span>«KICKER»</span></div>
+  <div class="hero">
+    <span class="kick">«KICKER · 副标题»</span>
+    <div class="t1">«BigWord»</div>
+    <div class="t2"><span class="hl">«高亮词»</span></div>
+    <div class="sub">«一句副文案» - <b>«强调的半句»</b></div>
+  </div>
+  <div class="motif">
+    <div class="mbox">
+      <span class="lab">«标签»</span>
+      <div class="row on"><span class="n">«要点 A»</span><span class="d">«说明»</span></div>
+      <div class="row"><span class="n">«要点 B»</span><span class="d">«说明»</span></div>
+    </div>
+  </div>
+  <div class="foot"><span>«左角标»<span class="dot"></span>«右半»</span><span>竖屏 · 3:4</span></div>
+</div>
+</body></html>

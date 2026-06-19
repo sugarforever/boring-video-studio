@@ -1,6 +1,6 @@
 # boring-video-studio
 
-口播视频制作的 Agent Skills 合集。把一段**口播文本**或一份**音频 + 字幕**,变成画面跟着声音走的 4K 成片。
+口播视频制作的 Agent Skills 合集。把一个**主题**或一段**口播文本**,变成画面跟着声音走的 4K 成片 —— 既可以用两个积木 skill 自己拼,也可以用编排 skill **一次会话产出整套物料**(成片 + 全比例封面 + 平台文案)。
 
 为 [Claude Code](https://claude.com/claude-code) 等支持 Agent Skills 的工具准备。
 
@@ -21,17 +21,20 @@ npx skills add sugarforever/boring-video-studio
 
 | Skill | 输入 → 输出 | 用途 |
 |---|---|---|
-| **`listenhub-tts`** | 口播文本 → `narration-full.mp3` + `narration.srt` | 上游:选音色(ListenHub speakers)→ 原生 `/v1/speech` 出音频 + **自带字幕**(首选,文字零识别错);云端 ASR(Groq/OpenAI Whisper)作 fallback + 文本级校正 |
-| **`producing-video`** | 音频 + SRT → 4K MP4 | 下游:用 HyperFrames(HTML 即视频)按 SRT 时间轴搭合成、渲染成片 |
+| **`blockframe-video`** | 主题 / 口播稿 → **整套物料** | **编排层**:一次会话产出成片 + **全比例封面**(3:4 / 9:16 / 16:9 / 16:10 / 4:3) + 平台文案(YouTube / Bilibili),按交付清单验收、缺一不可。BlockFrame 设计系统;支持移动竖屏短视频(short,主 3:4)与横版长视频(long,主 16:9) |
+| **`listenhub-tts`** | 口播文本 → `narration-full.mp3` + `narration.srt` | 上游积木:选音色(ListenHub speakers)→ 原生 `/v1/speech` 出音频 + **自带字幕**(首选,文字零识别错);云端 ASR(Groq/OpenAI Whisper)作 fallback + 文本级校正 |
+| **`producing-video`** | 音频 + SRT → 4K MP4 | 下游积木:用 HyperFrames(HTML 即视频)按 SRT 时间轴搭合成、渲染成片 |
 
-两者组成完整链路:
+`blockframe-video` 编排另外两个积木,补齐它们之间「整套物料」这一层:
 
 ```
-narration.txt ──[listenhub-tts]──▶ narration-full.mp3 + narration.srt ──[producing-video]──▶ 4K MP4
+                  ┌──────────────── blockframe-video(编排:全比例封面 + 平台文案 + 清单验收)────────────────┐
+主题 / 口播稿 ──▶ │ narration.txt ─[listenhub-tts]▶ mp3 + srt ─[producing-video]▶ 4K MP4 + 全比例封面 + 文案 │ ──▶ 整套物料
+                  └──────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-- 用户**只有文本** → 先 `listenhub-tts`,再 `producing-video`。
-- 用户**已有音频 + SRT** → 直接 `producing-video`,跳过上游。
+- 想**一步到位出整套物料**(系列日更/短视频) → 用 `blockframe-video`。
+- 只想要**积木**自己拼:只有文本 → 先 `listenhub-tts` 再 `producing-video`;已有音频 + SRT → 直接 `producing-video`。
 
 ## 依赖
 

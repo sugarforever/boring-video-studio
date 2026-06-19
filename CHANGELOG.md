@@ -6,6 +6,30 @@
 `npx skills add sugarforever/boring-video-studio` 跟踪的是 `main` 分支最新内容;
 tag(如 `v0.1.0`)用于标记发版节点,方便对照。
 
+## [0.2.0] — 2026-06-18
+
+新增编排 skill,把两个积木升级成「一次会话产出整套物料」。
+
+### Added
+
+- **`blockframe-video`** —— 主题 / 口播稿 → **整套视频物料**(编排 `listenhub-tts` + `producing-video`)。
+  补齐两个积木之间最容易漏的「交付完整性」这一层:
+  - **交付清单写死、自动验收**:成片(已 `loudnorm` -14 LUFS)+ 字幕 + **全比例封面**
+    (3:4 / 9:16 / 16:9 / 16:10 / 4:3)+ 平台文案(`youtube.md` / `bilibili.md`)。
+    `scripts/check-deliverables.sh` 收尾验,有 ✗ 不算完成 —— 不再靠人手动提醒「还要 4:3 封面」。
+  - **全比例封面一键渲**:`scripts/render-all-covers.sh` 遍历 `cover-*.html` → `cover-*.png`,
+    用系统 Chrome headless 2× 超采样(`scripts/render-cover.sh`,无 npm 依赖)。
+  - **格式分支**:short(移动竖屏,主 3:4)/ long(横版,主 16:9)走同一流水线,只换画布/分辨率/封面集/节奏。
+  - **3:4 的 4K 解法**(实测):`hyperframes render --resolution` 无 3:4 预设;用 `zoom:2` + 翻倍捕获画布
+    做真·超采样到 2160×2880(9:16 用 `portrait-4k`、16:9 用 `landscape-4k`)。
+  - **assets**:`kit.css`(BlockFrame HyperFrames 组件内核)+ `cover-vertical.html` / `cover-horizontal.html`
+    (全比例封面模板)。
+
+### Verified
+
+- 封面渲染:系统 Chrome headless `--screenshot --force-device-scale-factor=2` 实测出 2× 清晰 PNG、本地 woff2 字体正常。
+- 3:4 4K:seg-01 实测 `zoom:2` 超采样渲出 2160×2880、文字重栅格化、GSAP seek 渲染正常、非空白。
+
 ## [0.1.0] — 2026-06-12
 
 口播视频制作 skills 的首个版本。两个扁平 skill,组成 `文稿/音频 → 4K 成片` 链路。
@@ -42,4 +66,5 @@ tag(如 `v0.1.0`)用于标记发版节点,方便对照。
 - producing-video 从 `sugarforever/01coder-agent-skills` 迁出;原 PR #12 关闭,该 skill
   不再留在 01coder。
 
+[0.2.0]: https://github.com/sugarforever/boring-video-studio/releases/tag/v0.2.0
 [0.1.0]: https://github.com/sugarforever/boring-video-studio/releases/tag/v0.1.0
