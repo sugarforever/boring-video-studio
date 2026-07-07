@@ -21,9 +21,11 @@ npx skills add sugarforever/boring-video-studio
 
 | Skill | 输入 → 输出 | 用途 |
 |---|---|---|
+| **`finance-stock-video`** | 一个公司(代码) / 财经主题 → **整套财经视频物料** | **财经领域层**(坐在 blockframe-video 之上):给个 A 股公司或「某股为什么涨」这类主题,先**核实官方财报原件**,再出客观脚本(提问开头 / 章节化 / 不构成投资建议)→ 灵依配音 → 横版(B站·YT)+ 竖版(抖音·小红书·视频号)成片 + 4 比例封面 + 平台文案。管财经独有的**数据获取核实、客观口径红线、财报内容模板、《A股上市公司速览》系列身份** |
 | **`blockframe-video`** | 主题 / 口播稿 → **整套物料** | **编排层**:一次会话产出成片 + **全比例封面**(3:4 / 9:16 / 16:9 / 16:10 / 4:3) + 平台文案(YouTube / Bilibili),按交付清单验收、缺一不可。BlockFrame 设计系统;支持移动竖屏短视频(short,主 3:4)与横版长视频(long,主 16:9) |
-| **`listenhub-tts`** | 口播文本 → `narration-full.mp3` + `narration.srt` | 上游积木:选音色(ListenHub speakers)→ 原生 `/v1/speech` 出音频 + **自带字幕**(首选,文字零识别错);云端 ASR(Groq/OpenAI Whisper)作 fallback + 文本级校正 |
+| **`listenhub-tts`** | 口播文本 → `narration-full.mp3` + `narration.srt` | 上游积木:选音色(ListenHub speakers)→ 原生 `/v1/speech` 出音频 + **自带字幕**(首选,文字零识别错);云端 ASR(Groq/OpenAI Whisper)作 fallback + 文本级校正;**跑 TTS 前多音字扫描**(`scan-heteronyms.sh`,防「调用」读成 tiáo) |
 | **`producing-video`** | 音频 + SRT → 4K MP4 | 下游积木:用 HyperFrames(HTML 即视频)按 SRT 时间轴搭合成、渲染成片 |
+| **`brand-icons`** | 品牌名 → 官方 SVG logo | 配料:从 LobeHub Icons CDN 取真实的 AI / 公司品牌标(OpenAI、Codex、Anthropic、GLM/智谱、Gemini……)放进封面 / 合成,不手画不 AI 生成 |
 
 `blockframe-video` 编排另外两个积木,补齐它们之间「整套物料」这一层:
 

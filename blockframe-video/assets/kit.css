@@ -56,6 +56,25 @@ html,body{background:#000;}
 .wrap{position:absolute;left:64px;right:64px;top:132px;bottom:120px;display:flex;flex-direction:column;}
 .wrap.center{justify-content:center;}
 .wrap.gap > * + *{margin-top:30px;}
+/* fill: content as ONE centered block (kicker+lead / hero / bottom-card), avoids
+   the "clustered at top, empty bottom" look on vertical formats. Prefer over .gap
+   for body scenes. Use center+gap (NOT space-between, which over-stretches). */
+.wrap.fill{justify-content:center;gap:60px;}
+.ztop > * + *{margin-top:24px;}          /* group kicker + a lead line in the top zone */
+/* bottom "why / takeaway" card — gives thin scenes a third anchor so they fill */
+.botcard{border:6px solid var(--ink);background:#FFFEF8;box-shadow:13px 13px 0 var(--ink);padding:32px 36px;}
+.botcard .bl{font-family:var(--mono);font-weight:600;font-size:27px;letter-spacing:.04em;color:var(--ink2);margin-bottom:12px;}
+.botcard .bb{font-family:var(--zh);font-weight:800;font-size:46px;line-height:1.22;color:var(--ink);}
+.botcard.g{background:var(--green);} .botcard.b{background:var(--blue);} .botcard.y{background:var(--yellow);} .botcard.p{background:var(--pink);}
+/* CTA outro (like / follow / share end card) */
+.ctawrap{position:absolute;left:64px;right:64px;top:150px;bottom:160px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:64px;}
+.cta-h{font-family:var(--zh);font-weight:900;font-size:96px;line-height:1.12;}
+.cta-h .hl{font-size:96px;}
+.cta-row{display:flex;gap:30px;}
+.cta{display:flex;flex-direction:column;align-items:center;gap:16px;border:7px solid var(--ink);box-shadow:15px 15px 0 var(--ink);padding:42px 40px;min-width:236px;}
+.cta.a{background:var(--pink);} .cta.b{background:var(--blue);} .cta.c{background:var(--green);}
+.cta .ci{font-family:var(--disp);font-weight:700;font-size:92px;line-height:1;}
+.cta .cl{font-family:var(--zh);font-weight:900;font-size:50px;color:var(--ink);}
 
 /* ---------- type ---------- */
 .kick{display:inline-block;align-self:flex-start;background:var(--ink);color:var(--cream);

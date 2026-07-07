@@ -74,7 +74,7 @@ cp <user-srt>   audio/narration.srt
 
 ### Step 4 · 编写合成（index.html）
 
-- **持久 chrome**：页眉/页脚/栅格/边框这类每一场都在的元素，放在场景**之外**（直接挂 `#root`，不是 clip），整片不动 —— 营造"节目"感。
+- **持久 chrome（宁少勿多）**：栅格/边框/进度条/一个角落的品牌 pill 这类每场都在的元素，放在场景**之外**（直接挂 `#root`，不是 clip），整片不动。**克制是关键**：chrome 只承担定位和品牌，**别塞填充式文字标签** —— "AI 资讯 · 客观分享""横版 · 16:9""竖版 · 3:4"这种既不是核心内容、又每一帧都杵在那儿的字，是噪声，一律删掉。够用的持久 chrome ＝ 细边框 + 进度条 + 一个小小的品牌 pill，别的都不要（页眉的系列/主题名可留一个，或也删）。
 - **音频一条连续 clip**（"音频即时钟"）：
   ```html
   <audio id="vo" src="audio/narration-full.mp3" data-start="0" data-duration="<总时长>" data-track-index="20" data-volume="1"></audio>
@@ -121,6 +121,20 @@ npx hyperframes inspect --samples 30   # 版面溢出，带时间戳；场景多
 - 验收：`ffprobe` 确认有 video(h264) + audio(aac) 两条轨且时长对得上（**CLI 汇总行的时长可能误报，以 `ffprobe` 为准**）；抽帧确认每场落在它的 cue 上。
 
 成片留在 `studio/videos/<slug>/renders/`。**不要自动提交**（除非用户明确要）。
+
+### Step 7 · 封面（同套 token，核心优先）
+
+各平台封面用**独立的静态 HTML**（无 GSAP，全部元素直接可见），复用成片的 `kit.css` + `fonts/`，截图成 PNG（本地 `python3 -m http.server` + Playwright，`scale:'device'` 取 2×）。常见尺寸：`cover-16x9`（横版主）、`cover-3x4` / `cover-9x16`（竖版）、`cover-4x3`（备用）。
+
+**封面纪律 = 少即是多**：一个压倒性的核心标题 + 少量辅助信息，别的都删。
+
+- **删掉填充式 chrome**：eyebrow/kicker（"上一期…的 follow-up" 这类前缀）、页眉次级说明行、页脚 tagline、比例标签（"横版 · 16:9"）—— 这些都不是核心，全去掉。
+- **留什么**：核心标题（大号衬线/黑体）＋ 一句副标题＋（可选）一个小 rail 预览 3–4 条内容要点；再加一个小小的品牌 pill 就够了。
+- 删掉 eyebrow 后记得把标题块的垂直定位重新居中一下（原来给 eyebrow 留的位置会让标题偏高）。
+
+### 语速与 1.1× 提速（上游音频阶段）
+
+口播偏慢的作者（本项目常见），在上游出音频时就该提速再交付：`ffmpeg -af "atempo=1.1,loudnorm=I=-14:TP=-1.5:LRA=11"`，**同时把 SRT 时间戳按 1/1.1 缩放**（否则字幕与画面全部错位）。校验：`ffprobe` 量成片时长应等于「原始 TTS 时长 ÷ 1.1」，不是原始时长 —— 用这个比值确认提速真的生效了。详见 `listenhub-tts` skill。
 
 ---
 
@@ -173,4 +187,7 @@ function wipe(sel, i){ tl.fromTo(sel, {clipPath:"inset(0 100% 0 0)"}, {clipPath:
 - [ ] `ffprobe`：video + audio 两轨、时长 = 音频时长（CLI 汇总行时长可能误报）
 - [ ] 响度已核查：低于 -16 LUFS 已 `loudnorm` 到 -14（`-c:v copy` 不重渲）
 - [ ] master 用 4K high（除非用户另说）
+- [ ] chrome 精简：无填充式页眉/页脚标签（"AI 资讯 · 客观分享""横版 · 16:9" 之类），只剩边框 + 进度条 + 小品牌 pill
+- [ ] 封面核心优先：无 eyebrow / 页眉次级行 / 页脚 tagline / 比例标签，突出主标题
+- [ ] 若作者语速偏慢：音频已 1.1× 提速且 SRT 已按 1/1.1 缩放（成片时长 = 原始 TTS ÷ 1.1）
 - [ ] 成片在 `studio/videos/<slug>/renders/`，未自动提交
