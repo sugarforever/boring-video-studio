@@ -4,10 +4,12 @@ import json, os, sys, subprocess, urllib.request, tempfile
 from concurrent.futures import ThreadPoolExecutor
 
 KEY = os.environ["LISTENHUB_API_KEY"]
-SPEAKER = "zh-female-wanwanxiaohe-moon-bigtts-fa851a51"
+# 音色/速度可配（默认财经系列：灵依 1.2x）；通用/克隆音色用 env 覆盖：
+#   TTS_SPEAKER=voice-clone-6a29dd635b88331426c4ecbc TTS_TEMPO=1.0（VerySmallWoods 克隆，自然速）
+SPEAKER = os.environ.get("TTS_SPEAKER", "zh-female-wanwanxiaohe-moon-bigtts-fa851a51")
 BASE = "https://api.marswave.ai/openapi/v1/speech"
 SR = 44100
-TEMPO = 1.2
+TEMPO = float(os.environ.get("TTS_TEMPO", "1.2"))
 OUTDIR = sys.argv[1]  # episode dir to write narration-full.mp3 + narration.srt
 CLIPS = "/tmp/tts_clips"; os.makedirs(CLIPS, exist_ok=True)
 
