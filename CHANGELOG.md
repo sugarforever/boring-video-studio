@@ -6,6 +6,14 @@
 `npx skills add sugarforever/boring-video-studio` 跟踪的是 `main` 分支最新内容;
 tag(如 `v0.1.0`)用于标记发版节点,方便对照。
 
+## [0.4.1] — 2026-07-07
+
+- **`blockframe-video`** —— 新增**「项目目录结构」规范**：一个选题一个项目目录，横竖两版是
+  `build-h` / `build-v` 两个子目录、共用上层 `audio/` `assets/` `fonts/`（软链引入）；
+  `renders/` 只留母版+响度版、`covers/` 收全比例封面、`publish.md`/`blog.md` 各就各位。
+  **明确别再散成 `<slug>-cn`/`-3x4`/`-16x9` 平级兄弟目录**（踩过：散乱易漏难归档）。
+  Step 0 起项目片段同步。`finance-stock-video` 引用该结构。
+
 ## [0.4.0] — 2026-07-07
 
 - **`finance-stock-video`（新）** —— 财经/A股个股视频**专用领域层**，坐在 `blockframe-video` 之上。

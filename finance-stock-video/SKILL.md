@@ -9,6 +9,8 @@ description: 财经/A股个股视频专用制作层 —— 给一个公司（股
 
 本 skill 是 **财经领域层**，坐在 **`blockframe-video`**（通用视频编排：合成 / 渲染 / 全比例封面 / 清单）之上，只补它没有的、财经独有的东西。视频怎么渲、封面怎么配全，交给 blockframe-video；本 skill 管**数据从哪来、口径怎么守、内容怎么排、系列长什么样**。
 
+**项目目录结构**：一个选题一个项目目录（`studio/videos/<YYYYMMDD-slug>/`），横竖两版是里面的 `build-h` / `build-v` 两个子目录、共用上层 `audio/` `assets/` `fonts/`；`research.md` / `script.md` / `narration.txt` / `renders/` / `covers/` / `publish.md` / `blog.md` 各就各位。**别再散成 `-cn`/`-3x4`/`-16x9` 兄弟目录**。完整结构见 blockframe-video 的「项目目录结构」。
+
 ## 三条铁律（违反任何一条这期就是废的）
 
 1. **数字必须核对官方原件，不信转述。** 下定期报告 PDF → `pdftotext -layout` → `grep` 核对每个关键数字。子 agent / 媒体给的数字一律回原件核。
