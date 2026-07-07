@@ -6,6 +6,15 @@
 `npx skills add sugarforever/boring-video-studio` 跟踪的是 `main` 分支最新内容;
 tag(如 `v0.1.0`)用于标记发版节点,方便对照。
 
+## [0.4.2] — 2026-07-07
+
+- **`producing-video`** —— 新增 **Step 6「预览 · 让用户先过目」**，一道渲染前的人工闸门。
+  用 `npx hyperframes preview` 起本地 studio 在浏览器里**按时间轴播放**合成（带播放头/scrub、
+  音频同放、热更新），中间迭代全在这里做，`render` 只留到最后一次。要点：**别直接双开
+  `index.html`**（定时动画挂在 `window.__timelines` 的 `tl` 上、靠外部 seek 驱动，裸开只看到静态
+  第一帧）；把 preview 交给用户过目、拿到 OK 再渲染，省掉「渲完才发现要改、又重渲」。
+  渲染/封面步骤顺延为 Step 7/8，输出清单加「已 preview 且用户 OK」勾项。
+
 ## [0.4.1] — 2026-07-07
 
 - **`blockframe-video`** —— 新增**「项目目录结构」规范**：一个选题一个项目目录，横竖两版是

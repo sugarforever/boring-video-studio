@@ -14,7 +14,7 @@ description: Turn a user-provided voiceover audio file + SRT subtitle into a fin
 | 谁 | 做什么 |
 |---|---|
 | **上游** | 写稿 → 录音/合成音频 → 生成 SRT |
-| **本 skill（你）** | 选 frame/品牌 → 按 SRT 搭 HyperFrames 合成 → 校对 → 渲染成片 |
+| **本 skill（你）** | 选 frame/品牌 → 按 SRT 搭 HyperFrames 合成 → 校对 → **preview 里让用户过目** → 渲染成片 |
 
 本 skill 的输入就是 **音频 + SRT**，你只管出片。**配音/字幕是上游的事**：用户自己录好交给你，或者只给了口播文本时——先用 **`listenhub-tts`** skill（文本 → 音频 + 字幕）补出 `narration-full.mp3` + `narration.srt`，再回到这里走主流程。声音克隆是另一条线（见"超出范围"）。
 
@@ -98,7 +98,23 @@ npx hyperframes inspect --samples 30   # 版面溢出，带时间戳；场景多
 ```
 装饰元素故意出血到画外 → 标 `data-layout-ignore`。真实溢出 → 改容器/字号/padding。
 
-### Step 6 · 渲染 + 验收
+### Step 6 · 预览 · 让用户先过目（渲染前的人工闸门）
+
+渲染很贵（4K 长片几分钟到十几分钟），**别把没人看过的合成直接送去渲染**。先用 HyperFrames 自带的 preview studio 在浏览器里「播放」合成，让用户肉眼确认效果、点头了再进 Step 7 渲染。
+
+```bash
+cd studio/videos/<slug>              # 横竖分目录时进到对应的 build-h / build-v
+npx hyperframes preview             # 默认 3002 端口，自动开浏览器
+```
+
+它起一个本地 studio，**真正按时间轴播放**你的合成：带播放头 + 刻度可任意 scrub、音频一起放（当场判断画面与口播同不同步）、改 `index.html` 热更新（秒级反馈，不用重渲）。这是「不出视频就预览」的主力 —— 中间所有迭代都在这里做，`render` 只留到最后出片一次。
+
+- **别直接双击打开 `index.html`** —— 那样只看到静态第一帧。原因见 Gotcha 12：所有定时动画挂在 `window.__timelines` 的 `tl` 上、靠外部 seek 驱动；裸开 HTML 没人 seek，wipe / 入场全停在初始态（场景叠在一起或空白）。**必须走 preview**（它替你驱动 tl）。
+- **这是人工闸门**：把 preview 地址/画面交给用户，请他过一遍 —— 尤其数据页的数字、转折页的节奏、和口播的同步 —— **拿到明确 OK 再进 Step 7**。渲染前多这一眼，省掉「渲完才发现要改、又重渲一遍」。
+- **agent 精修**：`npx hyperframes preview --context`（或 `--selection`，加 `--json`）能把 studio 里当前选中的元素/上下文吐成文本，据此帮用户精确定位改哪块。
+- **清理**：`--list` 看在跑的预览、`--kill-all` 全部关掉；换项目或端口占用时加 `--force-new`。
+
+### Step 7 · 渲染 + 验收
 
 - **先 standard 跑一版自检**（快），用 `ffmpeg` 抽几帧验证同步：在"你知道这一刻在讲什么"的时间点抽帧，确认画面对得上。
   ```bash
@@ -122,7 +138,7 @@ npx hyperframes inspect --samples 30   # 版面溢出，带时间戳；场景多
 
 成片留在 `studio/videos/<slug>/renders/`。**不要自动提交**（除非用户明确要）。
 
-### Step 7 · 封面（同套 token，核心优先）
+### Step 8 · 封面（同套 token，核心优先）
 
 各平台封面用**独立的静态 HTML**（无 GSAP，全部元素直接可见），复用成片的 `kit.css` + `fonts/`，截图成 PNG（本地 `python3 -m http.server` + Playwright，`scale:'device'` 取 2×）。常见尺寸：`cover-16x9`（横版主）、`cover-3x4` / `cover-9x16`（竖版）、`cover-4x3`（备用）。
 
@@ -153,7 +169,7 @@ npx hyperframes inspect --samples 30   # 版面溢出，带时间戳；场景多
 9. **确定性**。禁止 `Date.now()` / `Math.random()`（破坏可复现渲染）；要随机用种子化 PRNG。
 10. **每个场景独立 track-index**；音频单独高 track-index。装饰出血标 `data-layout-ignore`。
 11. **画质**：原生 1080p 在 Retina 上看会发虚（被放大 + H.264 4:2:0 软化彩色字缘）；master 用 `--resolution landscape-4k --quality high`。
-12. **定时动画必须挂在 `tl` 上**（最高频废片坑）。一律 `tl.from / tl.to / tl.fromTo(sel, vars, 位置秒)`。**绝不用裸 `gsap.from()` / `gsap.to()`** —— 它们挂到 gsap 全局时间轴，而 HyperFrames 渲染只 seek 注册到 `window.__timelines` 的那个 `tl`。结果 wipe（在 tl）与入场（在全局轴）各跑各的，**后段场景的 clip-path 不被驱动 → 整片只剩持久 chrome、内容空白**。现象很隐蔽：前几场正常、越往后越空。排查用 Gotcha 7 / Step 6 的「空白场景廉价自检」。
+12. **定时动画必须挂在 `tl` 上**（最高频废片坑）。一律 `tl.from / tl.to / tl.fromTo(sel, vars, 位置秒)`。**绝不用裸 `gsap.from()` / `gsap.to()`** —— 它们挂到 gsap 全局时间轴，而 HyperFrames 渲染只 seek 注册到 `window.__timelines` 的那个 `tl`。结果 wipe（在 tl）与入场（在全局轴）各跑各的，**后段场景的 clip-path 不被驱动 → 整片只剩持久 chrome、内容空白**。现象很隐蔽：前几场正常、越往后越空。preview 里 scrub 到后段就能一眼看出（Step 6），或用 Gotcha 7 / Step 7 的「空白场景廉价自检」。
 13. **`data-layout-ignore` 元素保持静态**。标了它的装饰元素（大水印数字等）会被 validate 从 DOM 上下文剔除，再对它 `tl.from` 会报 `GSAP target not found`。装饰随场景 wipe 一起揭出即可，别单独 tween 它。
 
 ## SRT → 场景时间轴（配方）
@@ -182,6 +198,7 @@ function wipe(sel, i){ tl.fromTo(sel, {clipPath:"inset(0 100% 0 0)"}, {clipPath:
 ## 输出清单
 
 - [ ] `lint` 0 error · `validate` 全过 · `inspect` 0 issue
+- [ ] **已在 `hyperframes preview` 里播放过、用户看过并 OK**，再进渲染（别跳过这道人工闸门）
 - [ ] 所有定时动画挂在 `tl` 上（无裸 `gsap.from/gsap.to`，见 Gotcha 12）
 - [ ] 抽帧确认每场落在它的 cue 上（尤其数据页/转折页）；跨场景帧大小无异常雷同（无空白场景）
 - [ ] `ffprobe`：video + audio 两轨、时长 = 音频时长（CLI 汇总行时长可能误报）
