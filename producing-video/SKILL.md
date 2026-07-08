@@ -129,6 +129,7 @@ npx hyperframes preview             # 默认 3002 端口，自动开浏览器
   npx hyperframes render --resolution landscape-4k --quality high --output renders/<slug>-4k.mp4
   ```
   `--resolution landscape-4k` 是把同一合成按 2× DPR 真·超采样到 3840×2160（不是放大）；4K master 即使观众看 1080p 也更耐平台二压。4K + 长片渲染较久（几分钟到十几分钟），可后台跑。
+  > **快速捕获默认开（0.7.38+）**：macOS 硬件 GPU 下 drawElement 快速捕获已默认启用，捕获约 2× 提速，且带逐帧自校验 —— 某帧证明不了正确会自动回退经典截图路径，正常情况不用管、白拿提速。**万一渲出异常帧/花屏，关掉它复现**：`PRODUCER_EXPERIMENTAL_FAST_CAPTURE=false npx hyperframes render ...`（回退到经典路径再排查）。渲染中途要停用 Studio 的 render cancel，或直接杀进程。
 - **响度核查 + 规范化**：用户的口播 / TTS 常偏安静。先 `ffmpeg -i renders/x.mp4 -af loudnorm=print_format=summary -f null -` 量整体响度；低于约 -16 LUFS 就规范化到网络标准（-14 LUFS）—— **视频流 `-c:v copy` 不重渲，几秒搞定**：
   ```bash
   ffmpeg -y -i renders/x.mp4 -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:v copy -c:a aac -b:a 192k renders/x-loud.mp4
