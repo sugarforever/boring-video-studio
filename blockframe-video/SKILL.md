@@ -147,6 +147,7 @@ done   # 只出一版就只建对应的一个
 - `#root` 画布按格式设（short 1080×1440 / long 1920×1080）。
 - 一条连续 `<audio>` clip 作时钟；每个场景一个全画布 `.scene.clip`，**场景开始时间 = 它首条 cue 的时间戳**。
 - 复用 `kit.css` 的 BlockFrame 组件（chrome / 标题 / hl 高亮块 / 终端窗口 / 卡片 / chips / grid），按本期加自己的小部件。
+- **视觉效果**（聚光 / 磨砂玻璃 / 背景模糊 / 放大镜）：机制见 `producing-video/references/visual-effects.md`（设计中立）；BlockFrame 的皮肤填值与现成片段见 **`references/effects-blockframe.md`**。
 - **照搬 `producing-video` 的全部 gotcha**：定时动画一律挂注册到 `window.__timelines["main"]` 的 `tl`（**绝不裸 `gsap.from/to`**）；转场只用 incoming 场景自身 clip-path 揭幕；强调色当标点、彩块上压墨色字；CJK 在彩块里给足 `~0.2em` 竖直 padding。
 - 长片建议**按段分目录** `build/seg-01..NN/`，每段一份 `index.html` 配自己那几条 cue（短片也可单文件）。
 

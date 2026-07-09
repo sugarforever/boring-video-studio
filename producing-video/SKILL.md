@@ -88,6 +88,7 @@ cp <user-srt>   audio/narration.srt
 - **入场动画**用 `tl.from(sel, vars, 位置秒)`（**必须挂在注册到 `window.__timelines` 的 `tl` 上**，第三参是 tl 上的绝对秒），定位在对应 cue 时间。短（0.3–0.7s），错峰，变化 ease。**绝不用裸 `gsap.from()` / `gsap.to()`** —— 它们挂到 gsap 全局时间轴，而渲染只 seek `tl`，会导致部分场景（尤其后段）在 seek 渲染里整片空白（见 Gotcha 12）。
 - **复用一套 class 化的 CSS 工具件**（kicker / headline / note / stat / chip-xform / cards / numbered-list / accent-mark），15 个场景共享，别每场写一套 id 样式。
 - **品牌纪律**：严格按 frame 的 token；强调色当"标点"不当"填充"（深色系：强调色只给小而实的标记；浅色系：强调色做色块、文字用墨色压在色块上）。
+- **视觉效果**（局部高光/聚光、iOS 磨砂玻璃、背景模糊/景深、局部放大镜）：要给某个场景加这类效果时，看 **`references/visual-effects.md`** —— 里面是设计中立的机制（纯 CSS + GSAP + 确定性渲染注意事项，外壳用 CSS 变量留口）。都在无头 Chrome 里验证过能逐帧渲染（含 `backdrop-filter`）。
 
 ### Step 5 · 校对（每次改完都跑）
 
