@@ -1,0 +1,149 @@
+/* ===================================================================
+   video-cover kit · BlockFrame cover stylesheet
+   -------------------------------------------------------------------
+   ONE grammar, three slots:
+
+       MARK       one object. logo, number, relation, glyph, chip — or nothing.
+       TITLE      the biggest ink on the cover. the reason to click.
+       QUALIFIER  one line of context. carries the single accent token.
+
+   Any slot may be null. The largest non-null slot is the focal object and
+   gets display size; everything else is subordinate. That single rule
+   generates every layout in references/composition.md — a new layout is a
+   slot configuration, not a new template.
+
+   Two layouts:
+       .lay-stack   centered column   → vertical covers (3:4, 9:16), brand cards
+       .lay-split   copy left, mark right → wide covers (16:9, 16:10, 4:3)
+
+   Canvas: set #cover{width;height} from the ratio table (scripts/ratios.sh).
+   Fonts: LOCAL woff2 in ./fonts next to the HTML. Never <link> Google Fonts.
+   Both filename conventions are listed per face — the src list is a fallback
+   chain, so a project using either naming renders without tofu.
+   =================================================================== */
+
+@font-face{font-family:"Noto Sans SC";font-weight:900;font-display:block;
+  src:url("fonts/notosc-900.woff2") format("woff2"),url("fonts/noto-sans-sc-900.woff2") format("woff2");}
+@font-face{font-family:"Noto Sans SC";font-weight:700;font-display:block;
+  src:url("fonts/notosc-700.woff2") format("woff2"),url("fonts/noto-sans-sc-700.woff2") format("woff2");}
+@font-face{font-family:"Noto Sans SC";font-weight:500;font-display:block;
+  src:url("fonts/notosc-500.woff2") format("woff2"),url("fonts/noto-sans-sc-500.woff2") format("woff2");}
+@font-face{font-family:"Space Grotesk";font-weight:700;font-display:block;
+  src:url("fonts/spacegrotesk-700.woff2") format("woff2"),url("fonts/space-grotesk-700.woff2") format("woff2");}
+@font-face{font-family:"JetBrains Mono";font-weight:700;font-display:block;
+  src:url("fonts/jbmono-700.woff2") format("woff2"),url("fonts/jetbrains-mono-600.woff2") format("woff2");}
+
+:root{
+  /* ground + ink */
+  --cream:#FFFDF5; --ink:#000; --ink2:#3A3A32; --ghost:#B5B2A2; --mute:#8B8878;
+  /* candy accents — use ONE per cover as the accent; the rest are structural */
+  --pink:#FE90E8; --blue:#C0F7FE; --green:#99E885; --yellow:#F7CB46; --gold:#FFDC8B;
+
+  --zh:"Noto Sans SC",sans-serif;
+  --disp:"Space Grotesk","Noto Sans SC",sans-serif;
+  --mono:"JetBrains Mono",monospace;
+
+  /* the one number that drives the vertical rhythm. Every other size is
+     derived from it, so retargeting a ratio is a single edit. */
+  --title:160px;
+  --optical:1;            /* per-mark fudge: normalize logos by INK AREA, not bbox */
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:#000;}
+
+#cover{position:relative;background:var(--cream);color:var(--ink);
+  overflow:hidden;font-family:var(--zh);}
+/* faint dot grid — the series' quiet signature */
+#cover::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background-image:radial-gradient(var(--ink) 1.5px,transparent 1.5px);
+  background-size:42px 42px;opacity:.05;}
+.frame{position:absolute;inset:22px;border:5px solid var(--ink);z-index:60;pointer-events:none;}
+
+/* ---------- brandbar: series identity, fixed position across the series ------ */
+.brandbar{position:absolute;left:74px;right:74px;top:60px;z-index:61;
+  display:flex;justify-content:space-between;align-items:center;gap:24px;}
+.chip{border:4px solid var(--ink);box-shadow:7px 7px 0 var(--ink);
+  padding:9px 22px;font-weight:700;font-size:30px;background:var(--cream);}
+.chip.series{background:var(--pink);}
+.chip.code{background:var(--green);font-family:var(--mono);letter-spacing:.16em;}
+
+/* ---------- layouts --------------------------------------------------------- */
+.lay-stack{position:absolute;inset:0;z-index:20;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  /* optical centering: a mathematically centered stack reads as low */
+  padding:200px 90px 240px;text-align:center;}
+.lay-stack > * + *{margin-top:38px;}
+
+.lay-split{position:absolute;inset:0;z-index:20;
+  display:grid;grid-template-columns:1fr auto;align-items:center;gap:80px;
+  padding:190px 104px 190px 96px;}
+
+/* ---------- TITLE ----------------------------------------------------------- */
+.title{font-size:var(--title);font-weight:900;line-height:1.02;letter-spacing:-.01em;}
+.title.en{font-family:var(--disp);font-weight:700;letter-spacing:-.02em;}
+.kicker{font-size:calc(var(--title) * .25);font-weight:700;color:var(--ink2);letter-spacing:.04em;}
+
+/* The accent highlight. A gradient — not a background-color — so the bar hugs
+   the exact glyph run: a plain background fills the whole line box and, on a
+   shrink-wrapped inline-block, overshoots or undershoots the last CJK glyph.
+   nowrap because the accent is ONE token: let it break across lines and you get
+   two ragged bars. If it doesn't fit, lower --title — don't let it wrap. */
+.hl{background:linear-gradient(var(--yellow),var(--yellow)) 0 78% / 100% 62% no-repeat;
+  padding:0 10px;margin-left:-10px;white-space:nowrap;}
+/* the heavier variant: a bordered candy block. give CJK ~.2em vertical padding
+   or the glyphs kiss the border. */
+.hl-block{display:inline-block;background:var(--green);border:7px solid var(--ink);
+  box-shadow:16px 16px 0 var(--ink);padding:.06em .16em .14em;line-height:1;}
+
+/* ---------- QUALIFIER ------------------------------------------------------- */
+.qual{font-size:calc(var(--title) * .24);font-weight:700;color:var(--ink2);line-height:1.32;}
+.qual b{color:var(--ink);}
+.stat{display:flex;align-items:center;gap:20px;}
+.lay-stack .stat{justify-content:center;}
+.stat b{font-size:calc(var(--title) * .26);font-weight:900;}
+.numplate{font-family:var(--mono);font-weight:700;font-size:calc(var(--title) * .26);
+  border:4px solid var(--ink);background:var(--green);box-shadow:6px 6px 0 var(--ink);padding:5px 18px;}
+
+/* ---------- MARK · five ways to fill the slot (references/composition.md) ---- */
+
+/* 1 · logo — sized by ink area via --optical, never by bounding box */
+.mark-logo img,.mark-logo svg{display:block;
+  height:calc(var(--title) * .62 * var(--optical));width:auto;}
+
+/* 2 · the number IS the mark */
+.mark-stat{font-family:var(--mono);font-weight:700;font-size:calc(var(--title) * 1.15);
+  line-height:.94;letter-spacing:-.02em;}
+
+/* 3 · the relation is the mark: A ⊕ B */
+.mark-rel{display:flex;align-items:center;gap:calc(var(--title) * .28);}
+.mark-rel img{height:calc(var(--title) * .74 * var(--optical));width:auto;}
+.mark-rel .op{font-family:var(--disp);font-weight:700;font-size:calc(var(--title) * .5);color:var(--ink2);}
+
+/* 4 · a glyph in the house style (drawn in SVG, or generated by codex-mark.sh) */
+.mark-glyph img,.mark-glyph svg{display:block;
+  height:calc(var(--title) * .95 * var(--optical));width:auto;}
+
+/* 5 · a label chip where the mark was */
+.mark-chip{display:inline-block;background:var(--ink);color:var(--cream);
+  font-weight:700;font-size:calc(var(--title) * .22);letter-spacing:.08em;padding:12px 26px;}
+
+/* a bordered card, for when the mark is a diagram that carries the claim */
+.mark-card{background:#fff;border:6px solid var(--ink);box-shadow:12px 12px 0 var(--ink);
+  padding:34px 52px 40px;display:flex;flex-direction:column;align-items:center;}
+.mark-card .cardtitle{font-size:30px;font-weight:700;letter-spacing:.10em;
+  color:var(--ink2);margin-bottom:24px;}
+.mark-card .foot{margin-top:36px;font-size:29px;font-weight:700;color:var(--ink2);}
+
+/* ---------- footer + the reserved corner ------------------------------------ */
+/* Bottom-LEFT only. The bottom-right belongs to the platform: YouTube and
+   Bilibili stamp a duration badge there, over whatever you put underneath.
+   check-covers.sh measures this corner and warns. */
+.disc{position:absolute;left:98px;bottom:74px;z-index:20;
+  font-size:29px;font-weight:500;color:var(--mute);letter-spacing:.03em;}
+
+/* Add class="debug" on #cover to see the reserved zone while authoring. */
+#cover.debug::after{content:"platform pill";position:absolute;right:0;bottom:0;
+  width:22%;height:16%;z-index:99;background:rgba(255,0,0,.14);
+  outline:3px dashed rgba(255,0,0,.5);color:rgba(200,0,0,.8);
+  font-family:var(--mono);font-size:22px;display:flex;align-items:flex-end;justify-content:flex-end;padding:8px;}

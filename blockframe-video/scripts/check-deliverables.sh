@@ -27,11 +27,13 @@ chk "renders/*.srt"  "字幕 srt"
 
 echo "covers (all ratios — none optional):"
 # Both formats ship the full ratio set; only the MAIN cover differs by format.
-chk "cover-3x4.png"   "3:4 竖屏"
-chk "cover-9x16.png"  "9:16 Shorts"
-chk "cover-16x9.png"  "16:9 横版"
-chk "cover-16x10.png" "16:10 B站横版"
-chk "cover-4x3.png"   "4:3 横版"
+# Covers live in covers/; the bare path is tolerated for older episodes.
+chk "covers/cover-3x4.png   cover-3x4.png"    "3:4 竖屏"
+chk "covers/cover-9x16.png  cover-9x16.png"   "9:16 Shorts"
+chk "covers/cover-16x9.png  cover-16x9.png"   "16:9 横版"
+chk "covers/cover-16x10.png cover-16x10.png"  "16:10 B站横版"
+chk "covers/cover-4x3.png   cover-4x3.png"    "4:3 横版"
+echo "  ↳ 深度检查（尺寸 / 平台安全区 / 证据图）：cover-design 的 check-covers.sh"
 
 echo "platform copy:"
 chk "youtube.md"  "YouTube 文案"

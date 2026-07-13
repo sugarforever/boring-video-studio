@@ -43,7 +43,7 @@ No logos, no photorealistic people, no robot face, no dark gradient, no neon."
 - 生成后到 `${CODEX_HOME:-$HOME/.codex}/generated_images/<session>/ig_*.png` 找图（codex 常不打印路径），`sips` 验 3:2 尺寸，`cp` 到 `blog-images/cover.png`。详见 `codex-cli` skill 的「Finding Generated Images」。
 
 ## 三、数据图：HTML→PNG，数字必精确
-博客里的数据图**不能 AI 生成**（生成模型画不准数字）——用 **HTML + CSS/SVG → 无头 Chrome 截图**（复用 `blockframe-video/scripts/render-cover.sh <html> <out.png> <W> <H> 2`，2× 高清）。
+博客里的数据图**不能 AI 生成**（生成模型画不准数字）——用 **HTML + CSS/SVG → 无头 Chrome 截图**（复用 `cover-design/scripts/render-cover.sh <html> <out.png> <W> <H> 2`，2× 高清）。
 - **配色与封面一脉相承**（编辑风）：暖白纸底 `#F7F3EA` + 墨蓝 `#1f2a37` + 克制青蓝 `#2c7da0` + 钢蓝/浅灰做次级；细网格、点栅格。**别套视频那套 BlockFrame 糖果色**（两种语境）。
 - 字体本地 woff2（Noto Sans SC + 数字用 Space Grotesk）。
 - 三个常用原型（按数据配型）：

@@ -1,0 +1,56 @@
+<!doctype html>
+<!-- ===================================================================
+     video-cover · HORIZONTAL starter  (.lay-split — copy left, mark right)
+       cover-16x9.html   1920×1080   YouTube / 通用缩略图 / long 主封面
+       cover-16x10.html  1920×1200   Bilibili 横版
+       cover-4x3.html    1440×1080
+
+     Retarget a ratio: change #cover{width;height} and --title. Nothing else.
+     Fonts: ./fonts/*.woff2 must sit next to this file (软链上层 fonts/)。
+
+     The bottom-right corner is deliberately empty — the platform stamps a
+     duration badge there. Add class="debug" to #cover to see the zone.
+
+       bash <video-cover>/scripts/render-covers.sh .
+       bash <video-cover>/scripts/check-covers.sh . long
+     ==================================================================== -->
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="color-scheme" content="light">
+<link rel="stylesheet" href="cover-kit.css">
+<style>
+  #cover{width:1920px;height:1080px;--title:160px;}
+</style></head>
+<body>
+<div id="cover">
+  <div class="frame"></div>
+
+  <div class="brandbar">
+    <div class="chip series">«系列名»</div>
+    <div class="chip code">«CODE»</div>
+  </div>
+
+  <div class="lay-split">
+    <!-- TITLE + QUALIFIER -->
+    <div>
+      <div class="kicker">«铺垫半句»</div>
+      <div class="title">«钩子上半»</div>
+      <div class="title"><span class="hl">«钩子下半 · 唯一强调»</span></div>
+      <div class="qual" style="margin-top:46px">«主体 · 地点 · 定位»</div>
+      <div class="stat" style="margin-top:26px">
+        <b>«可信度事实»</b>
+        <div class="numplate">«数字»</div>
+      </div>
+    </div>
+
+    <!-- MARK — pick ONE, delete the rest. Ladder: references/composition.md
+         Nothing on the ladder fits? Delete this whole column and let the
+         title carry the cover. An empty mark slot beats a decorative one. -->
+    <div class="mark-logo"><img src="marks/«brand».svg" alt="" style="--optical:1"></div>
+    <!-- <div class="mark-stat">+453%</div> -->
+    <!-- <div class="mark-rel"><img src="marks/a.svg" alt=""><span class="op">×</span><img src="marks/b.svg" alt=""></div> -->
+    <!-- <div class="mark-glyph"><img src="marks/«glyph».png" alt=""></div> -->
+    <!-- <div class="mark-chip">发布</div> -->
+  </div>
+
+  <div class="disc">«一行免责 / 出处»</div>
+</div>
+</body></html>

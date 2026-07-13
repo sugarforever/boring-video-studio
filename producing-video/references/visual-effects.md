@@ -8,6 +8,9 @@
 - [② iOS 磨砂玻璃 Frosted Glass](#-ios-磨砂玻璃-frosted-glass)
 - [③ 背景模糊 / 景深 Depth of Field](#-背景模糊--景深-depth-of-field)
 - [④ 局部放大镜 Magnifier](#-局部放大镜-magnifier)
+- [⑤ 材质填充大字 Text-as-Material](#-材质填充大字-text-as-material)
+- [⑥ 光带扫字 Light-band Shimmer](#-光带扫字-light-band-shimmer)
+- [⑦ 半调 canvas 底 Halftone Field](#-半调-canvas-底-halftone-field)
 - [外壳变量（皮肤）](#外壳变量皮肤)
 
 ## 通用铁律
@@ -77,6 +80,45 @@ tl.fromTo("#lens",       {x:0}, {x:D,        duration:3.4, ease:"power1.inOut"},
 tl.fromTo(".lens .inner",{x:0}, {x:-(D*m),   duration:3.4, ease:"power1.inOut"}, at);
 ```
 **关键坑**：被放大的那行文字要**锁 `line-height` = `font-size`（并给等高 `height`）**，否则行盒的真实竖直中心不确定，放大点会上下偏（踩过）。
+
+## ⑤ 材质填充大字 Text-as-Material
+给巨号标题填上真实材质（金属/石材/织物），**零 WebGL、确定性、渲染直接嵌得进**。用来做片头/片尾/封面的 hero 标题。
+
+**机制**：一层**纯色渐变**叠在一张**材质 PNG** 上、`multiply` 混合，整体 `background-clip:text` 裁进字形。所有观感走 CSS 变量，一套 class 服务 N 种材质。
+```css
+.mat-word{
+  color:transparent;
+  background-image: var(--solid-fill), var(--texture-url);        /* linear-gradient(#c,#c), url(masks/metal.png) */
+  background-blend-mode: multiply;
+  background-size: 100% 100%, 125% 125%;
+  background-position: center, var(--mask-pos, 40% 50%);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-stroke: 1px rgba(255,255,255,.22);
+}
+```
+**变体·材质翻页**：一个 `styleFrames[]`（材质 slug + 填充 + mask 位置 + 微偏移），用 `tl.set`/`tl.call` 在固定步长（如 0.105s）逐个换——一段确定性的"材质采样"快剪。微偏移（`x:-8..12`）保持生动而不引入随机。
+
+## ⑥ 光带扫字 Light-band Shimmer
+一道高光/金色带扫过一个词——廉价的"高级感"，同步到口播念到那个词的收尾。
+
+**机制**：渐变裁进文字、动 `backgroundPosition`。
+```css
+.shine{ background-image:linear-gradient(90deg,#8a6a1a,#d4a72c,#f4d35e,#d4a72c,#8a6a1a);
+  background-size:200% 100%; -webkit-background-clip:text; color:transparent; }
+```
+```js
+tl.fromTo(".shine",{backgroundPosition:"100% 0"},{backgroundPosition:"0% 0",duration:0.6,ease:"power2.inOut"}, at);
+```
+
+## ⑦ 半调 canvas 底 Halftone Field
+一整块**会呼吸的背景**（半调点阵采 fbm 域扭曲场 + 一层模糊色雾），不是装饰点、是"视频纹理底"。给氛围场用。
+
+**机制**：整张 canvas 是 `bgState` 对象的**纯函数**——一条**线性主 tween** 推进单调参数、`onUpdate` 重画；噪声用整数 hash value-noise（无 `Math.random`），所以确定性、seek-safe。这是"代理时钟桥"（见 `runtime-adapters.md`）的一个 canvas 实例。
+```js
+tl.to(bgState, { flow:FINAL_FLOW, phase:FINAL_PHASE, duration:TOTAL, ease:"none",
+                 onUpdate(){ drawHalftone(bgState); } }, 0);
+```
+**关键设计律·单调 vs 可绽放拆开**：`flow`/`phase`（"始终在动"的参数）**只由那条线性主 tween 推进、永远无零速边界**——否则背景会"动-停-动-停"卡顿感；每次换场的过场 tween **只准碰"可绽放"参数**（`density/radius/palette/wash/warp` 等）。再给一组静息基线常量（`REST_LIFT/REST_WASH…`），让落定的场景永远不发黑。**大位移别露边**：canvas plate 开到超出画布（如 `4320×3300`）。
 
 ## 外壳变量（皮肤）
 机制留这些口，由 frame/品牌填值：

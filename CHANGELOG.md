@@ -6,6 +6,55 @@
 `npx skills add sugarforever/boring-video-studio` 跟踪的是 `main` 分支最新内容;
 tag(如 `v0.1.0`)用于标记发版节点,方便对照。
 
+## [Unreleased]
+
+- **`producing-video`** —— 研读 HeyGen 官方 [hyperframes-launches](https://github.com/heygen-com/hyperframes-launches)
+  15 支 launch 合成后，把可复用、且仍确定性/seek-safe 的技法折进本 skill:
+  - 新增 **`references/scene-transitions.md`(换场动词表)** —— clip-path 揭幕之外的电影感接缝:
+    同底硬切、穿越变焦(Z 单向律)、顺势切(速度连续)、帧连续硬切(`data-media-start`)、曲边升幕，
+    并给出「交叉淡化红线」与逐帧亮度验证法。全部只动场景本体、不引入独立幕布。
+  - 新增 **`references/runtime-adapters.md`(运行时适配器)** —— 把 WebGL/Canvas/Lottie/伪 3D 等
+    命令式引擎接进时间轴的**代理时钟桥**(`tl` 上 `ease:"none"` 补代理、`onUpdate` 绘制、绝不 rAF)，
+    含 Lottie 帧驱动、WebGL→2D 兜底、DOM→纹理捕获、永不黑屏硬化清单。
+  - `motion-patterns.md` 扩到 **15 类**(新增粒子爆发/黄金角、seek-safe 打字机)，并补充连点声波环、
+    typeNum/码表数字、编舞辅助(cbz ease / `shiftChildren` / `timeScale`)。
+  - `visual-effects.md` 新增 **⑤ 材质填充大字 / ⑥ 光带扫字 / ⑦ 半调 canvas 底**。
+  - SKILL 新增 Gotcha 14–17(补时长契约、媒体挂 master/视频需 id、`immediateRender` 竞争、多合成
+    root 解析 fallback)、Step 6 contact-sheet 先行、Step 7 接缝亮度量证，以及**「系列模板(variables)」**
+    一节(`data-composition-variables` + `data-var-text/src` + `--variables-file` 批量出片)。
+  - `blockframe-video` / `cover-design` 加了指向以上参考的短指针(系列复用、材质 hero 标题)。
+- **`producing-video`** —— 新增 **`references/motion-patterns.md`(动效图鉴)**，把 13 类常见 UI
+  Motion 动效整理成设计中立、seek-safe 的 GSAP 配方:换场 Push/Slide、错峰入场、状态变化、
+  点击涟漪、滚动、导航指示条/抽屉、加载 spinner/骨架微光、数据长柱 + 数字滚动、列表重排、
+  拖拽回弹、脉冲引导、logo Orbit/Assemble、3D 翻卡 + 视差。每类给**标准名**(跟 Agent 沟通
+  直接报名,省得写一长段动作描述)。跟 `visual-effects.md`(画面质感)互补——这份管"怎么动"。
+  Step 4 加了指向它的一条 checklist。素材来源:@shao__meng 的「常见 Motion 动画图鉴」。
+
+## [0.5.0] — 2026-07-09
+
+- **新 skill `cover-design`** —— 封面从此有唯一归属地。`blockframe-video` 的 Step 4 和
+  `finance-stock-video` 的 Step 5 都收缩成一句「委托 `cover-design`」；模板和渲染脚本从
+  `blockframe-video` **迁移**过来(`assets/cover-{h,v}.html`、`scripts/render-cover{,s}.sh`),
+  不再两处各自漂移。
+  - **生成方式**:codex-cli + gpt-image,画风固定、构图按主题变、版式按比例变;标题短、出图后逐字核对
+    那个是视觉主体。一条规则生成全部版式(brand-card / stat-card / relation-card /
+    glyph-card / chip-card / title-card)。
+  - **三道检查**:`check-covers.sh` 验五比例齐 + 像素尺寸精确 + **平台右下时长徽标区**
+    干净(横版),并写出证据图 —— **240px 缩略图**(信息流真实尺寸)和 **1:1 中心裁切**
+    (抖音 / 视频号 / 小红书主页宫格)。证据图是给人 / agent `Read` 的,脚本判断不了
+    「标题在 240px 还读不读得出来」。
+  - **`scripts/codex-mark.sh`** —— codex-cli 出图的诚实 wrapper,只服务阶梯第 4 档。
+    内置 `image_gen` **总是**写到 `$CODEX_HOME/generated_images/<thread_id>/`,agent 转述
+    的路径不可信。wrapper 从 `--json` 事件流读 `thread_id`,自己去那个目录取文件、验 PNG。
+    **勘误**:早先记的「codex 图片工具此环境不可用(会谎称成功不落盘)」——工具是好的,
+    报告是假的;已实测(codex-cli 0.143.0)并修正。
+  - **踩坑固化**:`.hl` 强调条用 `linear-gradient` 而非 `background-color`(后者在
+    shrink-wrap 的 inline-block 上会在最后一个汉字处过冲/欠冲),且 `nowrap`(断行会变成
+    两截参差色条);`--title` 是唯一自变量,但**每个比例都要重调**(4:3 的文案栏比 16:9 窄,
+    实测 132px 会断行、要降到 116px)。
+- **`blockframe-video`** —— `check-deliverables.sh` 改到 `covers/` 下找封面(此前查的是剧集
+  根目录,实际封面都在 `covers/`,五个比例全部误报 MISSING),兼容老剧集的裸路径。
+
 ## [0.4.2] — 2026-07-07
 
 - **`producing-video`** —— 新增 **Step 6「预览 · 让用户先过目」**，一道渲染前的人工闸门。

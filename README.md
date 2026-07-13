@@ -25,13 +25,15 @@ npx skills add sugarforever/boring-video-studio
 | **`blockframe-video`** | 主题 / 口播稿 → **整套物料** | **编排层**:一次会话产出成片 + **全比例封面**(3:4 / 9:16 / 16:9 / 16:10 / 4:3) + 平台文案(YouTube / Bilibili),按交付清单验收、缺一不可。BlockFrame 设计系统;支持移动竖屏短视频(short,主 3:4)与横版长视频(long,主 16:9) |
 | **`listenhub-tts`** | 口播文本 → `narration-full.mp3` + `narration.srt` | 上游积木:选音色(ListenHub speakers)→ 原生 `/v1/speech` 出音频 + **自带字幕**(首选,文字零识别错);云端 ASR(Groq/OpenAI Whisper)作 fallback + 文本级校正;**跑 TTS 前多音字扫描**(`scan-heteronyms.sh`,防「调用」读成 tiáo) |
 | **`producing-video`** | 音频 + SRT → 4K MP4 | 下游积木:用 HyperFrames(HTML 即视频)按 SRT 时间轴搭合成、渲染成片 |
+| **`cover-design`** | 一条视频/一篇文章 → **整套封面** | 封面的唯一归属地(`blockframe-video` / `finance-stock-video` 都委托到这里)。用 **codex-cli 调 gpt-image** 生成手绘编辑风封面:**画风固定、构图按主题变、版式按比例变**。自带 codex 出图 wrapper(codex 会谎报落盘路径)、尺寸/比例校验,以及**右下徽标区 / 竖版 1:1 宫格裁切 / 120px 缩略图可读性**三道检查。需要精确数字或真实商标时,兜底走 HTML→PNG |
 | **`brand-icons`** | 品牌名 → 官方 SVG logo | 配料:从 LobeHub Icons CDN 取真实的 AI / 公司品牌标(OpenAI、Codex、Anthropic、GLM/智谱、Gemini……)放进封面 / 合成,不手画不 AI 生成 |
 
-`blockframe-video` 编排另外两个积木,补齐它们之间「整套物料」这一层:
+`blockframe-video` 编排另外三个积木,补齐它们之间「整套物料」这一层:
 
 ```
-                  ┌──────────────── blockframe-video(编排:全比例封面 + 平台文案 + 清单验收)────────────────┐
-主题 / 口播稿 ──▶ │ narration.txt ─[listenhub-tts]▶ mp3 + srt ─[producing-video]▶ 4K MP4 + 全比例封面 + 文案 │ ──▶ 整套物料
+                  ┌──────────────── blockframe-video(编排:清单验收,封面委托 cover-design)────────────────┐
+主题 / 口播稿 ──▶ │ narration.txt ─[listenhub-tts]▶ mp3 + srt ─[producing-video]▶ 4K MP4                │ ──▶ 整套物料
+                  │                                            └[cover-design]▶ 五比例封面 + 平台文案      │
                   └──────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -65,6 +67,9 @@ export GROQ_API_KEY=gsk_xxx          # 可选,仅 ASR fallback
 |---|---|---|---|
 | `subtitle-correction` | `listenhub-tts`(字幕校正) | 推荐 | `npx skills add sugarforever/01coder-agent-skills` · 缺失时退回内置、需用户确认的文本级校正(`srt_helper.py correct`) |
 | `hyperframes` + `hyperframes-cli` | `producing-video`(搭合成 + 渲染) | **必须** | `npx hyperframes skills` 安装;缺失则无法出片 |
+
+`cover-design` 需要 **codex-cli**(出图,用 Codex 订阅鉴权)和 **python3 + Pillow**(尺寸 / 安全区检查 + 证据图);兜底的 HTML→PNG 还需要系统 **Chrome**。
+`codex-cli` 可选 —— 只在需要一个 house-style 小图形、且图标库里没有官方标时才用;缺席不影响任何主路径。
 
 `producing-video` 还需 [HyperFrames](https://www.hyperframes.dev) 本机工具链:
 
