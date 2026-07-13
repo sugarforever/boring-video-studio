@@ -8,6 +8,13 @@ tag(如 `v0.1.0`)用于标记发版节点,方便对照。
 
 ## [Unreleased]
 
+- **仓库结构** —— 六个 skill 按**三层职责**归入 `skills/<category>/` 子目录(参考
+  [mattpocock/skills](https://github.com/mattpocock/skills) 的组织方式):`orchestration/`
+  (blockframe-video、finance-stock-video)、`building-blocks/`(producing-video、
+  listenhub-tts)、`assets/`(cover-design、brand-icons)。分类仅用于源码组织,`npx skills add`
+  安装时按各自 `name` **展平**为独立 skill,skill 之间的引用(如 `producing-video/references/...`)
+  在展平后的安装布局里照常解析,无需改动。**README 重写**为该合集的正式介绍:钩子式定位、快速
+  开始、目录结构、按类分组的 skills 索引,以及「从你手上有什么开始」的选型指引。
 - **`producing-video`** —— 研读 HeyGen 官方 [hyperframes-launches](https://github.com/heygen-com/hyperframes-launches)
   15 支 launch 合成后，把可复用、且仍确定性/seek-safe 的技法折进本 skill:
   - 新增 **`references/scene-transitions.md`(换场动词表)** —— clip-path 揭幕之外的电影感接缝:
