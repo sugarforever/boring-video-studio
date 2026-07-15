@@ -2,13 +2,16 @@
 # check-deliverables.sh — verify a video episode folder has the COMPLETE deliverable
 # set, so nothing (a render, a cover ratio, a platform copy) silently goes missing.
 #
-#   check-deliverables.sh <episode-dir> [short|long]   # format defaults to short
+#   check-deliverables.sh <episode-dir> [short|long] [full|finance]
+#     format     defaults to short
+#     cover-set  defaults to full (5 ratios); 'finance' drops 16:10 (finance-stock-video 只出 4 比例)
 #
 # Exits non-zero if anything required is missing — run it before you call the job done.
 set -uo pipefail
 
-dir="${1:?usage: check-deliverables.sh <episode-dir> [short|long]}"
+dir="${1:?usage: check-deliverables.sh <episode-dir> [short|long] [full|finance]}"
 fmt="${2:-short}"
+cover_set="${3:-full}"
 cd "$dir"
 
 ok=0; miss=0
@@ -25,13 +28,18 @@ echo "render:"
 chk "renders/*.mp4"  "成片 mp4"
 chk "renders/*.srt"  "字幕 srt"
 
-echo "covers (all ratios — none optional):"
+if [ "$cover_set" = finance ]; then
+  echo "covers (finance · 4 ratios — 16:10 不出):"
+else
+  echo "covers (all ratios — none optional):"
+fi
 # Both formats ship the full ratio set; only the MAIN cover differs by format.
 # Covers live in covers/; the bare path is tolerated for older episodes.
 chk "covers/cover-3x4.png   cover-3x4.png"    "3:4 竖屏"
 chk "covers/cover-9x16.png  cover-9x16.png"   "9:16 Shorts"
 chk "covers/cover-16x9.png  cover-16x9.png"   "16:9 横版"
-chk "covers/cover-16x10.png cover-16x10.png"  "16:10 B站横版"
+[ "$cover_set" = finance ] || \
+  chk "covers/cover-16x10.png cover-16x10.png"  "16:10 B站横版"
 chk "covers/cover-4x3.png   cover-4x3.png"    "4:3 横版"
 echo "  ↳ 深度检查（尺寸 / 平台安全区 / 证据图）：cover-design 的 check-covers.sh"
 

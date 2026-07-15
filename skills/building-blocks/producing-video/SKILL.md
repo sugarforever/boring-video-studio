@@ -1,6 +1,6 @@
 ---
 name: producing-video
-description: Turn a user-provided voiceover audio file + SRT subtitle into a finished, narration-synced MP4 using HyperFrames (HTML-to-video). The audio + SRT are the source of truth — scenes are timed to the SRT cues, content is read from the SRT, and the audio is muxed in automatically. Use when the user hands over an mp3/wav + srt and wants a video, says "把音频做成视频", "做一期视频", "audio + srt to video", "把这期早读做成视频", "render this narration into a video", or provides a recording + subtitles for an explainer / daily / 解读 / 口播. If the user only has narration text (no audio/SRT), run the `listenhub-tts` skill first to produce them, then come back here. NOT for slide decks (use a slides skill).
+description: 把用户给的口播音频 + SRT 字幕做成画面跟着声音走的成片（用 HyperFrames，HTML 即视频）：音频和 SRT 是唯一事实源，场景按 cue 时间轴排、内容读自 SRT、音频自动合流。当用户交来 mp3/wav + srt 想出片，或说「把音频做成视频」「做一期视频」「audio + srt to video」「把这期早读做成视频」「render this narration into a video」，或给了一段录音 + 字幕（解读 / 日报 / 口播）时用本 skill。只有口播文本、没有音频/SRT → 先跑 listenhub-tts 再回来。不做幻灯片 deck（用 slides 类 skill）。
 ---
 
 # Producing-Video · 音频 + 字幕 → 成片
@@ -200,8 +200,8 @@ npx hyperframes preview             # 默认 3002 端口，自动开浏览器
 1. **音频即时钟**。场景时长从 SRT 量出来，不要凭感觉定时长再硬塞音频。
 2. **有 SRT 就别转写**。用户给了 SRT = 精确时间轴免费拿到，不需要 Whisper。（没 SRT 想自己转写前先问用户。）
 3. **转场只用场景自身 clip-path 揭幕**。**绝不**用单独的全屏色块/幕布/刀闸/砸场板去做转场 —— 在渲染引擎里它会"扫进来盖住下一场后卡住不走"，整场变成纯色/黑屏。揭幕揭的是 incoming 场景本体。
-4. **不要给 `.pad` 容器套整体 opacity 的 "pushIn" 包装**。容器级 opacity 动画在 seek 渲染里可能留在 0，把整场变黑。用每个元素各自的 `tl.from()`（挂在 `tl` 上，不是裸 `gsap.from`，见 Gotcha 12）。
-5. **配对 tween 不要加 `overwrite:"auto"`**。它会把配对的另一条 tween 杀掉（比如"扫入"在、"扫出"没了）。lint 的 overlapping_gsap_tweens 是无害告警，宁可留着。
+4. **入场用每个元素各自的 `tl.from()`（挂 `tl`，见 Gotcha 12）**，别给 `.pad` 容器套整体 opacity 的 "pushIn" 包装 —— 容器级 opacity 动画在 seek 渲染里可能留在 0、把整场变黑。
+5. **配对 tween 保持各自独立，别加 `overwrite:"auto"`** —— 它会把配对的另一条 tween 杀掉（比如"扫入"在、"扫出"没了）。lint 的 overlapping_gsap_tweens 是无害告警，留着即可。
 6. **字体必须本地 woff2**。Google Fonts `<link>` 会被 lint 标记、且 sandbox 渲染里不可靠。中文配 Noto Sans SC；**中文字在彩色 accent 色块里要给足竖直 padding/line-height**（CJK 字形比 em 框高，padding 太紧 inspect 会报 text_box_overflow，给到 ~0.2em 竖直 padding + line-height ~1.12）。
 7. **深色主题别信亮度探测**。1×1 平均亮度对深底+稀疏文字永远偏低，会把正常场景误判成黑屏。**靠抽帧看图**确认。
 8. **浅色主题的对比度误报**。validate 在固定几个时间戳采样**所有** DOM 文字，包括当时未激活的场景。浅底上"浅色文字"（白字、奶油字）一旦不在自己场景的激活时刻被采到，就报低对比度——这是误报。规避：**accent 色块上一律用墨色（深）文字**，未激活时墨字压奶油底仍是高对比，零误报。

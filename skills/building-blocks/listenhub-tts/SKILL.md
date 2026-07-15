@@ -1,6 +1,6 @@
 ---
 name: listenhub-tts
-description: Turn a narration script (口播文本) into a voiceover audio file + a time-accurate SRT subtitle. Preferred path uses ListenHub's native /v1/speech (the audio engine emits its own subtitles — text == input, no recognition errors); a cloud ASR (Groq / OpenAI Whisper) path is the fallback. Then orchestrates a text-level subtitle correction. The output (narration-full.mp3 + narration.srt) is exactly what the `producing-video` skill needs as its source of truth. Use when the user has only the narration text (no audio/SRT) and says "把文稿做成音频", "生成配音", "文本转语音", "口播配音 + 字幕", "text to speech with subtitles", "做配音", or hands over a script for a daily / 解读 / 口播 and wants the audio + subtitles produced. Also covers picking the voice (speaker) — "选音色", "换个声音", "用女声", "choose a voice" — by listing ListenHub speakers. NOT for voice cloning (use a cloud TTS that supports it) and NOT for rendering the video itself (that's `producing-video`).
+description: 把一段口播文本变成配音音频 + 时间轴准确的 SRT 字幕。首选 ListenHub 原生 /v1/speech（引擎自带字幕、文字＝输入原文、零识别错），云端 ASR（Groq / OpenAI Whisper）作 fallback，再编排文本级字幕校正；产物 narration-full.mp3 + narration.srt 正是 producing-video 需要的事实源。当用户只有口播文本、说「把文稿做成音频」「生成配音」「文本转语音」「口播配音 + 字幕」「text to speech with subtitles」「做配音」，或交来一份稿子（日报 / 解读 / 口播）想出音频 + 字幕时用本 skill；也管选音色（「选音色」「换个声音」「用女声」）。不做声音克隆（用支持克隆的云端 TTS），不做出片（那是 producing-video）。
 ---
 
 # ListenHub-TTS · 文稿 → 音频 + 字幕

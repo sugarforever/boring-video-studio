@@ -1,6 +1,6 @@
 ---
 name: blockframe-video
-description: 从一个主题或一份口播稿，一次会话产出一整套 BlockFrame 风格口播视频物料 —— 成片（4K）+ 全比例封面（3:4 / 9:16 / 16:9 / 16:10 / 4:3）+ 平台文案（YouTube / Bilibili），按交付清单验收、缺一不可。编排上游 listenhub-tts（出音频+字幕）与 producing-video（出片），补齐它们之间缺的「完整物料」这一层。支持移动竖屏短视频（short，主 3:4）和横版长视频（long，主 16:9）。当用户说「做个视频 / 短视频 / 用 BlockFrame 做个视频 / 一步到位出整套物料 / 配齐封面」时用本 skill。
+description: 把一个主题或一份口播稿，一次会话产出整套 BlockFrame 口播视频物料：4K 成片 + 全比例封面 + YouTube/Bilibili 文案，按交付清单缺一不可。编排 listenhub-tts 与 producing-video，补上它们之间「整套物料」这一层（竖屏 short / 横版 long 走同一流水线）。当用户说「做个视频 / 短视频 / 用 BlockFrame 做个视频 / 一步到位出整套物料 / 配齐封面」时用本 skill。
 ---
 
 # BlockFrame-Video · 主题/口播稿 → 一整套视频物料（一次到位）
@@ -32,7 +32,7 @@ codex --version                        # 封面出图用（cover-design）
 echo "${LISTENHUB_API_KEY:?需要 LISTENHUB_API_KEY}" >/dev/null   # 上游配音用
 ```
 
-需要在场的 skill：**`listenhub-tts`**、**`producing-video`**、**`cover-design`**（封面全套），以及 `producing-video` 要的 `hyperframes` / `hyperframes-cli`。封面走 `cover-design` 的 codex 出图（用 Codex 订阅鉴权，不读 OPENAI_API_KEY）。key 全走环境变量、**绝不入库**。
+需要在场的 skill：**`listenhub-tts`**、**`producing-video`**、**`cover-design`**（封面全套），以及 `producing-video` 要的 `hyperframes` / `hyperframes-cli`；用到官方 logo 时还有 `brand-icons`（可选，见 Step 2）。封面走 `cover-design` 的 codex 出图（用 Codex 订阅鉴权，不读 OPENAI_API_KEY）。key 全走环境变量、**绝不入库**。
 
 ---
 
@@ -149,6 +149,7 @@ done   # 只出一版就只建对应的一个
 - `#root` 画布按格式设（short 1080×1440 / long 1920×1080）。
 - 一条连续 `<audio>` clip 作时钟；每个场景一个全画布 `.scene.clip`，**场景开始时间 = 它首条 cue 的时间戳**。
 - 复用 `kit.css` 的 BlockFrame 组件（chrome / 标题 / hl 高亮块 / 终端窗口 / 卡片 / chips / grid），按本期加自己的小部件。
+- **需要 AI / 公司官方 logo 时**（终端窗口标牌、模型对比卡、片头徽标）→ 走 `brand-icons` skill 从 LobeHub CDN 取官方 SVG（`find-icon.sh` 搜 slug → `fetch-icon.sh` 下到 `assets/brand/`），**别手画也别 AI 生成**。单色标记得放白 / 奶油小块里（黑底黑标看不见）。
 - **视觉效果**（聚光 / 磨砂玻璃 / 背景模糊 / 放大镜 / 材质大字 / 光带扫字 / 半调底）：机制见 `producing-video/references/visual-effects.md`（设计中立）；BlockFrame 的皮肤填值与现成片段见 **`references/effects-blockframe.md`**。
 - **动效 / 换场 / 命令式引擎**：编舞看 `producing-video/references/motion-patterns.md`（15 类）；想要比 clip-path 揭幕更电影感的换场（穿越变焦 / 顺势切 / 同底硬切）看 `references/scene-transitions.md`；WebGL/Canvas/Lottie 看 `references/runtime-adapters.md`（代理时钟桥）——三者都 seek-safe。
 - **系列复用（可选）**：BlockFrame 系列日更想让品牌 chrome / 版式 / 动效**只写一次、每期换数据**，用合成变量（`data-composition-variables` + `data-var-text/src` + `--variables-file`），见 `producing-video` 的「系列模板（variables）」。注意时间轴仍按每期 SRT 重排。
@@ -183,9 +184,8 @@ npx hyperframes inspect --samples 30    # 版面溢出；装饰出血标 data-la
 
 ### Step 3 · 渲染（按格式分支）
 
-- **long（16:9）**：`npx hyperframes render --resolution landscape-4k --quality high --output renders/<slug>-4k.mp4`
-- **short 9:16**：`--resolution portrait-4k --quality high`
-- **short 3:4**：无预设 → 走上面「3:4 的 4K」的 `zoom:2` 逐段渲染，再 `ffmpeg concat` 拼接。
+- **long（16:9）**：`npx hyperframes render --resolution landscape-4k --quality high --output renders/<slug>-h-4k.mp4`（真 4K 超采样）。
+- **short 3:4（竖版默认）**：无 4K 预设 → 原生 `--quality high` 渲 1080×1440，再 ffmpeg lanczos 放大到 2160×2880（完整命令见上「3:4 的 4K」，产出 `renders/<slug>-v-4k.mp4`）。**别用 `zoom:2`**（已废弃，见 Gotcha 3）。
 - **响度规范化**（口播常偏安静，视频流不重渲）：
   ```bash
   ffmpeg -i renders/<slug>.mp4 -af loudnorm=print_format=summary -f null -    # 量
@@ -224,7 +224,8 @@ bash <cover-design>/scripts/check-covers.sh covers/
 ### Step 6 · 清单验收（收尾必跑）
 
 ```bash
-bash <本 skill>/scripts/check-deliverables.sh <slug-dir> short   # 或 long
+bash <本 skill>/scripts/check-deliverables.sh <slug-dir> short          # 或 long；默认 full = 5 比例
+# 第 3 个参数是封面档位：full（默认，5 比例）/ finance（4 比例，跳过 16:10，供 finance-stock-video 用）
 ```
 全 ✓ 才算完成；有 ✗ 回去补齐。**不要自动提交**（除非用户明确要）。
 
@@ -273,7 +274,7 @@ narration 念完后加一页**静音尾卡**：点赞 / 关注 / 分享，停留
 1. **封面是「一套」不是「一张」。** 委托 `cover-design` 逐比例跑 `gen-cover.sh` + `check-covers.sh` 出全比例，再 `check-deliverables.sh` 收口。这是本 skill 的头号存在意义 —— 别又只做主封面。
 2. **竖版固定 3:4，不要做 9:16 视频。** 9:16 太瘦高、移动端体验差（用户明确偏好）；竖版主画布一律 3:4（1080×1440）。9:16 只留作封面比例之一，视频本体不出。
 3. **3:4 没有 4K 预设，别用 `zoom:2`。** 别试 `--resolution 2160x2880`（会被拒）。`zoom:2` 超采样**已废弃**（搞坏 `bottom:` 定位的页脚/chips，假阳性踩过）。用「原生 1080×1440 `--quality high` + ffmpeg lanczos 放大到 2160×2880」（Step 3）。16:9 用 `landscape-4k`（有真预设）。
-3. **临时 `index-4k.html` 渲完即删。** 别把超采样临时文件留在 `build/` 里。
+4. **3:4 的中间原生渲染（`/tmp/v-native.mp4`）用完即删。** lanczos 放大后只留 `renders/` 里的母版，别把中间文件留在项目里。
 5. **系列一致性。** 音色、配色、字体、页眉页脚、封面版式都沿用系列；新一期延续而非另起。
 6. **事实实证。** 命令/架构/流程类内容，真实跑过再放进画面，别编输入输出。
 7. **口播稿过两遍 `personal-chinese-writing-style`，不是一遍。** 单遍会放过声音层的拟人化口语动词（默默干、喊一声、活儿、长在、丢进……）。第一遍清标点、第二遍清声音；`diff` 草稿确认两遍都落地（见 Step 0）。

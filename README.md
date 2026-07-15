@@ -107,10 +107,11 @@ export GROQ_API_KEY=gsk_xxx          # 可选,仅 ASR fallback
 
 | Skill | 被谁用 | 必需性 | 来源 / 缺失行为 |
 |---|---|---|---|
+| `personal-chinese-writing-style` | `blockframe-video` / `finance-stock-video`(口播稿处理) | **必须** | `npx skills add sugarforever/01coder-agent-skills` · 口播稿要过它**两遍**(标点一遍 + 声音一遍),是系列招牌,别省 |
 | `subtitle-correction` | `listenhub-tts`(字幕校正) | 推荐 | `npx skills add sugarforever/01coder-agent-skills` · 缺失时退回内置、需用户确认的文本级校正(`srt_helper.py correct`) |
 | `hyperframes` + `hyperframes-cli` | `producing-video`(搭合成 + 渲染) | **必须** | `npx hyperframes skills` 安装;缺失则无法出片 |
 
-`cover-design` 需要 **codex-cli**(出图,用 Codex 订阅鉴权)和 **python3 + Pillow**(尺寸 / 安全区检查 + 证据图);兜底的 HTML→PNG 还需要系统 **Chrome**。`codex-cli` 可选 —— 只在需要一个 house-style 小图形、且图标库里没有官方标时才用;缺席不影响任何主路径。
+`cover-design` 需要 **codex-cli**(出图,用 Codex 订阅鉴权)和 **python3 + Pillow**(尺寸 / 安全区检查 + 证据图);兜底的 HTML→PNG 还需要系统 **Chrome**。**codex-cli 的必需性看用法**:出封面(单独跑 `cover-design`,或走 `blockframe-video` / `finance-stock-video` —— 封面五比例是铁律)就**必须**有;只有完全不生成封面时才用不上。需要精确数字 / 真实商标的封面走 HTML→PNG,那条兜底路不用 codex,但用 Chrome。
 
 `producing-video` 还需 [HyperFrames](https://www.hyperframes.dev) 本机工具链:
 

@@ -1,6 +1,6 @@
 ---
 name: brand-icons
-description: 给视频封面 / 合成 / 幻灯片取「官方的」AI、LLM、公司品牌矢量 logo（OpenAI、Anthropic、Claude、Gemini、DeepSeek、GLM / 智谱、Qwen、Mistral、Codex……），从 LobeHub Icons 的静态 SVG CDN 直接拉，不用手画也不用 AI 生成。提供按关键词搜图标 + 下载到项目的脚本。当用户说「加个 X 的 logo / 品牌图标」「封面放 OpenAI 标」「找 GLM 的 icon」「需要某模型的官方标识」时用本 skill。配合 blockframe-video（封面 / 合成里用）。
+description: 给视频封面 / 合成 / 幻灯片取官方的 AI、LLM、公司品牌矢量 logo（OpenAI、Anthropic、Gemini、DeepSeek、GLM / 智谱、Qwen、Codex……），从 LobeHub Icons 的静态 SVG CDN 直接拉，不手画也不 AI 生成；提供按关键词搜图标 + 下载到项目的脚本。当用户说「加个 X 的 logo / 品牌图标」「封面放 OpenAI 标」「找 GLM 的 icon」「需要某模型的官方标识」时用本 skill。
 ---
 
 # Brand-Icons · 取官方 AI / 公司品牌 SVG logo
