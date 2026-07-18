@@ -16,6 +16,21 @@ CLIPS = "/tmp/tts_clips"; os.makedirs(CLIPS, exist_ok=True)
 segs = [s["content"] for s in json.load(open("/tmp/req.json"))["scripts"]]
 print(f"segments: {len(segs)}")
 
+# 停顿：{after_cue(1-based): 成片里的停顿秒数}。由 srt_helper.py buildreq --pause-map 产出。
+# 逐句合成是 1.0x 域，最后整段 atempo=TEMPO，所以插 dur*TEMPO 的静音、成片里正好是 dur 秒。
+PAUSES = {}
+_pf = os.environ.get("PAUSE_MAP", "/tmp/pauses.json")
+if os.path.exists(_pf):
+    for _p in json.load(open(_pf, encoding="utf-8")):
+        PAUSES[int(_p["after_cue"])] = float(_p["dur"])
+    print(f"pauses: {len(PAUSES)} 处 (成片域秒数)")
+
+def _silence_wav(dur_raw, tag):
+    w = f"{CLIPS}/sil-{tag}.wav"
+    subprocess.run(["ffmpeg", "-y", "-f", "lavfi", "-i", f"anullsrc=r={SR}:cl=mono",
+                    "-t", f"{dur_raw:.3f}", w], check=True, stderr=subprocess.DEVNULL)
+    return w
+
 def synth(i_text):
     i, text = i_text
     body = json.dumps({"scripts":[{"content":text,"speakerId":SPEAKER}]}).encode()
@@ -54,13 +69,19 @@ with ThreadPoolExecutor(max_workers=4) as ex:
     results = list(ex.map(synth, list(enumerate(segs))))
 results.sort(key=lambda x:x[0])
 
-# concat wavs (1.0x)
+# concat wavs (1.0x)，在 pause map 指定的段后插一段静音（1.0x 域 = dur*TEMPO）
 listf=f"{CLIPS}/list.txt"
-open(listf,"w").write("".join(f"file '{w}'\n" for _,w,_ in results))
+_lines=[]
+for _i,(_,w,_) in enumerate(results):
+    _lines.append(f"file '{w}'\n")
+    _cue=_i+1
+    if _cue in PAUSES:
+        _lines.append(f"file '{_silence_wav(PAUSES[_cue]*TEMPO, f'{_cue:02d}')}'\n")
+open(listf,"w").write("".join(_lines))
 full10=f"{CLIPS}/full-1.0x.wav"
 subprocess.run(["ffmpeg","-y","-f","concat","-safe","0","-i",listf,"-c","copy",full10],check=True,stderr=subprocess.DEVNULL)
 
-# cumulative cue times at 1.0x, then /TEMPO for final 1.2x
+# cumulative cue times at 1.0x, then /TEMPO for final 1.2x（cue 末尾若有停顿，累加 dur*TEMPO）
 def fmt(t):
     if t<0:t=0
     h=int(t//3600);t-=h*3600;m=int(t//60);t-=m*60;s=int(t);ms=int(round((t-s)*1000))
@@ -70,6 +91,8 @@ cues=[]; t=0.0
 for i,(_,_,dur) in enumerate(results):
     start=t/TEMPO; end=(t+dur)/TEMPO
     cues.append((start,end,segs[i])); t+=dur
+    if (i+1) in PAUSES:
+        t += PAUSES[i+1]*TEMPO      # 停顿也进累计时长，后续 cue 自动顺延（/TEMPO 后正好 +dur）
 # write starts for scene mapping
 json.dump([{"i":i,"start":round(c[0],3),"end":round(c[1],3),"text":c[2]} for i,c in enumerate(cues)],
           open(f"{OUTDIR}/cue-starts.json","w"),ensure_ascii=False,indent=1)

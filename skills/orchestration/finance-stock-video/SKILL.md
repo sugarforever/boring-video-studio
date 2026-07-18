@@ -96,7 +96,7 @@ grep -nE "453\.21|6,476,855,244\.59|88\.66|127,673" report.txt
 - **官方数据为主**，客观陈列；每个数字都能回溯到年报页码 / 报告期。
 - **章节化**（归因类）：每章一个小标题，配「章节徽标」（黑底序号 + 黄底标题）；章节起点 = 该段第一句 cue 时间，产出**描述用时间戳**。
 - **结尾**：一句话小结（官方口径 + 结构 + 驱动 + 另一面）→ 明说行业叙事是市场分析 → 「以上全部来自公开财报，只做陈列」→ 免责定格（本视频信息均来自公开资料，仅作客观分享，不构成任何投资建议。市场有风险，决策需谨慎）。
-- **写作风格**：过 `personal-chinese-writing-style` **两遍**（标点一遍 + 声音一遍），再过**多音字扫描**（喂 TTS 前）。细节委托 blockframe-video 的 Step 0 / listenhub-tts。
+- **写作风格**：过用户的写作风格 **两遍**（标点一遍 + 声音一遍），再过**多音字扫描**（喂 TTS 前）。风格源按解析梯子：写作风格 skill（如 `personal-chinese-writing-style`）→ memory → 内置基线；有 skill 就**用 Skill 工具调用**，别手写。细节委托 blockframe-video 的 Step 0 / listenhub-tts。
 - 脚本落盘 `script.md`；同时出**纯口播** `narration.txt`（把百分号写成「百分之 X」、去掉难读的英文型号缩写或改写，利于 TTS）。
 
 ---
@@ -112,6 +112,16 @@ grep -nE "453\.21|6,476,855,244\.59|88\.66|127,673" report.txt
 ```
 
 驱动脚本见 `scripts/regen_tts.py`（逐句合成 + 拼接 + 出精确 SRT + 1.2x）。零误差、不依赖 ASR、不上屏幕字幕（竖屏短视频不烧字幕，SRT 只用于场景对齐）。出片后**审听**兜多音字。
+
+**先切句 + 解析停顿标记**（`regen_tts.py` 读 `/tmp/req.json` 和 `/tmp/pauses.json`）：
+```bash
+python3 <listenhub-tts>/scripts/srt_helper.py buildreq narration.txt \
+  zh-female-wanwanxiaohe-moon-bigtts-fa851a51 --model flowtts \
+  --pause-map /tmp/pauses.json > /tmp/req.json
+python3 scripts/regen_tts.py <episode-dir>          # 逐句合成，按 pauses.json 在段间插静音
+```
+
+**停顿 / 呼吸节奏**：`narration.txt` 里用空行（段落 0.8s）/ `[停 X]`（关键数字后 0.5、转折前 0.4）标停顿，标记不进 TTS；`regen_tts.py` 在拼接时插静音、按 1.2x 折算，成片里正好是设定秒数、时间轴零漂移。财经稿尤其建议在**每个章节徽标前**留 0.8 - 1.2s，让观众切换话题。详见 `listenhub-tts` 的「Step 0.7 · 停顿节奏」。
 
 ---
 
@@ -189,7 +199,7 @@ grep -nE "453\.21|6,476,855,244\.59|88\.66|127,673" report.txt
 
 - [ ] `research.md`：官方数据备料，逐项标源【官方/第三方/存疑】+ 存疑清单
 - [ ] **关键数字已亲自 grep 官方原件核对**（不只信子 agent/媒体）
-- [ ] `script.md` + `narration.txt`：提问开头、官方为主、章节化、免责收尾；过两遍风格 + 多音字扫描
+- [ ] `script.md` + `narration.txt`：提问开头、官方为主、章节化、免责收尾；过两遍写作风格（skill → memory → 基线）+ 多音字扫描
 - [ ] 配音：灵依 1.2x，逐句合成拿精确时间轴
 - [ ] **横版 16:9 母版（4K）** + **竖版 3:4 母版**，均响度 -14 LUFS
 - [ ] **4 比例封面**：3:4 / 9:16 / 16:9 / 4:3（本系列不出 16:10；信息精简、突出重点）

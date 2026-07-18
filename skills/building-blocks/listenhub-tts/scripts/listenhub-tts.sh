@@ -56,19 +56,27 @@ SRT="$OUTDIR/narration.srt"
 TMP="$(mktemp -d -t lh)"
 trap 'rm -rf "$TMP"' EXIT
 
+# 预处理：切句 + 解析停顿标记（空行 / [停 X] / ///，标记**不进 TTS**）。
+#   req.json    送 /v1/speech 的请求体（干净分段）
+#   pauses.json 「第 N 段后插 X 秒」；speech 路出片后据此拼静音、顺延字幕
+#   clean.txt   剥掉标记的原文（ASR fallback 整段 TTS 用，防标记被念出来）
+REQ="$TMP/req.json"; PAUSEMAP="$TMP/pauses.json"; CLEAN="$TMP/clean.txt"
+python3 "$HERE/srt_helper.py" buildreq "$INPUT" "$TTS_SPEAKER" --model "$TTS_MODEL" \
+  --pause-map "$PAUSEMAP" --clean-out "$CLEAN" > "$REQ"
+has_pauses() { [ -s "$PAUSEMAP" ] && [ "$(cat "$PAUSEMAP")" != "[]" ]; }
+
 # ============================================================
 # 路 A · 原生 /v1/speech：切句多段 → audio + 自带字幕
 # 返回 0=audio+字幕都拿到；2=拿到 audio 但没字幕（让 ASR 补字幕）；1=整体失败（fallback）
 # ============================================================
 speech_path() {
-  echo "[speech] build request (切句成多段 scripts) → POST $LH_BASE/speech" >&2
-  local req="$TMP/req.json" resp="$TMP/resp.json"
-  python3 "$HERE/srt_helper.py" buildreq "$INPUT" "$TTS_SPEAKER" --model "$TTS_MODEL" > "$req"
+  echo "[speech] build request (切句成多段 scripts, 已剥停顿标记) → POST $LH_BASE/speech" >&2
+  local resp="$TMP/resp.json"
 
   local code
   code=$(curl -sS -w '%{http_code}' -o "$resp" -X POST "$LH_BASE/speech" \
     -H "Authorization: Bearer $LISTENHUB_API_KEY" -H "Content-Type: application/json" \
-    --data-binary @"$req")
+    --data-binary @"$REQ")
 
   if [ "$PROBE" = "1" ]; then
     echo "── /v1/speech 原始响应 (HTTP $code) ──" >&2
@@ -122,6 +130,19 @@ PY
   echo "[speech] subtitle: $sub_url" >&2
   curl -sSL -o "$TMP/sub.raw" "$sub_url"
   python3 "$HERE/srt_helper.py" normalize "$TMP/sub.raw" "$SRT" >&2
+  # 停顿：speech 路 cue 与输入段 1:1，在对应 cue 末尾拼静音 + 顺延 SRT（零漂移）
+  if has_pauses; then
+    if command -v ffmpeg >/dev/null; then
+      echo "[speech] 插入停顿静音 + 顺延字幕" >&2
+      if python3 "$HERE/srt_helper.py" insert-pauses "$MP3" "$SRT" "$PAUSEMAP" "$TMP/paused.mp3" "$TMP/paused.srt" >&2; then
+        mv "$TMP/paused.mp3" "$MP3"; mv "$TMP/paused.srt" "$SRT"
+      else
+        echo "[speech] 停顿插入失败，保留无停顿版本继续" >&2
+      fi
+    else
+      echo "[speech] 有停顿标记但未装 ffmpeg，跳过停顿（音频从头讲到尾）" >&2
+    fi
+  fi
   return 0
 }
 
@@ -129,13 +150,14 @@ PY
 # 路 B · fallback：/v1/audio/speech 出 mp3（若还没有）+ Whisper ASR 出字幕
 # ============================================================
 asr_path() {
-  # 1) 没有 mp3 才用 OpenAI 兼容端点出一版
+  # 1) 没有 mp3 才用 OpenAI 兼容端点出一版（用剥掉停顿标记的 clean.txt，别把标记念出来）
   if ! file "$MP3" 2>/dev/null | grep -qiE 'audio|mpeg|MP3'; then
+    has_pauses && echo "[asr] 注意：ASR 整段合成 + Whisper 重分句，cue 与输入段不 1:1，本路**不插停顿**（停顿只在 speech 主路生效）。" >&2
     echo "[asr] TTS via $LH_BASE/audio/speech → $MP3  (speaker=$TTS_SPEAKER model=$TTS_MODEL)" >&2
     local code
     code=$(curl -sS -w '%{http_code}' -o "$MP3" -X POST "$LH_BASE/audio/speech" \
       -H "Authorization: Bearer $LISTENHUB_API_KEY" -H "Content-Type: application/json" \
-      --data "$(T="$(cat "$INPUT")" SP="$TTS_SPEAKER" MD="$TTS_MODEL" python3 -c '
+      --data "$(T="$(cat "$CLEAN")" SP="$TTS_SPEAKER" MD="$TTS_MODEL" python3 -c '
 import json,os; print(json.dumps({"input":os.environ["T"],"voice":os.environ["SP"],"response_format":"mp3","model":os.environ["MD"]}))')")
     if [ "$code" != "200" ] || ! file "$MP3" | grep -qiE 'audio|mpeg|MP3'; then
       echo "[asr] TTS failed (HTTP $code):" >&2; head -c 600 "$MP3" >&2; echo >&2; exit 1

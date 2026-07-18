@@ -2,15 +2,20 @@
 """SRT 帮手(纯标准库,无第三方依赖)。子命令:
 
   speakers  <json|->                        ListenHub /v1/speakers/list 的 JSON → 可读音色表
-  buildreq  <txt> <speakerId> [--model M]   口播文本 → 切句 → ListenHub /v1/speech 请求体
-                                            {"scripts":[{content,speakerId}...]} (打到 stdout)
+  buildreq  <txt> <speakerId> [--model M] [--pause-map P.json] [--clean-out C.txt]
+                                            口播文本 → 切句 → ListenHub /v1/speech 请求体
+                                            {"scripts":[{content,speakerId}...]} (打到 stdout)。
+                                            识别停顿标记(空行 / [停 X] / ///),标记不进 TTS;
+                                            --pause-map 写「第 N 段后插 X 秒」;--clean-out 写剥标记的原文
+  insert-pauses <in.mp3> <in.srt> <pause.json> <out.mp3> <out.srt>
+                                            按 pause map 在对应 cue 末尾拼静音(ffmpeg)+ SRT 顺延(零漂移)
   normalize <raw_subtitle> <out.srt>        ListenHub 自带字幕(VTT/JSON/SRT 任一)→ 规整 SRT
   build     <verbose_json> <out.srt>        云端 ASR 的 verbose_json → SRT(fallback 路径用)
   correct   <in.srt> <out.srt> --base ...   文本级 LLM 校正(只改字、不动时间轴/编号/条数)
 
 校正铁律(同 subtitle-correction):NEVER modify timestamps / numbering / count。
 """
-import sys, json, re, argparse, urllib.request
+import sys, json, re, argparse, urllib.request, shutil, subprocess
 
 
 # ---------- 时间戳工具 ----------
@@ -95,16 +100,111 @@ def split_sentences(text):
     return [p.strip() for p in parts if p and p.strip()]
 
 
+# 停顿标记：单独成行的 [停 X] / [停] / [停顿] / [pause X] / ///（X 秒，缺省 0.8）。
+# 空行也算段落停顿（0.8）。标记与空行都**不送 TTS**（否则会被念出来），只当停顿指令。
+PAUSE_DEFAULT = 0.8
+_MARK_RE = re.compile(r"^\s*(?:\[\s*(?:停顿?|pause)\s*([0-9]+(?:\.[0-9]+)?)?\s*\]|/{3,})\s*$", re.I)
+
+
+def pause_of(line):
+    """整行是停顿标记 → 返回秒数；否则 None（空行由调用方按段落默认处理）。"""
+    m = _MARK_RE.match(line)
+    if not m:
+        return None
+    return float(m.group(1)) if m.group(1) else PAUSE_DEFAULT
+
+
+def parse_pacing(raw):
+    """口播文本 → (segments, pauses, clean_lines)。
+    segments：送 TTS 的干净句子；与引擎回的 cue 一一对应。
+    pauses  ：[{"after_cue": n(1-based), "dur": 秒}]，同一间隙里显式标记优先于空行。
+    clean_lines：剥掉标记/空行后的原文行（ASR fallback 整段 TTS 用，防标记被念出来）。"""
+    raw = raw.replace("\r", "")
+    segments, pauses, clean = [], [], []
+    pend_explicit, pend_blank = 0.0, False
+    for line in raw.split("\n"):
+        mark = pause_of(line)
+        if mark is not None:                       # 显式标记行
+            pend_explicit = max(pend_explicit, mark)
+            continue
+        if not line.strip():                       # 空行 = 段落停顿
+            pend_blank = True
+            continue
+        # 文本行：先把上一段之后的停顿落到 pause map（显式优先），再切句
+        dur = pend_explicit if pend_explicit > 0 else (PAUSE_DEFAULT if pend_blank else 0.0)
+        if dur > 0 and segments:
+            pauses.append({"after_cue": len(segments), "dur": round(dur, 3)})
+        pend_explicit, pend_blank = 0.0, False
+        clean.append(line.strip())
+        for s in split_sentences(line):
+            segments.append(s)
+    return segments, pauses, clean
+
+
 def buildreq(a):
-    text = open(a.input, encoding="utf-8").read()
-    sents = split_sentences(text)
-    if not sents:
+    segments, pauses, clean = parse_pacing(open(a.input, encoding="utf-8").read())
+    if not segments:
         print("no sentences in input", file=sys.stderr); sys.exit(1)
-    scripts = [{"content": s, "speakerId": a.speaker} for s in sents]
+    scripts = [{"content": s, "speakerId": a.speaker} for s in segments]
     payload = {"scripts": scripts}
     if a.model:
         payload["model"] = a.model
     sys.stdout.write(json.dumps(payload, ensure_ascii=False))
+    if a.pause_map:
+        json.dump(pauses, open(a.pause_map, "w", encoding="utf-8"), ensure_ascii=False)
+    if a.clean_out:
+        open(a.clean_out, "w", encoding="utf-8").write("\n".join(clean) + "\n")
+    print(f"[buildreq] {len(segments)} 段 · {len(pauses)} 处停顿"
+          + (f" → {a.pause_map}" if a.pause_map else ""), file=sys.stderr)
+
+
+# ---------- insert-pauses：按 pause map 在音频对应 cue 末尾拼静音 + SRT 顺延（零漂移） ----------
+def insert_pauses(a):
+    pauses = json.load(open(a.pause_map, encoding="utf-8")) if a.pause_map else []
+    cues = cues_from_srt(open(a.srt, encoding="utf-8").read())
+    n = len(cues)
+    valid = [p for p in pauses if 1 <= int(p["after_cue"]) <= n and float(p["dur"]) > 0]
+    if not valid:                                  # 没有可用停顿 → 原样透传
+        if a.out_audio != a.in_audio:
+            shutil.copy(a.in_audio, a.out_audio)
+        if a.out_srt != a.srt:
+            shutil.copy(a.srt, a.out_srt)
+        print("[insert-pauses] 无停顿，原样透传", file=sys.stderr)
+        return
+    if not shutil.which("ffmpeg"):
+        print("[insert-pauses] 未找到 ffmpeg，跳过（音频不插停顿）", file=sys.stderr)
+        if a.out_audio != a.in_audio:
+            shutil.copy(a.in_audio, a.out_audio)
+        if a.out_srt != a.srt:
+            shutil.copy(a.srt, a.out_srt)
+        return
+    # 插入点：第 after_cue 条 cue 的结束时刻，插 dur 秒静音
+    ins = sorted(({"t": cues[int(p["after_cue"]) - 1][1], "d": float(p["dur"]),
+                   "after": int(p["after_cue"])} for p in valid), key=lambda x: x["t"])
+    parts, labels, prev = [], [], 0.0
+    for i, x in enumerate(ins):
+        parts.append(f"[0:a]atrim=start={prev:.3f}:end={x['t']:.3f},asetpts=N/SR/TB,"
+                     f"aformat=sample_rates=44100:channel_layouts=stereo[a{i}]")
+        labels.append(f"[a{i}]")
+        parts.append(f"anullsrc=r=44100:cl=stereo:d={x['d']:.3f}[s{i}]")
+        labels.append(f"[s{i}]")
+        prev = x["t"]
+    fi = len(ins)
+    parts.append(f"[0:a]atrim=start={prev:.3f},asetpts=N/SR/TB,"
+                 f"aformat=sample_rates=44100:channel_layouts=stereo[a{fi}]")
+    labels.append(f"[a{fi}]")
+    filt = "; ".join(parts) + "; " + "".join(labels) + f"concat=n={len(labels)}:v=0:a=1[out]"
+    subprocess.run(["ffmpeg", "-y", "-i", a.in_audio, "-filter_complex", filt,
+                    "-map", "[out]", "-c:a", "libmp3lame", "-q:a", "2", a.out_audio],
+                   check=True, stderr=subprocess.DEVNULL)
+    # SRT 顺延：第 j(1-based) 条 cue 后移量 = 所有 after<j 的停顿之和（零漂移）
+    shifted = []
+    for j, (st, en, tx) in enumerate(cues, 1):
+        sh = sum(x["d"] for x in ins if x["after"] < j)
+        shifted.append((st + sh, en + sh, tx))
+    write_srt(shifted, a.out_srt)
+    print(f"[insert-pauses] 插入 {len(ins)} 处停顿 (+{sum(x['d'] for x in ins):.2f}s) "
+          f"→ {a.out_audio} · {a.out_srt}", file=sys.stderr)
 
 
 # ---------- normalize:ListenHub 自带字幕 → SRT ----------
@@ -262,7 +362,14 @@ sub = p.add_subparsers(dest="cmd", required=True)
 sp = sub.add_parser("speakers"); sp.add_argument("input"); sp.set_defaults(fn=speakers)
 
 br = sub.add_parser("buildreq"); br.add_argument("input"); br.add_argument("speaker")
-br.add_argument("--model", default=""); br.set_defaults(fn=buildreq)
+br.add_argument("--model", default="")
+br.add_argument("--pause-map", dest="pause_map", default="", help="停顿指令写到这个 JSON")
+br.add_argument("--clean-out", dest="clean_out", default="", help="剥掉标记的干净文本写到这里(ASR 路用)")
+br.set_defaults(fn=buildreq)
+
+ip = sub.add_parser("insert-pauses")
+ip.add_argument("in_audio"); ip.add_argument("srt"); ip.add_argument("pause_map")
+ip.add_argument("out_audio"); ip.add_argument("out_srt"); ip.set_defaults(fn=insert_pauses)
 
 nz = sub.add_parser("normalize"); nz.add_argument("input"); nz.add_argument("output")
 nz.set_defaults(fn=normalize)
