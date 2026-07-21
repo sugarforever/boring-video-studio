@@ -255,6 +255,27 @@ narration 念完后加一页**静音尾卡**：点赞 / 关注 / 分享，停留
 
 ---
 
+## 增量重建 · 章节化生产（改一段只重生成一段）
+
+**动机：一次小改动，实际触发三笔开销。** 审核后常改口播稿（换词、调停顿、修 TTS 读错的专名）。整片单体流水线里，一个小改动连锁触发：① **TTS 全量重生成**（哪怕一个词，整条旁白重跑）；② **整片重定时** —— TTS 每次重跑、即使句子没变，时间戳也整体漂移（TTS 非确定性），所有 `data-start` + `tl` 时间全要重对齐（手工重定时是 agent token 开销大头）；③ **整片重渲染**（4K 十几分钟）。
+
+**当片子较长、且预期会反复微调口播时，改用章节化增量模式**，把三笔都收敛到「只动改了的那段」。短片 / 一次成型的不必上这套。
+
+**一句话架构：** 一个章节（口播稿一个 `[NN]` 小节 = 天然单元）= 自包含单元 = { 该段口播 → 该段音频（从 0 计时）→ 该段合成 → 渲成一个 clip }。各段**编码参数严格一致**，最后 `assemble-episode.sh` **无重编码拼接**，进度条作为最后一道 overlay 叠上。改 `[07]` 只需：重生成 `[07]` 音频 → 该段 SRT 自动重定时 → 只重渲 `[07]` → 重新拼接；其余段命中缓存、不动。
+
+**三个非踩不可的点**（完整设计、目录结构、`manifest.json` 缓存账本见 `references/incremental-chapters.md`）：
+
+1. **拼接必须无重编码** —— 各段用完全一致的编码参数（渲染时从 `manifest.encode` 读死），`ffmpeg -f concat` demuxer 直接拼、秒级、零画质损失。参数不一致则前功尽弃。
+2. **SRT 驱动定时，别写死秒数** —— 动效绑定「第 N 条 cue / 锚点」，构建时读该段 SRT 自动填 `tl`。于是该段 TTS 一变，重跑定时脚本即自动对齐，**零手工、零 token**。这条即使不做章节化、单用在单体流水线，也能立刻消灭重定时开销。
+3. **进度条作为最后一道 overlay，别让章节各自画** —— 段渲染时不画进度条；拼完用 `assemble-episode.sh` 的 `drawbox`（宽度随 `t/总时长`）叠出，与章节解耦，只在总时长变化时重叠一次。
+
+**收口脚本：**
+```bash
+scripts/assemble-episode.sh --segs segs/ --out renders/<slug>-4k.mp4   # 无重编码拼接 + 进度条 overlay
+scripts/assemble-episode.sh --segs segs/ --out /tmp/body.mp4 --no-bar  # 纯拼接(最快),进度条另叠
+```
+片头（cover-as-intro）与 loudnorm 仍是最终步骤，在拼接产物之后照常跑。缓存判定：逐段比对 `narration_hash` / `html_hash`，只对失配的段跑 TTS / 渲染（详见 reference）。
+
 ## 交付清单（这条 skill 的「完成」定义）
 
 - [ ] `renders/<slug>.mp4`（已 `loudnorm` 到 -14 LUFS）+ `renders/<slug>.srt`
