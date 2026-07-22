@@ -220,7 +220,12 @@ bash <cover-design>/scripts/check-covers.sh covers/
 
 ### Step 5 · 平台文案
 
-写 `youtube.md` + `bilibili.md`（沿用系列模板：标题、简介、章节时间戳、链接、标签）。从 `narration.srt` 的 cue 时间生成**章节时间戳**。带上用户的推广位（油管会员 / B 站赞助 / 知识星球 / Twitter）。
+写 `youtube.md` + `bilibili.md`。**段落顺序、平台差异、章节偏移、标题公式全部照 [`references/platform-copy.md`](./references/platform-copy.md) 的模板来 —— 别凭记忆重建。** 两平台结构不同（YouTube 推广块在正文前、有章节；Bilibili 广告置顶、无章节），最容易搞反；模板把顺序写死了。
+
+三个每期必查、最常漏的点（详见模板）：
+- **章节时间戳要算片头偏移**：若加了封面开篇，所有非零章节 `+= offset`（默认 2.5s）。不加会系统性早 2-3 秒。
+- **正文在会员块之后**（YouTube），不是之前。
+- **推广位是用户私有**（会员链接 / 赞助商广告 / 星球 / 播放列表名）：从用户的推广位配置读取，模板里是 `«占位符»`，别硬编造。
 
 ### Step 6 · 清单验收（收尾必跑）
 
