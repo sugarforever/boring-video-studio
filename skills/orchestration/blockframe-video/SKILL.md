@@ -220,12 +220,11 @@ bash <cover-design>/scripts/check-covers.sh covers/
 
 ### Step 5 · 平台文案
 
-写 `youtube.md` + `bilibili.md`。**段落顺序、平台差异、章节偏移、标题公式全部照 [`references/platform-copy.md`](./references/platform-copy.md) 的模板来 —— 别凭记忆重建。** 两平台结构不同（YouTube 推广块在正文前、有章节；Bilibili 广告置顶、无章节），最容易搞反；模板把顺序写死了。
+写 `youtube.md` + `bilibili.md`。**模板是唯一事实来源：段落顺序、平台差异、章节偏移、标题公式全照 [`references/platform-copy.md`](./references/platform-copy.md)。** 两平台顺序相反、最容易搞反，凭记忆必漂移。
 
-三个每期必查、最常漏的点（详见模板）：
-- **章节时间戳要算片头偏移**：若加了封面开篇，所有非零章节 `+= offset`（默认 2.5s）。不加会系统性早 2-3 秒。
-- **正文在会员块之后**（YouTube），不是之前。
-- **推广位是用户私有**（会员链接 / 赞助商广告 / 星球 / 播放列表名）：从用户的推广位配置读取，模板里是 `«占位符»`，别硬编造。
+**推广位（置顶推广块 / 赞助行 / 个人信息 / 合集名）是创作者私有**，模板里只有 `«占位符»`；内容按「当期对话上下文 → agent memory 里的创作者档案 → 问用户」取，**别硬编造任何平台名、品牌、推广方**。
+
+收尾判据见 Step 6：`check-deliverables.sh` 无 ✗、章节软校验无 ⚠。
 
 ### Step 6 · 清单验收（收尾必跑）
 
