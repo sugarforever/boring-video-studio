@@ -220,7 +220,9 @@ bash <cover-design>/scripts/check-covers.sh covers/
 
 ### Step 5 · 平台文案
 
-写 `youtube.md` + `bilibili.md`（沿用系列模板：标题、简介、章节时间戳、链接、标签）。从 `narration.srt` 的 cue 时间生成**章节时间戳**。带上用户的推广位（油管会员 / B 站赞助 / 知识星球 / Twitter）。
+写 `youtube.md` + `bilibili.md`，段落顺序、平台差异、章节时间戳按 [`references/platform-copy.md`](./references/platform-copy.md) 的骨架来。
+
+具体内容 —— 推广、广告、个人信息、相关链接 —— 是占位符，由 agent 按当期情况判断填：有时有推广、有时没有，保持灵活。内容来源可以是当期对话上下文、用户 memory 里的创作者档案，或直接问用户。
 
 ### Step 6 · 清单验收（收尾必跑）
 
