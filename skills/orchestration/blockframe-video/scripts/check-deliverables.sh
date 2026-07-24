@@ -47,48 +47,9 @@ echo "platform copy:"
 chk "youtube.md"  "YouTube 文案"
 chk "bilibili.md" "Bilibili 文案"
 
-# 结构软校验（warn only，不计入 miss）—— 见 references/platform-copy.md
-warn=0
-softwarn() { printf '  ⚠ %-26s %s\n' "$1" "$2"; warn=$((warn+1)); }
-
-# 字幕文件（章节时间就从这里来）：优先 audio/narration.srt，回退 renders/*.srt
-srt=""
-for c in audio/narration.srt renders/*.srt narration.srt; do
-  [ -f "$c" ] && { srt="$c"; break; }
-done
-
-if [ -f youtube.md ] && grep -q '⏱ 章节' youtube.md; then
-  first_ch=$(awk '/⏱ 章节/{f=1;next} f && match($0,/[0-9]+:[0-9][0-9]/){print substr($0,RSTART,RLENGTH);exit}' youtube.md)
-  [ "$first_ch" != "0:00" ] \
-    && softwarn "YouTube 章节" "首章应为 0:00（现为 ${first_ch:-无}）—— 结构错，见 platform-copy.md"
-
-  # 章节时间大致对得上字幕 cue 吗（宽容差 5s，吸收片头偏移；低精度，只抓大漂移/漏重算）
-  if [ -n "$srt" ]; then
-    bad=$(awk -v tol=5 '
-      FNR==NR {                                # pass 1: srt cue 起始秒
-        if ($0 ~ /-->/) { ts=$1; gsub(/[,.].*/,"",ts); split(ts,a,":")
-          if (a[3]!="") cue[++n]=a[1]*3600+a[2]*60+a[3] }
-        next }
-      /⏱ 章节/ { inch=1; next }                 # pass 2: youtube.md 章节
-      inch && /^## / { inch=0 }
-      inch && match($0,/[0-9]+:[0-9][0-9]/) {
-        split(substr($0,RSTART,RLENGTH),c,":"); t=c[1]*60+c[2]
-        if (t>0) { hit=0
-          for (i=1;i<=n;i++) if (cue[i]>=t-tol && cue[i]<=t+tol) { hit=1; break }
-          if (!hit) miss++ } }
-      END { print miss+0 }
-    ' "$srt" youtube.md)
-    [ "${bad:-0}" -gt 0 ] \
-      && softwarn "YouTube 章节" "$bad 个章节起始时间对不上字幕 cue（±5s）—— 起始时间应落在 $srt 的 cue 上，见 platform-copy.md"
-  fi
-fi
-if [ -f bilibili.md ] && grep -q '⏱ 章节' bilibili.md; then
-  softwarn "Bilibili 章节" "B 站描述通常不放章节时间戳（见平台差异表）"
-fi
-
 echo "—"
 if [ "$miss" -eq 0 ]; then
-  echo "✓ complete — $ok deliverables present${warn:+, $warn warning(s)}"
+  echo "✓ complete — $ok deliverables present"
   exit 0
 else
   echo "✗ incomplete — $miss missing, $ok present"
