@@ -1,8 +1,8 @@
 # 选设计 · HyperFrames 预制 design 目录
 
-视频的观感由一个 **frame preset（预制设计）** 决定 - 配色、字体、版式一整套。每期**先让我从下面选一个**（默认 BlockFrame），别替我定。
+视频的观感由一个 **frame preset（预制设计）** 决定 - 配色、字体、版式一整套。用户从以下列表选择（默认 BlockFrame）。
 
-来源：<https://www.hyperframes.dev/design>（每个都能 Fine-tune）。本机预制在 `hyperframes-creative/frame-presets/<slug>/`。
+来源 - https://www.hyperframes.dev/design
 
 ## 目录（slug + 一句风格）
 
@@ -22,7 +22,7 @@
 | daisy-days | 阳光花园粉彩，3px 炭笔描边，硬阴影，Fredoka + Quicksand |
 | editorial-forest | 绿/粉/奶油编辑三色，Source Serif 4 + JetBrains Mono，细线 |
 
-> 列表会变，以官网/本机 `frame-presets/` 为准；新增了就往这张表补一行，别每次凭记忆。
+> 列表会变，以官网为准。
 
 ## 怎么用（选完之后）
 
@@ -32,9 +32,4 @@
 node <faceless-explainer>/scripts/build-frame.mjs --preset <slug> --hyperframes .
 ```
 
-`frame.md` 就是这一期的配色/字体/版式真理。之后逐帧搭画面都以它为准。详见 `references/video.md`。
-
-## 说明
-
-- **视频 preset 和封面风格是两码事。** 视频画面用上面的 preset；**封面**是另出的 BlockFrame HTML 海报（见 `references/covers.md`）。默认两边都偏 BlockFrame，但视频 preset 我可能会换（比如技术选题用 code-editorial），封面保持 BlockFrame 的品牌一致性。
-- 选 preset 是「给判断力」不是「背规则」：我给风格倾向（如「这期想稳一点」/「想活泼」），你据此推荐 1-2 个，让我拍板。
+`frame.md` 就是这一期的配色/字体/版式。之后逐帧搭画面都以它为准。详见 `references/video.md`。
