@@ -1,6 +1,6 @@
 ---
 name: verysmallwoods-video
-description: 小木头的个人视频流水线。把一个主题 / 一篇文章 / 一份口播稿，做成一整套可发布物料 - 成片 + 五比例封面 + YouTube/Bilibili 文案 + 博客 + 推文。视频用 HyperFrames（HTML 即视频），设计从预制 design 里选（默认 BlockFrame 糖果海报风）；旁白可 TTS 也可自己录。当我说「做个视频 / 做一期 / 把这篇文章做成视频 / 出整套物料 / 配齐封面文案博客」时用本 skill。
+description: 小木头的个人视频流水线。基于一个主题，一篇文章，或一份口播稿，生成一整套可发布物料：视频成片，封面图，YouTube/Bilibili 文案，博客，以及社交媒体推广文案。视频制作采用 HyperFrames。当我说「做个视频 / 做一期 / 把这篇文章做成视频 / 出整套物料 / 配齐封面文案博客」时用本 skill。
 ---
 
 # verysmallwoods-video · 主题/文章/口播稿 → 一整套可发布物料
