@@ -9,11 +9,11 @@ description: 小木头的个人视频流水线。基于一个主题，一篇文�
 
 **本 skill 是它之上的一层编排，相对 faceless 只补三件事：**
 
-1. **设计给用户选** —— faceless 自己按 showcase 判断选 preset；这里**让用户从预制 design 里挑**（默认 `blockframe`）。见 `references/designs.md`。
-2. **旁白多一条「自录」** —— faceless 默认走 TTS；这里额外提供**用户自行录制**这条路（用户给音频 + SRT，你校对、切段、对齐、重排节奏）。见 `references/audio.md`。
+1. **设计由用户选择** - 见 `references/designs.md`。
+2. **旁白增加一个「自录」选项** —— faceless 默认走 TTS；这里额外提供**用户自行录制**这条路（用户给音频 + SRT，你校对、切段、对齐、重排节奏）。见 `references/audio.md`。
 3. **生成发布素材** —— faceless 只出视频；这里补齐**五比例封面 + YouTube/Bilibili 文案 + 博客 + 推文**。见 `references/covers.md` / `platform-copy.md` / `blog-and-tweet.md`。
 
-开局把 ① ② 两个选择先问用户，别替他定。其余尽量用判断，只在拿不准、或涉及事实/口径/发布这类不可逆时才问用户。
+开局把 ① ② 两个选择先问用户。
 
 ## 交付清单（本 skill 的「完成」定义）
 
@@ -25,7 +25,7 @@ description: 小木头的个人视频流水线。基于一个主题，一篇文�
 
 ## 工作流骨架（每步的「怎么做」在 references 里）
 
-一个选题 = 一个项目目录 `studio/videos/<YYYYMMDD-slug>/`
+一个选题 = 一个项目目录（当前工作目录下，命名 `<YYYYMMDD-slug>`）
 
 - Step 0 · 定选题、问两个选择（设计 + 旁白来源）→ `references/designs.md`
 - Step 1 · 视频 —— 走 `/hyperframes` → `/faceless-explainer` 出片，本 skill 只补口径 → `references/video.md`

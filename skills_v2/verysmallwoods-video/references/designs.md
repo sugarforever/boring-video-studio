@@ -16,7 +16,7 @@
 | capsule | 胶囊编辑风：奶油纸 + 糖果色，Bodoni Moda 衬线标题 |
 | cartesian | 极简留白：暖羊皮纸，墨色显示体，灰褐点缀，细线 |
 | cobalt-grid | 编辑羊皮纸 + 钴蓝网格，Newsreader + Hanken Grotesk |
-| code-editorial | 暖米纸 + 珊瑚点睛 + JetBrains Mono 代码面，EB Garamond。技术随笔感（本仓上一期用的就是它） |
+| code-editorial | 暖米纸 + 珊瑚点睛 + JetBrains Mono 代码面，EB Garamond。技术随笔感 |
 | coral | Bebas Neue 大写标题 + 珊瑚，奶油底 |
 | creative-mode | 奶油 + 饱和糖果，Archivo Black + JetBrains Mono |
 | daisy-days | 阳光花园粉彩，3px 炭笔描边，硬阴影，Fredoka + Quicksand |
