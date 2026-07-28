@@ -8,6 +8,12 @@
 
 [![skills.sh](https://skills.sh/b/sugarforever/boring-video-studio)](https://skills.sh/sugarforever/boring-video-studio)
 
+## 视频介绍
+
+[![观看视频介绍](https://img.youtube.com/vi/Kgjh97IsL8s/maxresdefault.jpg)](https://youtu.be/Kgjh97IsL8s)
+
+> ▶️ 点击上图在 YouTube 观看本 repo 的视频介绍。
+
 ## 快速开始
 
 ```bash
