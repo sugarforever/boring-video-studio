@@ -2,6 +2,8 @@
 
 视频的观感由一个 **frame preset（预制设计）** 决定 - 配色、字体、版式一整套。用户从以下列表选择（默认 BlockFrame）。
 
+> **将以下表格中的设计完整列给用户做选择。**
+
 来源 - https://www.hyperframes.dev/design
 
 ## 目录（slug + 一句风格）
