@@ -1,0 +1,238 @@
+<!--
+  Raycast Dark — caption skin (preset-local source). Inspired by the Raycast design system.
+
+  This is the preset's own lower-third karaoke caption look. faceless-explainer's
+  Step 2 (build-frame.mjs) copies it into the project as .hyperframes/caption-skin.html;
+  captions.mjs then fills the three reserved holes, wraps the fragment in a <template>,
+  and writes compositions/captions.html:
+    · the empty GROUPS array            → the engine's scene-aware word groups
+    · the 0 duration + 0 width/height   → real total + canvas size
+    · the empty data-brand-tokens style → :root tokens derived from the project's frame.md
+
+  Token contract — reference ONLY this fixed vocab (captions.mjs injects it from
+  frame.md, so the Step-2 brand overlay flows through; each var has a Raycast literal
+  fallback for standalone preview):
+    --cap-ink · --cap-canvas · --cap-accent · --cap-accent-2 · --font-display ·
+    --font-body · --cap-band-top · --cap-band-height
+  Hooks (do not rename): .caption-group / .caption-word + states .is-active / .is-spoken,
+  root data-composition-id="captions", timeline at window.__timelines["captions"].
+  State changes use gsap.set({className}) (applied on the engine's frame-by-frame seek);
+  never tl.call() callbacks (seek does not fire them → wrong state on render).
+
+  Visual: a macOS-native elevated caption card — a near-black blue-tinted surface framed
+  by a barely-visible white hairline border (rgba 255,255,255,0.08), an inset top
+  highlight (light from above), and a soft paired drop shadow (depth is REAL here, never
+  a flat rectangle) — ROUNDED corners (12px). Inter, positive letter-spacing, weight 500,
+  near-white ink glyphs. Upcoming words sit in dim cool-gray; the current word gets a
+  Raycast-Red highlight — a soft red-tint fill with a red hairline ring + subtle red glow,
+  the word itself in Raycast Red (red as punctuation, one word at a time). Spoken words
+  settle to solid near-white ink, the red cleared. Blue is never used; red is the brand.
+-->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+
+<!-- captions.mjs injects the project's :root tokens here -->
+<style data-brand-tokens></style>
+
+<style>
+  #captions-root {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .caption-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    pointer-events: none;
+  }
+  /* the keep-out band, from captionBand(H) — frame content stays above it */
+  .caption-stage {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: var(--cap-band-top, 900px);
+    height: var(--cap-band-height, 180px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .caption-group {
+    /* every group is absolutely stacked over the SAME band — exactly one shown at a
+       time via opacity. Must be absolute: in-flow groups would lay out side-by-side. */
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+  }
+
+  /* THE elevated caption card — macOS-native depth: a near-black surface, a barely-visible
+     white hairline border, an inset top highlight (light from above), and a soft paired
+     drop shadow. ROUNDED corners. Depth is real here, never a flat rectangle. */
+  .caption-pill {
+    position: relative;
+    max-width: 82%;
+    padding: 16px 34px 18px;
+    background: var(--cap-canvas, #101111);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+      inset 0 0 0 1px rgba(7, 8, 10, 0.6),
+      0 1px 2px rgba(0, 0, 0, 0.28),
+      0 12px 34px rgba(0, 0, 0, 0.5);
+  }
+  .caption-line {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.14em 0.34em;
+    font-family: var(--font-display, "Inter"), -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 600;
+    font-size: clamp(34px, 3.8vw, 52px);
+    line-height: 1.16;
+    letter-spacing: 0.006em;
+    font-feature-settings: "calt", "kern", "liga", "ss03";
+  }
+
+  /* upcoming — dim cool-gray, no highlight */
+  .caption-word {
+    display: inline-block;
+    padding: 0.02em 0.16em;
+    border-radius: 6px;
+    color: color-mix(in srgb, var(--cap-ink, #f9f9f9) 44%, var(--cap-canvas, #101111));
+    transition: none;
+  }
+  /* current word — the Raycast-Red highlight: a soft red-tint fill with a red hairline
+     ring + subtle red glow, the word itself in Raycast Red. Red as punctuation, one word
+     at a time. */
+  .caption-word.is-active {
+    color: var(--cap-accent, #ff6363);
+    background: color-mix(in srgb, var(--cap-accent, #ff6363) 15%, transparent);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--cap-accent, #ff6363) 40%, transparent),
+      0 0 18px color-mix(in srgb, var(--cap-accent, #ff6363) 22%, transparent);
+  }
+  /* already spoken — solid near-white ink, highlight cleared */
+  .caption-word.is-spoken {
+    color: var(--cap-ink, #f9f9f9);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  /* optional per-word accents (dormant until a word-classer tags them) */
+  /* brand / key term — set in the ONE red (Raycast red is the brand punctuation) */
+  .caption-word.cap-brand {
+    color: var(--cap-accent, #ff6363);
+  }
+  /* numerals / data — the JetBrains Mono chrome voice, slightly recessed */
+  .caption-word.cap-num {
+    font-family: var(--font-body, "JetBrains Mono"), ui-monospace, monospace;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: color-mix(in srgb, var(--cap-ink, #f9f9f9) 82%, var(--cap-canvas, #101111));
+  }
+  /* emphasis — a red underline rule (no second hue; emphasis is the ink/accent) */
+  .caption-word.cap-cta {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-decoration-color: var(--cap-accent, #ff6363);
+    text-underline-offset: 0.14em;
+  }
+
+  @media (max-aspect-ratio: 9/16) {
+    .caption-pill {
+      max-width: 92%;
+    }
+    .caption-line {
+      font-size: clamp(30px, 5vw, 44px);
+    }
+  }
+</style>
+
+<div
+  id="captions-root"
+  data-composition-id="captions"
+  data-timeline-locked
+  data-start="0"
+  data-duration="0"
+  data-fps="30"
+  data-width="0"
+  data-height="0"
+>
+  <div class="caption-layer" aria-hidden="true">
+    <div id="caption-stage" class="caption-stage"></div>
+  </div>
+</div>
+
+<script>
+  // captions.mjs injects the engine's scene-aware groups + real duration here.
+  var GROUPS = [];
+  var DURATION = 0;
+
+  (function () {
+    var stage = document.getElementById("caption-stage");
+
+    // build DOM: one .caption-group per group, .caption-word per word
+    GROUPS.forEach(function (group, g) {
+      var groupEl = document.createElement("div");
+      groupEl.className = "caption-group";
+      groupEl.id = "caption-group-" + g;
+      var pill = document.createElement("div");
+      pill.className = "caption-pill";
+      var line = document.createElement("div");
+      line.className = "caption-line";
+      (group.words || []).forEach(function (w, i) {
+        var span = document.createElement("span");
+        span.className = "caption-word";
+        span.id = "caption-word-" + g + "-" + i;
+        span.textContent = String(w.text);
+        line.appendChild(span);
+      });
+      pill.appendChild(line);
+      groupEl.appendChild(pill);
+      stage.appendChild(groupEl);
+    });
+
+    window.__timelines = window.__timelines || {};
+    var tl = gsap.timeline({ paused: true });
+
+    GROUPS.forEach(function (group, g) {
+      var groupEl = document.getElementById("caption-group-" + g);
+      var words = group.words || [];
+      var next = GROUPS[g + 1];
+      var isLast = g === GROUPS.length - 1;
+      var start = Math.max(0, Number(group.start));
+      var end = isLast ? DURATION : Math.min(Number(next.start), Number(group.end) + 0.3);
+      if (end <= start) end = start + 0.01;
+
+      // group on/off — exactly one group visible at a time
+      tl.set(groupEl, { opacity: 1 }, start);
+      tl.set(groupEl, { opacity: 0 }, end);
+
+      // 3-state karaoke via className SETS — seek-safe (gsap.set applies on the
+      // engine's frame-by-frame seek; .call callbacks would NOT fire).
+      words.forEach(function (w, i) {
+        var el = document.getElementById("caption-word-" + g + "-" + i);
+        var at = Math.max(start, Number(w.start));
+        tl.set(el, { className: "caption-word" }, start); // upcoming (also resets on reverse-seek)
+        tl.set(el, { className: "caption-word is-active" }, at); // current
+        tl.fromTo(el, { scale: 0.985 }, { scale: 1, duration: 0.1, ease: "power4.out" }, at);
+        if (i + 1 < words.length) {
+          var nextAt = Math.max(start, Number(words[i + 1].start));
+          tl.set(el, { className: "caption-word is-spoken" }, nextAt); // demote when next activates
+        }
+      });
+      if (words.length) {
+        var lastEl = document.getElementById("caption-word-" + g + "-" + (words.length - 1));
+        var lastSpoken = Math.min(end, Number(words[words.length - 1].end) + 0.1);
+        tl.set(lastEl, { className: "caption-word is-spoken" }, lastSpoken);
+      }
+    });
+
+    // full-span anchor so the sub-comp timeline spans the whole video
+    tl.to({}, { duration: DURATION }, 0);
+    window.__timelines["captions"] = tl;
+  })();
+</script>

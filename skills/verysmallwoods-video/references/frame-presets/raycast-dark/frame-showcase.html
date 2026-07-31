@@ -1,0 +1,1311 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Raycast Dark</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style id="ds-tokens">
+      :root {
+        --canvas: #07080a;
+        --surface: #101111;
+        --card: #1b1c1e;
+        --key-cap: #121212;
+        --key-end: #0d0d0d;
+        --ink: #f9f9f9;
+        --ink-soft: #cdcdce;
+        --ink-dim: #9c9c9d;
+        --ink-mute: #6a6b6c;
+        --accent: #ff6363;
+        --border: #252829;
+        --hairline: rgba(255, 255, 255, 0.08);
+        --highlight: rgba(255, 255, 255, 0.1);
+        --glow: rgba(215, 201, 175, 0.05);
+        --sans: "Inter", -apple-system, "Helvetica Neue", Arial, sans-serif;
+        --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        /* the macOS-native paired elevation — outer ring + inset top light + drop */
+        --elev:
+          0 0 0 1px var(--card), inset 0 0 0 1px rgba(7, 8, 10, 0.6),
+          inset 0 1px 0 0 var(--highlight), 0 1px 2px rgba(0, 0, 0, 0.28),
+          0 18px 44px rgba(0, 0, 0, 0.5);
+        /* the iconic diagonal red-stripe field */
+        --stripes: repeating-linear-gradient(
+          -45deg,
+          var(--accent) 0,
+          var(--accent) 10px,
+          transparent 10px,
+          transparent 26px
+        );
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        background: #000;
+      }
+      body {
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-feature-settings: "calt", "kern", "liga", "ss03";
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ── shared type atoms ── */
+      .mono {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+      }
+      .kicker {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .kicker::before {
+        content: "";
+        width: 20px;
+        height: 8px;
+        border-radius: 2px;
+        background: var(--accent);
+      }
+      .lede {
+        font-family: var(--sans);
+        font-weight: 500;
+        font-size: 17px;
+        line-height: 1.6;
+        letter-spacing: 0.012em;
+        color: var(--ink-soft);
+        max-width: 54ch;
+      }
+      /* a gradient keycap — physical 3D shortcut key */
+      .keycap {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 30px;
+        height: 30px;
+        padding: 0 9px;
+        font-family: var(--mono);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink-soft);
+        background: linear-gradient(var(--key-cap), var(--key-end));
+        border: 1px solid var(--hairline);
+        border-radius: 6px;
+        box-shadow:
+          inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
+          0 1.5px 0.5px 1px rgba(0, 0, 0, 0.4),
+          0 2px 6px rgba(0, 0, 0, 0.5);
+      }
+
+      /* ── page shell ── */
+      section {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 128px 96px;
+        position: relative;
+        border-bottom: 1px solid var(--hairline);
+        overflow: hidden;
+      }
+      .sec-head {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 24px;
+        align-items: baseline;
+        margin-bottom: 64px;
+      }
+      .sec-head .n {
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 0.02em;
+        color: var(--accent);
+        grid-column: 1 / 2;
+      }
+      .sec-head h2 {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 42px;
+        letter-spacing: -0.005em;
+        line-height: 1.08;
+        grid-column: 2 / 9;
+      }
+      .sec-head .meta {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+        grid-column: 9 / 13;
+        text-align: right;
+      }
+
+      /* ═══ COVER ═══ */
+      .cover {
+        min-height: 100vh;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        max-width: none;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .cover-inner {
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 64px 96px 96px;
+      }
+      .cover .chrome-top,
+      .cover .chrome-bot {
+        display: flex;
+        justify-content: space-between;
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 34px 96px;
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+      }
+      .cover .chrome-top {
+        border-bottom: 1px solid var(--hairline);
+      }
+      .cover .chrome-bot {
+        border-top: 1px solid var(--hairline);
+      }
+      .cover h1 {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: clamp(48px, 7vw, 108px);
+        line-height: 1.02;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+        max-width: 16ch;
+      }
+      .cover h1 .red {
+        color: var(--accent);
+      }
+      .cover .kicker {
+        margin-bottom: 28px;
+      }
+      .cover .lede {
+        margin-top: 28px;
+      }
+      .cover .cta-row {
+        margin-top: 40px;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+      }
+      .btn-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        height: 48px;
+        padding: 0 26px;
+        border-radius: 86px;
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 16px;
+        letter-spacing: 0.02em;
+        background: hsla(0, 0%, 100%, 0.9);
+        color: var(--canvas);
+        box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+        transition: opacity 0.15s;
+      }
+      .btn-ghost {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        height: 48px;
+        padding: 0 22px;
+        border-radius: 8px;
+        font-family: var(--sans);
+        font-weight: 500;
+        font-size: 16px;
+        color: var(--ink-soft);
+        border: 1px solid var(--hairline);
+        box-shadow: inset 0 1px 0 0 var(--highlight);
+      }
+      /* diagonal red stripes, upper-right, generated by rule */
+      .stripes {
+        position: absolute;
+        top: -80px;
+        right: -60px;
+        width: 460px;
+        height: 460px;
+        background: var(--stripes);
+        -webkit-mask-image: radial-gradient(circle at 70% 30%, #000 30%, transparent 72%);
+        mask-image: radial-gradient(circle at 70% 30%, #000 30%, transparent 72%);
+        opacity: 0.9;
+        pointer-events: none;
+      }
+
+      /* ═══ PALETTE ═══ */
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+      }
+      .swatch {
+        background: var(--surface);
+        border: 1px solid var(--hairline);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: var(--elev);
+      }
+      .swatch .chip {
+        aspect-ratio: 5 / 3;
+        border-radius: 10px;
+        border: 1px solid var(--hairline);
+        box-shadow: inset 0 1px 0 0 var(--highlight);
+      }
+      .swatch .name {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 14px;
+        margin-top: 14px;
+        color: var(--ink);
+      }
+      .swatch .hex {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--ink-dim);
+        margin-top: 4px;
+        text-transform: uppercase;
+      }
+      .swatch .role {
+        font-family: var(--sans);
+        font-size: 12px;
+        color: var(--ink-dim);
+        margin-top: 8px;
+        line-height: 1.5;
+      }
+
+      /* ═══ TYPOGRAPHY ═══ */
+      .type-row {
+        display: grid;
+        grid-template-columns: 190px 1fr;
+        gap: 40px;
+        align-items: baseline;
+        padding: 28px 0;
+        border-top: 1px solid var(--hairline);
+      }
+      .type-row:last-child {
+        border-bottom: 1px solid var(--hairline);
+      }
+      .type-row .spec {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.02em;
+        color: var(--ink-dim);
+        text-transform: uppercase;
+        line-height: 1.7;
+      }
+      .type-row .spec b {
+        color: var(--ink);
+        font-weight: 500;
+      }
+      .sp-display {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 82px;
+        line-height: 1.02;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+      }
+      .sp-headline {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 56px;
+        line-height: 1.08;
+        letter-spacing: -0.008em;
+        color: var(--ink);
+      }
+      .sp-h2 {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 38px;
+        letter-spacing: 0;
+        color: var(--ink);
+      }
+      .sp-body {
+        font-family: var(--sans);
+        font-weight: 500;
+        font-size: 18px;
+        line-height: 1.6;
+        letter-spacing: 0.012em;
+        color: var(--ink-soft);
+        max-width: 60ch;
+      }
+      .sp-mono {
+        font-family: var(--mono);
+        font-size: 15px;
+        font-weight: 500;
+        letter-spacing: 0.018em;
+        color: var(--ink-soft);
+      }
+
+      /* ═══ COMPONENTS ═══ */
+      .comp-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+      .comp {
+        border: 1px solid var(--hairline);
+        border-radius: 16px;
+        padding: 28px;
+        min-height: 220px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        background: var(--surface);
+        box-shadow: var(--elev);
+      }
+      .comp .cap {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+        margin-top: auto;
+      }
+      .comp .cap b {
+        color: var(--ink);
+        display: block;
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 13px;
+        margin-bottom: 4px;
+        letter-spacing: 0;
+        text-transform: none;
+      }
+      /* elevated card demo */
+      .demo-elev {
+        margin-bottom: 22px;
+        display: flex;
+        gap: 12px;
+      }
+      .demo-elev .tile {
+        flex: 1;
+        height: 80px;
+        border-radius: 12px;
+        background: var(--card);
+        border: 1px solid var(--hairline);
+        box-shadow:
+          inset 0 1px 0 0 var(--highlight),
+          0 1px 2px rgba(0, 0, 0, 0.28),
+          0 12px 26px rgba(0, 0, 0, 0.5);
+      }
+      .demo-elev .tile.alert {
+        border-left: 3px solid var(--accent);
+        box-shadow:
+          inset 0 1px 0 0 var(--highlight),
+          0 0 22px rgba(255, 99, 99, 0.16),
+          0 12px 26px rgba(0, 0, 0, 0.5);
+      }
+      /* keycap demo */
+      .demo-keys {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 22px;
+      }
+      .demo-keys .plus {
+        color: var(--ink-mute);
+        font-family: var(--mono);
+        font-size: 13px;
+      }
+      /* command palette demo */
+      .demo-cmd {
+        margin-bottom: 20px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--hairline);
+        background: var(--canvas);
+        box-shadow: inset 0 1px 0 0 var(--highlight);
+      }
+      .demo-cmd .row {
+        display: grid;
+        grid-template-columns: 22px 1fr auto;
+        gap: 12px;
+        align-items: center;
+        padding: 11px 14px;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .demo-cmd .row:last-child {
+        border-bottom: none;
+      }
+      .demo-cmd .row .ic {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        background: var(--card);
+        border: 1px solid var(--hairline);
+      }
+      .demo-cmd .row .nm {
+        font-family: var(--sans);
+        font-weight: 500;
+        font-size: 14px;
+        letter-spacing: 0.012em;
+        color: var(--ink-soft);
+      }
+      .demo-cmd .row.on {
+        background: var(--card);
+      }
+      .demo-cmd .row.on .ic {
+        background: var(--accent);
+        border-color: transparent;
+      }
+      .demo-cmd .row.on .nm {
+        color: var(--ink);
+      }
+      .demo-cmd .row .kc {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-dim);
+      }
+      /* red stripe demo */
+      .demo-stripe {
+        height: 96px;
+        border-radius: 12px;
+        margin-bottom: 22px;
+        background: var(--stripes);
+        -webkit-mask-image: linear-gradient(105deg, #000 40%, transparent 88%);
+        mask-image: linear-gradient(105deg, #000 40%, transparent 88%);
+      }
+      /* stat cards demo */
+      .demo-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 22px;
+      }
+      .demo-stats .s {
+        border-radius: 12px;
+        background: var(--card);
+        border: 1px solid var(--hairline);
+        box-shadow:
+          inset 0 1px 0 0 var(--highlight),
+          0 8px 18px rgba(0, 0, 0, 0.45);
+        padding: 14px 14px 12px;
+      }
+      .demo-stats .s .fig {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 30px;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+      }
+      .demo-stats .s.red .fig {
+        color: var(--accent);
+      }
+      .demo-stats .s .lb {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 11px;
+        letter-spacing: 0.02em;
+        color: var(--ink-dim);
+        margin-top: 6px;
+      }
+      /* code block demo */
+      .demo-code {
+        margin-bottom: 20px;
+        border-radius: 10px;
+        border: 1px solid var(--hairline);
+        background: var(--canvas);
+        box-shadow: inset 0 1px 0 0 var(--highlight);
+        padding: 16px 18px;
+        font-family: var(--mono);
+        font-size: 13px;
+        line-height: 1.7;
+        color: var(--ink-soft);
+      }
+      .demo-code .k {
+        color: var(--ink-dim);
+      }
+      .demo-code .r {
+        color: var(--accent);
+      }
+
+      /* ═══ COMPOSITIONS ═══ */
+      .frames {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+      }
+      .frame-wrap .fl {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .frame-wrap .fl b {
+        color: var(--ink);
+        font-family: var(--sans);
+        font-weight: 600;
+        text-transform: none;
+        letter-spacing: 0;
+      }
+      .frame {
+        aspect-ratio: 16 / 9;
+        background: var(--canvas);
+        border: 1px solid var(--hairline);
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+        container-type: size;
+        box-shadow: var(--elev);
+      }
+      .frame .fchrome {
+        position: absolute;
+        left: 5cqw;
+        right: 5cqw;
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 2.3cqh;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+      }
+      .frame .fchrome.top {
+        top: 6cqh;
+      }
+      .frame .fchrome.bot {
+        bottom: 6cqh;
+      }
+      .fk {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 2.5cqh;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 1.4cqw;
+      }
+      .fk::before {
+        content: "";
+        width: 2.6cqw;
+        height: 1.2cqh;
+        border-radius: 0.4cqh;
+        background: var(--accent);
+      }
+      /* F1 cover */
+      .f-cover .h {
+        position: absolute;
+        left: 5cqw;
+        top: 40cqh;
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 7.4cqw;
+        line-height: 1.0;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+      }
+      .f-cover .h .red {
+        color: var(--accent);
+      }
+      .f-cover .kk {
+        position: absolute;
+        left: 5cqw;
+        top: 30cqh;
+      }
+      .f-cover .stripe {
+        position: absolute;
+        top: -6cqh;
+        right: -4cqw;
+        width: 40cqw;
+        height: 40cqw;
+        background: var(--stripes);
+        -webkit-mask-image: radial-gradient(circle at 72% 28%, #000 26%, transparent 70%);
+        mask-image: radial-gradient(circle at 72% 28%, #000 26%, transparent 70%);
+      }
+      .f-cover .cap-chip {
+        position: absolute;
+        left: 5cqw;
+        top: 68cqh;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 8cqw;
+        height: 6cqh;
+        padding: 0 2cqw;
+        font-family: var(--mono);
+        font-size: 2.2cqh;
+        font-weight: 600;
+        color: var(--ink-soft);
+        background: linear-gradient(var(--key-cap), var(--key-end));
+        border: 0.14cqh solid var(--hairline);
+        border-radius: 1.4cqh;
+        box-shadow:
+          inset 0 0.14cqh 0 0 rgba(255, 255, 255, 0.12),
+          0 0.6cqh 1.4cqh rgba(0, 0, 0, 0.5);
+      }
+      /* F2 feature/command palette */
+      .f-index .hh {
+        position: absolute;
+        left: 5cqw;
+        top: 11cqh;
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 4cqw;
+        letter-spacing: -0.005em;
+        color: var(--ink);
+      }
+      .f-index .palette {
+        position: absolute;
+        left: 5cqw;
+        right: 5cqw;
+        top: 30cqh;
+        border-radius: 2cqh;
+        overflow: hidden;
+        border: 0.14cqh solid var(--hairline);
+        background: var(--surface);
+        box-shadow:
+          inset 0 0.14cqh 0 0 var(--highlight),
+          0 3cqh 6cqh rgba(0, 0, 0, 0.55);
+      }
+      .f-index .palette .r {
+        display: grid;
+        grid-template-columns: 4cqw 1fr auto;
+        gap: 2cqw;
+        align-items: center;
+        padding: 2.4cqh 3cqw;
+        border-bottom: 0.14cqh solid var(--hairline);
+      }
+      .f-index .palette .r:last-child {
+        border-bottom: none;
+      }
+      .f-index .palette .r .ic {
+        width: 3cqw;
+        height: 3cqw;
+        border-radius: 0.8cqh;
+        background: var(--card);
+        border: 0.14cqh solid var(--hairline);
+      }
+      .f-index .palette .r .n {
+        font-family: var(--sans);
+        font-weight: 500;
+        font-size: 2.7cqh;
+        letter-spacing: 0.012em;
+        color: var(--ink-soft);
+      }
+      .f-index .palette .r .k {
+        font-family: var(--mono);
+        font-size: 2cqh;
+        color: var(--ink-dim);
+      }
+      .f-index .palette .r.on {
+        background: var(--card);
+      }
+      .f-index .palette .r.on .ic {
+        background: var(--accent);
+        border-color: transparent;
+      }
+      .f-index .palette .r.on .n {
+        color: var(--ink);
+      }
+      /* F3 statement */
+      .f-stmt .s {
+        position: absolute;
+        left: 5cqw;
+        top: 30cqh;
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 6.6cqw;
+        line-height: 1.04;
+        letter-spacing: -0.012em;
+        color: var(--ink);
+        max-width: 82cqw;
+      }
+      .f-stmt .s .red {
+        color: var(--accent);
+      }
+      .f-stmt .att {
+        position: absolute;
+        left: 5cqw;
+        bottom: 13cqh;
+        font-family: var(--mono);
+        font-size: 2.2cqh;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        color: var(--ink-dim);
+        border-top: 0.14cqh solid var(--hairline);
+        padding-top: 1.6cqh;
+      }
+      /* F4 data */
+      .f-data .hh {
+        position: absolute;
+        left: 5cqw;
+        top: 12cqh;
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 3.6cqw;
+        letter-spacing: -0.005em;
+        color: var(--ink);
+        max-width: 70cqw;
+      }
+      .f-data .cards {
+        position: absolute;
+        left: 5cqw;
+        right: 5cqw;
+        bottom: 13cqh;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 3cqw;
+      }
+      .f-data .cards .c {
+        border-radius: 1.6cqh;
+        background: var(--card);
+        border: 0.14cqh solid var(--hairline);
+        box-shadow:
+          inset 0 0.14cqh 0 0 var(--highlight),
+          0 2cqh 4cqh rgba(0, 0, 0, 0.5);
+        padding: 3cqh 2cqw 2.4cqh;
+      }
+      .f-data .cards .c .f {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 6cqh;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+      }
+      .f-data .cards .c.red .f {
+        color: var(--accent);
+      }
+      .f-data .cards .c .l {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 2cqh;
+        letter-spacing: 0.02em;
+        color: var(--ink-dim);
+        margin-top: 1cqh;
+      }
+      /* F5 two-panel */
+      .f-edit .txt {
+        position: absolute;
+        left: 5cqw;
+        top: 26cqh;
+        width: 38cqw;
+      }
+      .f-edit .txt .t {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 3.6cqw;
+        letter-spacing: -0.005em;
+        line-height: 1.06;
+        color: var(--ink);
+      }
+      .f-edit .txt .b {
+        font-family: var(--sans);
+        font-weight: 500;
+        font-size: 2cqh;
+        line-height: 1.6;
+        letter-spacing: 0.012em;
+        color: var(--ink-dim);
+        margin-top: 2.4cqh;
+      }
+      .f-edit .win {
+        position: absolute;
+        right: 5cqw;
+        top: 18cqh;
+        bottom: 18cqh;
+        width: 42cqw;
+        border-radius: 1.6cqh;
+        background: var(--surface);
+        border: 0.14cqh solid var(--hairline);
+        box-shadow:
+          inset 0 0.14cqh 0 0 var(--highlight),
+          0 4cqh 8cqh rgba(0, 0, 0, 0.6);
+        overflow: hidden;
+      }
+      .f-edit .win .bar {
+        display: flex;
+        gap: 1cqw;
+        padding: 2cqh 2cqw;
+        border-bottom: 0.14cqh solid var(--hairline);
+      }
+      .f-edit .win .bar i {
+        width: 1.6cqw;
+        height: 1.6cqw;
+        border-radius: 50%;
+        background: var(--card);
+        border: 0.1cqh solid var(--hairline);
+      }
+      .f-edit .win .body {
+        padding: 2.6cqh 2.4cqw;
+        font-family: var(--mono);
+        font-size: 1.9cqh;
+        line-height: 1.9;
+        color: var(--ink-dim);
+      }
+      .f-edit .win .body .r {
+        color: var(--accent);
+      }
+      /* F6 closing */
+      .f-close .rail {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 12cqw;
+        background: var(--stripes);
+        -webkit-mask-image: linear-gradient(to right, #000 40%, transparent);
+        mask-image: linear-gradient(to right, #000 40%, transparent);
+      }
+      .f-close .s {
+        position: absolute;
+        left: 22cqw;
+        top: 34cqh;
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 5.6cqw;
+        line-height: 1.04;
+        letter-spacing: -0.012em;
+        color: var(--ink);
+        max-width: 62cqw;
+      }
+      .f-close .s .red {
+        color: var(--accent);
+      }
+      .f-close .m {
+        position: absolute;
+        left: 22cqw;
+        bottom: 13cqh;
+        font-family: var(--mono);
+        font-size: 2.2cqh;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        color: var(--ink-dim);
+        border-top: 0.14cqh solid var(--hairline);
+        padding-top: 1.6cqh;
+      }
+
+      /* ═══ PRINCIPLES ═══ */
+      .principles {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 56px;
+      }
+      .principles .col h3 {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 22px;
+        letter-spacing: 0;
+        padding-bottom: 16px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .principles .col.do h3 {
+        color: var(--ink);
+      }
+      .principles .col.dont h3 {
+        color: var(--accent);
+      }
+      .principles ul {
+        list-style: none;
+      }
+      .principles li {
+        display: grid;
+        grid-template-columns: 26px 1fr;
+        gap: 10px;
+        padding: 16px 0;
+        border-bottom: 1px solid var(--hairline);
+        font-size: 15px;
+        line-height: 1.6;
+        letter-spacing: 0.012em;
+        color: var(--ink-dim);
+      }
+      .principles li b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .principles .do li::before {
+        content: "+";
+        font-family: var(--mono);
+        color: var(--ink-soft);
+      }
+      .principles .dont li::before {
+        content: "×";
+        font-family: var(--mono);
+        color: var(--accent);
+      }
+
+      .footer {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 96px 80px;
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+      }
+      @media (max-width: 900px) {
+        section {
+          padding: 72px 32px;
+        }
+        .swatches,
+        .comp-grid,
+        .frames,
+        .principles {
+          grid-template-columns: 1fr;
+        }
+        .cover .chrome-top,
+        .cover .chrome-bot,
+        .cover-inner {
+          padding-left: 32px;
+          padding-right: 32px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══════════ COVER ═══════════ -->
+    <section class="cover">
+      <div class="chrome-top mono">
+        <span>Raycast Dark — Frame Preset</span>
+        <span>S01 / 06</span>
+        <span>Inspired by Raycast</span>
+      </div>
+      <div class="cover-inner">
+        <div class="stripes" aria-hidden="true"></div>
+        <span class="kicker">Design Preset · No. 15</span>
+        <h1>Dark, precise, and one&nbsp;<span class="red">red</span>.</h1>
+        <p class="lede">
+          The Raycast design system rebuilt for the 1920×1080 frame. A near-black blue-tinted void,
+          macOS-native layered depth, Inter with airy positive tracking, and Raycast Red used only
+          as punctuation — nothing pervasive, nothing flat.
+        </p>
+        <div class="cta-row">
+          <span class="btn-pill">Open the frame <span class="keycap">⌘K</span></span>
+          <span class="btn-ghost">Read the spec</span>
+        </div>
+      </div>
+      <div class="chrome-bot mono">
+        <span>#07080a · never pure black</span>
+        <span>Inter · JetBrains Mono</span>
+        <span>Vol. 01</span>
+      </div>
+    </section>
+
+    <!-- ═══════════ PALETTE ═══════════ -->
+    <section>
+      <div class="sec-head">
+        <span class="n">01</span>
+        <h2>Palette</h2>
+        <span class="meta">Near-black + ink + one red</span>
+      </div>
+      <div class="swatches">
+        <div class="swatch">
+          <div class="chip" style="background: var(--canvas)"></div>
+          <div class="name">Canvas</div>
+          <div class="hex">#07080A</div>
+          <div class="role">The near-black blue-tinted ground — never pure black.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--surface)"></div>
+          <div class="name">Surface</div>
+          <div class="hex">#101111</div>
+          <div class="role">Elevated surface — standard card background.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--card)"></div>
+          <div class="name">Card</div>
+          <div class="hex">#1B1C1E</div>
+          <div class="role">Raised container — badge & tag fill.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--accent)"></div>
+          <div class="name">Raycast Red</div>
+          <div class="hex">#FF6363</div>
+          <div class="role">The ONE accent — punctuation, never pervasive.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--ink)"></div>
+          <div class="name">Ink</div>
+          <div class="hex">#F9F9F9</div>
+          <div class="role">Near-white — primary, high-emphasis text.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--ink-soft)"></div>
+          <div class="name">Ink-soft</div>
+          <div class="hex">#CDCDCE</div>
+          <div class="role">Secondary body text, descriptions.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--ink-dim)"></div>
+          <div class="name">Ink-dim</div>
+          <div class="hex">#9C9C9D</div>
+          <div class="role">Tertiary labels, nav, captions.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--border)"></div>
+          <div class="name">Border</div>
+          <div class="hex">#252829</div>
+          <div class="role">Cool-gray divider; hairlines are white rgba 0.06–0.10.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ TYPOGRAPHY ═══════════ -->
+    <section>
+      <div class="sec-head">
+        <span class="n">02</span>
+        <h2>Typography</h2>
+        <span class="meta">Inter · positive tracking · weight 500</span>
+      </div>
+      <div class="type-row">
+        <div class="spec"><b>Display-hero</b><br />Inter 600<br />6.4cqw · −0.008em</div>
+        <div class="sp-display">Command palette</div>
+      </div>
+      <div class="type-row">
+        <div class="spec"><b>Headline</b><br />Inter 600<br />3.6cqw · −0.005em</div>
+        <div class="sp-headline">Depth is real here</div>
+      </div>
+      <div class="type-row">
+        <div class="spec"><b>H2</b><br />Inter 600<br />2.6cqw · 0em</div>
+        <div class="sp-h2">Restrained, not shouty</div>
+      </div>
+      <div class="type-row">
+        <div class="spec"><b>Body</b><br />Inter 500<br />0.85cqw · +0.012em</div>
+        <div class="sp-body">
+          Hierarchy is built through weight, size, and elevation inside a single humanist family.
+          Body sets at medium weight (500) with positive letter-spacing — deliberately airy, unlike
+          most dark UIs, so the type breathes against dense dark surfaces.
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="spec"><b>Mono / code</b><br />JetBrains Mono 500<br />13px · UPPER chrome</div>
+        <div class="sp-mono">S04 / 06 &nbsp;·&nbsp; SOURCE — INTERNAL / 2026 &nbsp;·&nbsp; ⌘ K</div>
+      </div>
+    </section>
+
+    <!-- ═══════════ COMPONENTS ═══════════ -->
+    <section>
+      <div class="sec-head">
+        <span class="n">03</span>
+        <h2>Components</h2>
+        <span class="meta">Elevated · rounded · macOS-native</span>
+      </div>
+      <div class="comp-grid">
+        <div class="comp">
+          <div class="demo-elev">
+            <div class="tile"></div>
+            <div class="tile alert"></div>
+            <div class="tile"></div>
+          </div>
+          <div class="cap"><b>Elevated cards</b>The paired shadow — outer ring + inset top highlight + drop. One card carries a red alert rail and glow.</div>
+        </div>
+
+        <div class="comp">
+          <div class="demo-keys">
+            <span class="keycap">⌘</span>
+            <span class="plus">+</span>
+            <span class="keycap">⇧</span>
+            <span class="plus">+</span>
+            <span class="keycap">K</span>
+          </div>
+          <div class="cap"><b>Keycaps</b>Gradient physical shortcut keys with heavy multi-layer shadow — the developer-tool signature.</div>
+        </div>
+
+        <div class="comp">
+          <div class="demo-cmd">
+            <div class="row"><span class="ic"></span><span class="nm">Search files</span><span class="kc">↵</span></div>
+            <div class="row on"><span class="ic"></span><span class="nm">Run command</span><span class="kc">⌘ K</span></div>
+            <div class="row"><span class="ic"></span><span class="nm">Open extension</span><span class="kc">⌥ ↵</span></div>
+          </div>
+          <div class="cap"><b>Command-row</b>The Raycast command-palette list item — icon, label, trailing keycap. The selected row fills with a red icon.</div>
+        </div>
+
+        <div class="comp">
+          <div class="demo-stripe" aria-hidden="true"></div>
+          <div class="cap"><b>Diagonal red stripes</b>The iconic brand motif — parallel bars at a fixed 45°, generated by rule, red only. One cluster per frame.</div>
+        </div>
+
+        <div class="comp">
+          <div class="demo-stats">
+            <div class="s"><div class="fig">40M</div><div class="lb">COMMANDS</div></div>
+            <div class="s red"><div class="fig">2×</div><div class="lb">FASTER</div></div>
+            <div class="s"><div class="fig">99.9</div><div class="lb">UPTIME %</div></div>
+          </div>
+          <div class="cap"><b>Stat cards</b>Elevated metric cards; the figure IS the data. One figure may run red — never invented.</div>
+        </div>
+
+        <div class="comp">
+          <div class="demo-code">
+            <div><span class="k">$</span> raycast build --frame</div>
+            <div><span class="k">→</span> depth: <span class="r">layered</span> · red: punctuation</div>
+          </div>
+          <div class="cap"><b>Code block</b>JetBrains Mono terminal on an elevated surface — low-contrast, one flagged red token, never rainbow.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ COMPOSITIONS ═══════════ -->
+    <section>
+      <div class="sec-head">
+        <span class="n">04</span>
+        <h2>Compositions</h2>
+        <span class="meta">6 frame treatments · 16:9</span>
+      </div>
+      <div class="frames">
+        <!-- F1 cover -->
+        <div class="frame-wrap">
+          <div class="fl"><b>1 · Cover</b><span>elevated wordmark + stripes</span></div>
+          <div class="frame f-cover">
+            <div class="fchrome top"><span>Raycast Dark</span><span>S01 / 06</span></div>
+            <div class="stripe" aria-hidden="true"></div>
+            <span class="fk kk">No. 15</span>
+            <div class="h">One <span class="red">red.</span></div>
+            <div class="cap-chip">⌘K</div>
+            <div class="fchrome bot"><span>Never pure black</span><span>Vol. 01</span></div>
+          </div>
+        </div>
+
+        <!-- F2 feature -->
+        <div class="frame-wrap">
+          <div class="fl"><b>2 · Feature</b><span>command-palette rows</span></div>
+          <div class="frame f-index">
+            <div class="fchrome top"><span>Features</span><span>S02 / 06</span></div>
+            <div class="hh">Commands</div>
+            <div class="palette">
+              <div class="r"><span class="ic"></span><span class="n">Search files</span><span class="k">↵</span></div>
+              <div class="r on"><span class="ic"></span><span class="n">Run command</span><span class="k">⌘ K</span></div>
+              <div class="r"><span class="ic"></span><span class="n">Open extension</span><span class="k">⌥ ↵</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- F3 statement -->
+        <div class="frame-wrap">
+          <div class="fl"><b>3 · Statement</b><span>large line + one red word</span></div>
+          <div class="frame f-stmt">
+            <div class="fchrome top"><span>Statement</span><span>S03 / 06</span></div>
+            <div class="s">The void is the <span class="red">stage</span>.</div>
+            <div class="att">Raycast — design principles</div>
+          </div>
+        </div>
+
+        <!-- F4 data -->
+        <div class="frame-wrap">
+          <div class="fl"><b>4 · Metrics</b><span>elevated stat cards</span></div>
+          <div class="frame f-data">
+            <div class="fchrome top"><span>Metrics</span><span>S04 / 06</span></div>
+            <div class="hh">Three cards, one baseline.</div>
+            <div class="cards">
+              <div class="c"><div class="f">40M</div><div class="l">COMMANDS</div></div>
+              <div class="c red"><div class="f">2×</div><div class="l">FASTER</div></div>
+              <div class="c"><div class="f">99.9</div><div class="l">UPTIME %</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- F5 two-panel -->
+        <div class="frame-wrap">
+          <div class="fl"><b>5 · Two-Panel</b><span>product window + text</span></div>
+          <div class="frame f-edit">
+            <div class="fchrome top"><span>Two-Panel</span><span>S05 / 06</span></div>
+            <div class="txt">
+              <div class="t">Product as content.</div>
+              <div class="b">A macOS window sits in real chrome — traffic-light dots, a deep floating shadow — opposite flush-left copy.</div>
+            </div>
+            <div class="win" aria-hidden="true">
+              <div class="bar"><i></i><i></i><i></i></div>
+              <div class="body">
+                <div>$ raycast open</div>
+                <div><span class="r">→</span> palette ready</div>
+                <div>⌘ K to run</div>
+              </div>
+            </div>
+            <div class="fchrome bot" style="left: 5cqw; right: 52cqw"><span>Fig. 05 — product window</span><span></span></div>
+          </div>
+        </div>
+
+        <!-- F6 closing -->
+        <div class="frame-wrap">
+          <div class="fl"><b>6 · Closing</b><span>stripe field + sign-off</span></div>
+          <div class="frame f-close">
+            <div class="rail" aria-hidden="true"></div>
+            <div class="fchrome top" style="left: 22cqw"><span>Closing</span><span>S06 / 06</span></div>
+            <div class="s">Serve the <span class="red">tool</span>.</div>
+            <div class="m">verysmallwoods.studio</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ PRINCIPLES ═══════════ -->
+    <section>
+      <div class="sec-head">
+        <span class="n">05</span>
+        <h2>Principles</h2>
+        <span class="meta">The rule &amp; the failure</span>
+      </div>
+      <div class="principles">
+        <div class="col do">
+          <h3>Do</h3>
+          <ul>
+            <li><span><b>Sit on #07080a.</b> Near-black blue-tinted ground — never pure black. Float content in the void.</span></li>
+            <li><span><b>Pair every shadow.</b> Outer ring + inset top highlight + soft drop. Depth is real, never a flat rectangle.</span></li>
+            <li><span><b>Track body positive.</b> +0.012em, weight 500; display at 600, near-zero tracking. Airy, not shouty.</span></li>
+            <li><span><b>Spend red sparingly.</b> A kicker tick, one flagged word, an alert rail, or the diagonal stripe motif.</span></li>
+            <li><span><b>Contain with hairlines.</b> Barely-visible white rgba 0.06–0.10; cool-gray #252829 for solid dividers.</span></li>
+            <li><span><b>Hover by opacity.</b> Interactions shift opacity or elevation — macOS-native, never a color swap.</span></li>
+          </ul>
+        </div>
+        <div class="col dont">
+          <h3>Don't</h3>
+          <ul>
+            <li><span><b>Use pure black.</b> #000000 kills the blue tint that makes it Raycast, not a generic dark theme.</span></li>
+            <li><span><b>Flatten the depth.</b> No single-layer shadows, no borderless flat rectangles.</span></li>
+            <li><span><b>Make red pervasive.</b> Blue is for interactive/info; red is the brand punctuation, one accent per frame.</span></li>
+            <li><span><b>Track body negative.</b> Raycast deliberately uses positive spacing for dark-mode readability.</span></li>
+            <li><span><b>Mix typefaces.</b> No serif, script, or decorative face outside Inter / JetBrains Mono.</span></li>
+            <li><span><b>Add ornament.</b> No second saturated hue, no colorful gradient backgrounds — the void is the stage.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      <span>Raycast Dark — Frame Preset</span>
+      <span>verysmallwoods · HyperFrames</span>
+      <span>Atoms sacred · Composition free</span>
+    </div>
+  </body>
+</html>
