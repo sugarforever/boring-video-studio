@@ -1,0 +1,1137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Swiss Minimalism</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style id="ds-tokens">
+      :root {
+        --paper: #f5f4f1;
+        --panel: #eae9e4;
+        --ink: #141414;
+        --ink-soft: #6b6b68;
+        --accent: #e30613;
+        --line: #141414;
+        --grid: rgba(20, 20, 20, 0.07);
+        --tight: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+        --sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+        --mono: "JetBrains Mono", ui-monospace, monospace;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        background: #0e0e0e;
+      }
+      body {
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--sans);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ── shared type atoms ── */
+      .tight {
+        font-family: var(--tight);
+        color: var(--ink);
+        letter-spacing: -0.025em;
+        line-height: 0.95;
+      }
+      .mono {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+      .kicker {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .kicker::before {
+        content: "";
+        width: 22px;
+        height: 8px;
+        background: var(--accent);
+      }
+      .label {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--ink);
+      }
+      .lede {
+        font-family: var(--sans);
+        font-weight: 400;
+        font-size: 17px;
+        line-height: 1.5;
+        color: var(--ink-soft);
+        max-width: 52ch;
+      }
+
+      /* ── page shell ── */
+      section {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 132px 96px;
+        position: relative;
+        border-bottom: 1px solid var(--line);
+        overflow: hidden;
+      }
+      .sec-head {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 24px;
+        align-items: baseline;
+        margin-bottom: 72px;
+      }
+      .sec-head .n {
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        color: var(--accent);
+        grid-column: 1 / 2;
+      }
+      .sec-head h2 {
+        font-family: var(--tight);
+        font-weight: 800;
+        font-size: 42px;
+        letter-spacing: -0.025em;
+        line-height: 1;
+        grid-column: 2 / 9;
+      }
+      .sec-head .meta {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        grid-column: 10 / 13;
+        text-align: right;
+      }
+
+      /* faint construction grid overlay (chrome) */
+      .grid-overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: repeating-linear-gradient(
+          to right,
+          var(--grid) 0 1px,
+          transparent 1px calc((100% - 96px * 2) / 12)
+        );
+        background-position: 96px 0;
+        background-size: calc(100% - 192px) 100%;
+        background-repeat: no-repeat;
+        opacity: 0;
+      }
+
+      /* ═══ COVER ═══ */
+      .cover {
+        min-height: 100vh;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .cover-inner {
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 64px 96px 88px;
+      }
+      .cover .chrome-top,
+      .cover .chrome-bot {
+        display: flex;
+        justify-content: space-between;
+        padding: 40px 96px;
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+      .cover .chrome-top {
+        border-bottom: 1px solid var(--line);
+      }
+      .cover .chrome-bot {
+        border-top: 1px solid var(--line);
+        color: var(--ink-soft);
+      }
+      .cover h1 {
+        font-family: var(--tight);
+        font-weight: 900;
+        font-size: clamp(56px, 9vw, 150px);
+        line-height: 0.88;
+        letter-spacing: -0.035em;
+        color: var(--ink);
+        max-width: 15ch;
+      }
+      .cover h1 .red {
+        color: var(--accent);
+      }
+      .cover .kicker {
+        margin-bottom: 28px;
+      }
+      .cover .lede {
+        margin-top: 30px;
+      }
+      /* concentric arcs, upper-right, generated by rule (widths double) */
+      .arcs {
+        position: absolute;
+        top: -160px;
+        right: -160px;
+        width: 620px;
+        height: 620px;
+        pointer-events: none;
+      }
+      .arcs span {
+        position: absolute;
+        border-radius: 50%;
+        border-style: solid;
+        border-color: var(--ink);
+        inset: 0;
+        margin: auto;
+      }
+
+      /* ═══ PALETTE ═══ */
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 24px;
+      }
+      .swatch .chip {
+        aspect-ratio: 4 / 3;
+        border: 1px solid var(--line);
+      }
+      .swatch .name {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 14px;
+        margin-top: 14px;
+      }
+      .swatch .hex {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--ink-soft);
+        margin-top: 4px;
+        text-transform: uppercase;
+      }
+      .swatch .role {
+        font-family: var(--sans);
+        font-size: 12px;
+        color: var(--ink-soft);
+        margin-top: 8px;
+        line-height: 1.45;
+      }
+
+      /* ═══ TYPOGRAPHY ═══ */
+      .type-row {
+        display: grid;
+        grid-template-columns: 168px 1fr;
+        gap: 40px;
+        align-items: baseline;
+        padding: 28px 0;
+        border-top: 1px solid var(--line);
+      }
+      .type-row:last-child {
+        border-bottom: 1px solid var(--line);
+      }
+      .type-row .spec {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        color: var(--ink-soft);
+        text-transform: uppercase;
+        line-height: 1.6;
+      }
+      .type-row .spec b {
+        color: var(--ink);
+        font-weight: 500;
+      }
+      .sp-display {
+        font-family: var(--tight);
+        font-weight: 900;
+        font-size: 92px;
+        line-height: 0.9;
+        letter-spacing: -0.035em;
+      }
+      .sp-headline {
+        font-family: var(--tight);
+        font-weight: 800;
+        font-size: 60px;
+        line-height: 0.98;
+        letter-spacing: -0.025em;
+      }
+      .sp-h2 {
+        font-family: var(--tight);
+        font-weight: 800;
+        font-size: 40px;
+        letter-spacing: -0.02em;
+      }
+      .sp-body {
+        font-family: var(--sans);
+        font-weight: 400;
+        font-size: 18px;
+        line-height: 1.5;
+        color: var(--ink-soft);
+        max-width: 60ch;
+      }
+      .sp-mono {
+        font-family: var(--mono);
+        font-size: 15px;
+        letter-spacing: 0.04em;
+      }
+
+      /* ═══ COMPONENTS ═══ */
+      .comp-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+      }
+      .comp {
+        border: 1px solid var(--line);
+        padding: 32px;
+        min-height: 220px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        background: var(--paper);
+      }
+      .comp .cap {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        margin-top: auto;
+      }
+      .comp .cap b {
+        color: var(--ink);
+        display: block;
+        font-weight: 500;
+        font-size: 13px;
+        margin-bottom: 3px;
+        letter-spacing: 0.02em;
+      }
+      /* red-bar demo */
+      .demo-redbar {
+        display: flex;
+        gap: 20px;
+        align-items: flex-end;
+        height: 96px;
+        margin-bottom: 24px;
+      }
+      .demo-redbar i {
+        display: block;
+        width: 26px;
+        background: var(--accent);
+      }
+      .demo-redbar i.ink {
+        background: var(--ink);
+      }
+      /* index rows */
+      .demo-index {
+        margin-bottom: 20px;
+      }
+      .demo-index .row {
+        display: grid;
+        grid-template-columns: 40px 1fr auto;
+        gap: 16px;
+        align-items: baseline;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .demo-index .row .ord {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--ink-soft);
+      }
+      .demo-index .row .nm {
+        font-family: var(--tight);
+        font-weight: 700;
+        font-size: 20px;
+        letter-spacing: -0.015em;
+      }
+      .demo-index .row.on .ord,
+      .demo-index .row.on .nm {
+        color: var(--accent);
+      }
+      .demo-index .row .mt {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-soft);
+      }
+      /* dot matrix */
+      .demo-dots {
+        display: grid;
+        grid-template-columns: repeat(9, 1fr);
+        gap: 8px;
+        width: 132px;
+        margin-bottom: 24px;
+      }
+      .demo-dots i {
+        aspect-ratio: 1;
+        background: var(--ink);
+      }
+      .demo-dots i.r {
+        background: var(--accent);
+      }
+      /* hairline demo */
+      .demo-hair {
+        margin-bottom: 24px;
+      }
+      .demo-hair hr {
+        border: none;
+        border-top: 1px solid var(--line);
+        margin: 14px 0;
+      }
+      .demo-hair hr.red {
+        border-top: 2px solid var(--accent);
+      }
+      /* image field */
+      .demo-imgfield {
+        flex: 1;
+        min-height: 110px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        position: relative;
+        margin-bottom: 16px;
+      }
+      .demo-imgfield::before,
+      .demo-imgfield::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to top right,
+          transparent calc(50% - 0.5px),
+          var(--line) calc(50% - 0.5px),
+          var(--line) calc(50% + 0.5px),
+          transparent calc(50% + 0.5px)
+        );
+      }
+      .demo-imgfield::after {
+        transform: scaleX(-1);
+      }
+      /* kpi bars */
+      .demo-kpi {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        align-items: end;
+        height: 130px;
+        margin-bottom: 22px;
+      }
+      .demo-kpi .col {
+        text-align: left;
+      }
+      .demo-kpi .col i {
+        display: block;
+        width: 100%;
+        background: var(--accent);
+      }
+      .demo-kpi .col .fig {
+        font-family: var(--tight);
+        font-weight: 800;
+        font-size: 26px;
+        letter-spacing: -0.02em;
+        margin-top: 8px;
+        border-top: 1px solid var(--line);
+        padding-top: 4px;
+      }
+      /* arcs mini */
+      .demo-arcs {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin-bottom: 24px;
+      }
+      .demo-arcs span {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        border-radius: 50%;
+        border-style: solid;
+      }
+
+      /* ═══ COMPOSITIONS ═══ */
+      .frames {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 28px;
+      }
+      .frame-wrap .fl {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .frame-wrap .fl b {
+        color: var(--ink);
+        font-weight: 500;
+      }
+      .frame {
+        aspect-ratio: 16 / 9;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        position: relative;
+        overflow: hidden;
+        container-type: size;
+      }
+      .frame .fchrome {
+        position: absolute;
+        left: 5cqw;
+        right: 5cqw;
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 2.4cqh;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+      .frame .fchrome.top {
+        top: 5cqh;
+      }
+      .frame .fchrome.bot {
+        bottom: 5cqh;
+        color: var(--ink-soft);
+      }
+      .fk {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 2.6cqh;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 1.2cqw;
+      }
+      .fk::before {
+        content: "";
+        width: 3cqw;
+        height: 1.3cqh;
+        background: var(--accent);
+      }
+      /* F1 cover */
+      .f-cover .h {
+        position: absolute;
+        left: 5cqw;
+        bottom: 14cqh;
+        font-family: var(--tight);
+        font-weight: 900;
+        font-size: 9cqw;
+        line-height: 0.86;
+        letter-spacing: -0.035em;
+      }
+      .f-cover .h .red {
+        color: var(--accent);
+      }
+      .f-cover .kk {
+        position: absolute;
+        left: 5cqw;
+        bottom: 40cqh;
+      }
+      .f-cover .arc {
+        position: absolute;
+        top: -14cqh;
+        right: -8cqw;
+        width: 44cqw;
+        height: 44cqw;
+      }
+      .f-cover .arc span {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        border-radius: 50%;
+        border-style: solid;
+      }
+      /* F2 index */
+      .f-index .rows {
+        position: absolute;
+        left: 5cqw;
+        top: 24cqh;
+        width: 58cqw;
+      }
+      .f-index .rows .r {
+        display: grid;
+        grid-template-columns: 6cqw 1fr;
+        gap: 2cqw;
+        align-items: baseline;
+        padding: 2.2cqh 0;
+        border-bottom: 0.14cqh solid var(--line);
+      }
+      .f-index .rows .r .o {
+        font-family: var(--mono);
+        font-size: 2.4cqh;
+        color: var(--ink-soft);
+      }
+      .f-index .rows .r .n {
+        font-family: var(--tight);
+        font-weight: 700;
+        font-size: 3.4cqh;
+        letter-spacing: -0.015em;
+      }
+      .f-index .rows .r.on .o,
+      .f-index .rows .r.on .n {
+        color: var(--accent);
+      }
+      .f-index .hh {
+        position: absolute;
+        left: 5cqw;
+        top: 12cqh;
+        font-family: var(--tight);
+        font-weight: 800;
+        font-size: 4.6cqw;
+        letter-spacing: -0.02em;
+      }
+      /* F3 statement */
+      .f-stmt .s {
+        position: absolute;
+        left: 5cqw;
+        top: 30cqh;
+        font-family: var(--tight);
+        font-weight: 900;
+        font-size: 8.2cqw;
+        line-height: 0.92;
+        letter-spacing: -0.03em;
+        max-width: 78cqw;
+      }
+      .f-stmt .s .red {
+        color: var(--accent);
+      }
+      .f-stmt .att {
+        position: absolute;
+        left: 5cqw;
+        bottom: 12cqh;
+        font-family: var(--mono);
+        font-size: 2.3cqh;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--ink-soft);
+        border-top: 0.14cqh solid var(--line);
+        padding-top: 1.4cqh;
+      }
+      /* F4 data */
+      .f-data .bars {
+        position: absolute;
+        left: 5cqw;
+        right: 5cqw;
+        bottom: 12cqh;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3cqw;
+        align-items: end;
+        height: 44cqh;
+      }
+      .f-data .bars .c i {
+        display: block;
+        background: var(--accent);
+      }
+      .f-data .bars .c i.ink {
+        background: var(--ink);
+      }
+      .f-data .bars .c .f {
+        font-family: var(--tight);
+        font-weight: 800;
+        font-size: 4cqh;
+        letter-spacing: -0.02em;
+        margin-top: 1cqh;
+        border-top: 0.14cqh solid var(--line);
+        padding-top: 0.8cqh;
+      }
+      .f-data .hh {
+        position: absolute;
+        left: 5cqw;
+        top: 14cqh;
+        font-family: var(--tight);
+        font-weight: 800;
+        font-size: 4.2cqw;
+        letter-spacing: -0.02em;
+        max-width: 60cqw;
+      }
+      /* F5 editorial */
+      .f-edit .txt {
+        position: absolute;
+        left: 5cqw;
+        top: 24cqh;
+        width: 38cqw;
+      }
+      .f-edit .txt .t {
+        font-family: var(--tight);
+        font-weight: 800;
+        font-size: 3.8cqw;
+        letter-spacing: -0.02em;
+        line-height: 1;
+      }
+      .f-edit .txt .b {
+        font-family: var(--sans);
+        font-size: 2cqh;
+        line-height: 1.5;
+        color: var(--ink-soft);
+        margin-top: 2cqh;
+      }
+      .f-edit .img {
+        position: absolute;
+        right: 5cqw;
+        top: 16cqh;
+        bottom: 16cqh;
+        width: 40cqw;
+        background: var(--panel);
+        border: 0.14cqh solid var(--line);
+      }
+      .f-edit .img::before,
+      .f-edit .img::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to top right,
+          transparent calc(50% - 0.5px),
+          var(--line) calc(50% - 0.5px),
+          var(--line) calc(50% + 0.5px),
+          transparent calc(50% + 0.5px)
+        );
+      }
+      .f-edit .img::after {
+        transform: scaleX(-1);
+      }
+      /* F6 closing */
+      .f-close .block {
+        position: absolute;
+        left: 5cqw;
+        top: 5cqh;
+        bottom: 5cqh;
+        width: 10cqw;
+        background: var(--accent);
+      }
+      .f-close .s {
+        position: absolute;
+        left: 20cqw;
+        top: 34cqh;
+        font-family: var(--tight);
+        font-weight: 900;
+        font-size: 6.4cqw;
+        line-height: 0.92;
+        letter-spacing: -0.03em;
+        max-width: 66cqw;
+      }
+      .f-close .m {
+        position: absolute;
+        left: 20cqw;
+        bottom: 12cqh;
+        font-family: var(--mono);
+        font-size: 2.3cqh;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--ink-soft);
+        border-top: 0.14cqh solid var(--line);
+        padding-top: 1.4cqh;
+      }
+
+      /* ═══ PRINCIPLES ═══ */
+      .principles {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 64px;
+      }
+      .principles .col h3 {
+        font-family: var(--tight);
+        font-weight: 800;
+        font-size: 22px;
+        letter-spacing: -0.01em;
+        padding-bottom: 16px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid var(--line);
+      }
+      .principles .col.do h3 {
+        color: var(--ink);
+      }
+      .principles .col.dont h3 {
+        color: var(--accent);
+      }
+      .principles ul {
+        list-style: none;
+      }
+      .principles li {
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        gap: 8px;
+        padding: 16px 0;
+        border-bottom: 1px solid var(--grid);
+        font-size: 15px;
+        line-height: 1.5;
+        color: var(--ink-soft);
+      }
+      .principles li b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .principles .do li::before {
+        content: "+";
+        font-family: var(--mono);
+        color: var(--ink);
+      }
+      .principles .dont li::before {
+        content: "×";
+        font-family: var(--mono);
+        color: var(--accent);
+      }
+
+      .footer {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 40px 96px 80px;
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+      }
+      @media (max-width: 900px) {
+        section {
+          padding: 72px 32px;
+        }
+        .swatches,
+        .comp-grid,
+        .frames,
+        .principles {
+          grid-template-columns: 1fr;
+        }
+        .cover .chrome-top,
+        .cover .chrome-bot,
+        .cover-inner {
+          padding-left: 32px;
+          padding-right: 32px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══════════ COVER ═══════════ -->
+    <section class="cover">
+      <div class="chrome-top mono">
+        <span>Swiss Minimalism — Frame Preset</span>
+        <span>S01 / 06</span>
+        <span>Int'l Typographic Style</span>
+      </div>
+      <div class="cover-inner">
+        <div class="arcs" aria-hidden="true">
+          <span style="border-width: 2px 2px 0 0; width: 100%; height: 100%; border-color: var(--ink)"></span>
+          <span style="border-width: 4px 4px 0 0; width: 74%; height: 74%; border-color: var(--accent)"></span>
+          <span style="border-width: 8px 8px 0 0; width: 50%; height: 50%; border-color: var(--ink)"></span>
+          <span style="border-width: 16px 16px 0 0; width: 28%; height: 28%; border-color: var(--accent)"></span>
+        </div>
+        <span class="kicker">Design Preset · No. 14</span>
+        <h1>Order,<br />clarity,<br />and one <span class="red">red</span>.</h1>
+        <p class="lede">
+          The International Typographic Style rebuilt for the 1920×1080 frame. A strict 12-column
+          grid, one grotesque family, and a single signal red — nothing decorative, nothing eyeballed.
+        </p>
+      </div>
+      <div class="chrome-bot mono">
+        <span>Müller-Brockmann · Hofmann · Ruder</span>
+        <span>Flush-left · Ragged-right</span>
+        <span>Vol. 01</span>
+      </div>
+    </section>
+
+    <!-- ═══════════ PALETTE ═══════════ -->
+    <section>
+      <div class="grid-overlay"></div>
+      <div class="sec-head">
+        <span class="n">01</span>
+        <h2>Palette</h2>
+        <span class="meta">Paper + Ink + one red</span>
+      </div>
+      <div class="swatches">
+        <div class="swatch">
+          <div class="chip" style="background: var(--paper)"></div>
+          <div class="name">Paper</div>
+          <div class="hex">#F5F4F1</div>
+          <div class="role">The stark neutral ground.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--panel)"></div>
+          <div class="name">Panel</div>
+          <div class="hex">#EAE9E4</div>
+          <div class="role">Only secondary surface — image fields.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--ink)"></div>
+          <div class="name">Ink</div>
+          <div class="hex">#141414</div>
+          <div class="role">Near-black — type + every 1px rule.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--ink-soft)"></div>
+          <div class="name">Ink-soft</div>
+          <div class="hex">#6B6B68</div>
+          <div class="role">Grey — secondary + body copy.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--accent)"></div>
+          <div class="name">Signal red</div>
+          <div class="hex">#E30613</div>
+          <div class="role">The ONE accent. A flat block, never a gradient.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ TYPOGRAPHY ═══════════ -->
+    <section>
+      <div class="sec-head">
+        <span class="n">02</span>
+        <h2>Typography</h2>
+        <span class="meta">One superfamily · weight = hierarchy</span>
+      </div>
+      <div class="type-row">
+        <div class="spec"><b>Display-hero</b><br />Inter Tight 900<br />9.6cqw · −0.035em</div>
+        <div class="sp-display tight">Grid systems</div>
+      </div>
+      <div class="type-row">
+        <div class="spec"><b>Headline</b><br />Inter Tight 800<br />5.2cqw · −0.025em</div>
+        <div class="sp-headline tight">Design is not decoration</div>
+      </div>
+      <div class="type-row">
+        <div class="spec"><b>H2</b><br />Inter Tight 800<br />3.4cqw · −0.02em</div>
+        <div class="sp-h2 tight">The message is served, not styled</div>
+      </div>
+      <div class="type-row">
+        <div class="spec"><b>Body</b><br />Inter 400<br />0.85cqw · flush-left</div>
+        <div class="sp-body">
+          Hierarchy is built through weight, size, and position inside a single sans-serif family —
+          never by mixing typefaces. Text sets flush-left, ragged-right, on a 12px baseline; word
+          spacing stays even and the right edge is left to fall where it will.
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="spec"><b>Mono chrome</b><br />JetBrains Mono 400<br />13px · 0.06em · UPPER</div>
+        <div class="sp-mono">S04 / 12 &nbsp;·&nbsp; SOURCE — INTERNAL / 2026 &nbsp;·&nbsp; № 06</div>
+      </div>
+    </section>
+
+    <!-- ═══════════ COMPONENTS ═══════════ -->
+    <section>
+      <div class="sec-head">
+        <span class="n">03</span>
+        <h2>Components</h2>
+        <span class="meta">Flat · square · systematic</span>
+      </div>
+      <div class="comp-grid">
+        <div class="comp">
+          <div class="demo-redbar">
+            <i style="height: 100%"></i>
+            <i class="ink" style="height: 62%"></i>
+            <i style="height: 40%"></i>
+            <i class="ink" style="height: 78%"></i>
+          </div>
+          <div class="cap"><b>Red-bar &amp; kicker-tick</b>Flat signal-red fills as compositional weight — the accent is a block, never a border.</div>
+        </div>
+
+        <div class="comp">
+          <div class="demo-arcs">
+            <span style="width: 100%; height: 100%; border-width: 2px; border-color: var(--ink)"></span>
+            <span style="width: 72%; height: 72%; border-width: 4px; border-color: var(--accent)"></span>
+            <span style="width: 46%; height: 46%; border-width: 8px; border-color: var(--ink)"></span>
+            <span style="width: 22%; height: 22%; border-width: 12px; border-color: var(--accent)"></span>
+          </div>
+          <div class="cap"><b>Concentric arcs</b>Müller-Brockmann geometry — ring widths double (1·2·4·8), generated by rule, red + ink only.</div>
+        </div>
+
+        <div class="comp">
+          <div class="demo-index">
+            <div class="row"><span class="ord">01</span><span class="nm">Objective clarity</span><span class="mt">§ 1.0</span></div>
+            <div class="row on"><span class="ord">02</span><span class="nm">The grid is law</span><span class="mt">§ 2.0</span></div>
+            <div class="row"><span class="ord">03</span><span class="nm">One accent, sparingly</span><span class="mt">§ 3.0</span></div>
+          </div>
+          <div class="cap"><b>Index-row</b>Numbered flush-left row on a 1px ink rule. One row may run red.</div>
+        </div>
+
+        <div class="comp">
+          <div class="demo-dots" aria-hidden="true">
+            <i></i><i></i><i></i><i class="r"></i><i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i><i class="r"></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            <i></i><i class="r"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            <i class="r"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <div class="cap"><b>Dot matrix</b>Constructivist field on the baseline lattice — systematic punctuation, one per frame.</div>
+        </div>
+
+        <div class="comp">
+          <div class="demo-kpi">
+            <div class="col"><i style="height: 40px"></i><div class="fig">75</div></div>
+            <div class="col"><i style="height: 78px"></i><div class="fig">200</div></div>
+            <div class="col"><i style="height: 110px"></i><div class="fig">25K</div></div>
+            <div class="col"><i style="height: 130px"></i><div class="fig">80K</div></div>
+          </div>
+          <div class="cap"><b>KPI bars</b>Flat red columns; height = real data scaled. Square ends, hairline baseline.</div>
+        </div>
+
+        <div class="comp">
+          <div class="demo-imgfield" aria-hidden="true"></div>
+          <div class="demo-hair"><hr /><hr class="red" /></div>
+          <div class="cap"><b>Image-field &amp; hairline</b>The objective-photo slot (crossed-X until wired) and the universal 1px rule.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ COMPOSITIONS ═══════════ -->
+    <section>
+      <div class="sec-head">
+        <span class="n">04</span>
+        <h2>Compositions</h2>
+        <span class="meta">6 frame treatments · 16:9</span>
+      </div>
+      <div class="frames">
+        <!-- F1 cover -->
+        <div class="frame-wrap">
+          <div class="fl"><b>1 · Cover</b><span>corner-weighted display + arc</span></div>
+          <div class="frame f-cover">
+            <div class="fchrome top"><span>Swiss Minimal</span><span>S01 / 06</span></div>
+            <div class="arc" aria-hidden="true">
+              <span style="width: 100%; height: 100%; border: 0.5cqw solid var(--ink); border-bottom: none; border-left: none"></span>
+              <span style="width: 62%; height: 62%; border: 1cqw solid var(--accent); border-bottom: none; border-left: none"></span>
+              <span style="width: 30%; height: 30%; border: 2cqw solid var(--ink); border-bottom: none; border-left: none"></span>
+            </div>
+            <span class="fk kk">No. 14</span>
+            <div class="h">One <span class="red">red.</span></div>
+            <div class="fchrome bot"><span>Ragged-right</span><span>Vol. 01</span></div>
+          </div>
+        </div>
+
+        <!-- F2 index -->
+        <div class="frame-wrap">
+          <div class="fl"><b>2 · Index</b><span>numbered hairline rows</span></div>
+          <div class="frame f-index">
+            <div class="fchrome top"><span>Agenda</span><span>S02 / 06</span></div>
+            <div class="hh">Contents</div>
+            <div class="rows">
+              <div class="r"><span class="o">01</span><span class="n">Objective clarity</span></div>
+              <div class="r on"><span class="o">02</span><span class="n">The grid is law</span></div>
+              <div class="r"><span class="o">03</span><span class="n">One accent</span></div>
+            </div>
+            <div class="fchrome bot"><span>Index</span><span>№ 02</span></div>
+          </div>
+        </div>
+
+        <!-- F3 statement -->
+        <div class="frame-wrap">
+          <div class="fl"><b>3 · Statement</b><span>giant flush-left word</span></div>
+          <div class="frame f-stmt">
+            <div class="fchrome top"><span>Statement</span><span>S03 / 06</span></div>
+            <div class="s">Whitespace is <span class="red">not</span> empty.</div>
+            <div class="att">Emil Ruder — Typographie, 1967</div>
+          </div>
+        </div>
+
+        <!-- F4 data -->
+        <div class="frame-wrap">
+          <div class="fl"><b>4 · Data</b><span>flat bars on a baseline</span></div>
+          <div class="frame f-data">
+            <div class="fchrome top"><span>Metrics</span><span>S04 / 06</span></div>
+            <div class="hh">Four columns, one baseline.</div>
+            <div class="bars">
+              <div class="c"><i style="height: 14cqh"></i><div class="f">75</div></div>
+              <div class="c"><i style="height: 24cqh"></i><div class="f">200</div></div>
+              <div class="c"><i class="ink" style="height: 33cqh"></i><div class="f">25K</div></div>
+              <div class="c"><i style="height: 42cqh"></i><div class="f">80K</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- F5 editorial -->
+        <div class="frame-wrap">
+          <div class="fl"><b>5 · Editorial</b><span>asymmetric image + text</span></div>
+          <div class="frame f-edit">
+            <div class="fchrome top"><span>Editorial</span><span>S05 / 06</span></div>
+            <div class="txt">
+              <div class="t">Image sits on the grid.</div>
+              <div class="b">Photography is objective and hard-cropped to its module — flush-left copy hangs from the left margin opposite.</div>
+            </div>
+            <div class="img" aria-hidden="true"></div>
+            <div class="fchrome bot"><span>Fig. 05 — objective photo</span><span>№ 05</span></div>
+          </div>
+        </div>
+
+        <!-- F6 closing -->
+        <div class="frame-wrap">
+          <div class="fl"><b>6 · Closing</b><span>red block + sign-off</span></div>
+          <div class="frame f-close">
+            <div class="block" aria-hidden="true"></div>
+            <div class="fchrome top" style="left: 20cqw"><span>Closing</span><span>S06 / 06</span></div>
+            <div class="s">Serve the message.</div>
+            <div class="m">verysmallwoods.studio</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ PRINCIPLES ═══════════ -->
+    <section>
+      <div class="sec-head">
+        <span class="n">05</span>
+        <h2>Principles</h2>
+        <span class="meta">The rule &amp; the failure</span>
+      </div>
+      <div class="principles">
+        <div class="col do">
+          <h3>Do</h3>
+          <ul>
+            <li><span><b>Snap to the grid.</b> Every edge on a 12-column field + 12px baseline. Never eyeballed.</span></li>
+            <li><span><b>Flush-left, ragged-right.</b> Tighten display with negative tracking; body tracking near zero.</span></li>
+            <li><span><b>Hold 40–60% empty.</b> Whitespace is an active counter-weight, not leftover.</span></li>
+            <li><span><b>One element dominates 4–8×.</b> Hierarchy is size + weight, not a device.</span></li>
+            <li><span><b>Use the one red sparingly.</b> A block, a tick, a chart leader, or a single flagged word.</span></li>
+            <li><span><b>Generate geometry by rule.</b> Arc widths double; dots on the baseline lattice.</span></li>
+          </ul>
+        </div>
+        <div class="col dont">
+          <h3>Don't</h3>
+          <ul>
+            <li><span><b>Center or justify text.</b> No right-aligned body, no letter-spaced lowercase.</span></li>
+            <li><span><b>Add a second hue.</b> No gradient, shadow, blur, or rounded corner — ever.</span></li>
+            <li><span><b>Mix typefaces.</b> No serif, script, or decorative face outside the system.</span></li>
+            <li><span><b>Eyeball or rotate casually.</b> A diagonal, if used, sits at a defined angle.</span></li>
+            <li><span><b>Crowd the frame.</b> Timid, evenly-sized type with no dominant whitespace reads as broken.</span></li>
+            <li><span><b>Use emotive stock imagery.</b> Photography is objective, high-contrast, grid-cropped.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      <span>Swiss Minimalism — Frame Preset</span>
+      <span>verysmallwoods · HyperFrames</span>
+      <span>Atoms sacred · Composition free</span>
+    </div>
+  </body>
+</html>

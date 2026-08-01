@@ -1,0 +1,1254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Claude Warm</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style id="ds-tokens">
+      :root {
+        --canvas: #f5f4ed;
+        --panel: #faf9f5;
+        --sand: #e8e6dc;
+        --ink: #141413;
+        --ink-2: #30302e;
+        --ink-soft: #5e5d59;
+        --ink-faint: #87867f;
+        --accent: #c96442;
+        --accent-soft: #d97757;
+        --sage: #6a6f4e;
+        --line: #e8e6dc;
+        --line-soft: #f0eee6;
+        --grid: rgba(20, 20, 19, 0.05);
+        --serif: "Newsreader", Georgia, "Times New Roman", serif;
+        --sans: "Inter", system-ui, "Helvetica Neue", Arial, sans-serif;
+        --mono: "JetBrains Mono", ui-monospace, monospace;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        background: #201f1c;
+      }
+      body {
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: var(--sans);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ── shared type atoms ── */
+      .serif {
+        font-family: var(--serif);
+        font-weight: 500;
+        color: var(--ink);
+        letter-spacing: -0.01em;
+        line-height: 1.14;
+      }
+      .mono {
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+      }
+      .kicker {
+        font-family: var(--mono);
+        font-weight: 500;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .kicker::before {
+        content: "";
+        width: 18px;
+        height: 8px;
+        border-radius: 2px;
+        background: var(--accent);
+      }
+      .label {
+        font-family: var(--sans);
+        font-weight: 500;
+        font-size: 13px;
+        letter-spacing: 0.02em;
+        color: var(--ink);
+      }
+      .lede {
+        font-family: var(--sans);
+        font-weight: 400;
+        font-size: 18px;
+        line-height: 1.6;
+        color: var(--ink-soft);
+        max-width: 54ch;
+      }
+      .u-accent {
+        color: var(--accent);
+        text-decoration: underline;
+        text-decoration-thickness: 3px;
+        text-underline-offset: 0.1em;
+        text-decoration-color: var(--accent-soft);
+      }
+
+      /* ── page shell ── */
+      section {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 140px 96px;
+        position: relative;
+        border-bottom: 1px solid var(--line);
+        overflow: hidden;
+      }
+      .sec-head {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 24px;
+        align-items: baseline;
+        margin-bottom: 76px;
+      }
+      .sec-head .n {
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        grid-column: 1 / 2;
+      }
+      .sec-head h2 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 46px;
+        letter-spacing: -0.012em;
+        line-height: 1.15;
+        grid-column: 2 / 10;
+      }
+      .sec-head .meta {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        grid-column: 10 / 13;
+        text-align: right;
+      }
+
+      /* ═══ COVER ═══ */
+      .cover {
+        min-height: 100vh;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .cover-inner {
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 72px 96px 96px;
+      }
+      .cover .chrome-top,
+      .cover .chrome-bot {
+        display: flex;
+        justify-content: space-between;
+        padding: 40px 96px;
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+      }
+      .cover .chrome-top {
+        border-bottom: 1px solid var(--line);
+      }
+      .cover .chrome-bot {
+        border-top: 1px solid var(--line);
+        color: var(--ink-faint);
+      }
+      .cover h1 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(52px, 8vw, 128px);
+        line-height: 1.08;
+        letter-spacing: -0.015em;
+        color: var(--ink);
+        max-width: 15ch;
+      }
+      .cover h1 .u {
+        color: var(--accent);
+        text-decoration: underline;
+        text-decoration-thickness: 5px;
+        text-underline-offset: 0.06em;
+        text-decoration-color: var(--accent-soft);
+      }
+      .cover .kicker {
+        margin-bottom: 30px;
+      }
+      .cover .lede {
+        margin-top: 34px;
+      }
+      /* soft sage dot cluster, upper-right, organic */
+      .sage-cluster {
+        position: absolute;
+        top: 48px;
+        right: 96px;
+        display: grid;
+        grid-template-columns: repeat(5, 14px);
+        gap: 14px;
+        pointer-events: none;
+        opacity: 0.9;
+      }
+      .sage-cluster i {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--sage);
+      }
+      .sage-cluster i.a {
+        background: var(--accent);
+      }
+      .sage-cluster i.o {
+        opacity: 0.35;
+      }
+
+      /* ═══ PALETTE ═══ */
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+      .swatch {
+        background: var(--panel);
+        border: 1px solid var(--line-soft);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 24px rgba(20, 20, 19, 0.04);
+      }
+      .swatch .chip {
+        aspect-ratio: 16 / 7;
+        border-radius: 10px;
+        border: 1px solid var(--line-soft);
+      }
+      .swatch .name {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 20px;
+        margin-top: 16px;
+      }
+      .swatch .hex {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--ink-faint);
+        margin-top: 4px;
+        text-transform: uppercase;
+      }
+      .swatch .role {
+        font-family: var(--sans);
+        font-size: 13px;
+        color: var(--ink-soft);
+        margin-top: 10px;
+        line-height: 1.5;
+      }
+
+      /* ═══ TYPOGRAPHY ═══ */
+      .type-row {
+        display: grid;
+        grid-template-columns: 190px 1fr;
+        gap: 44px;
+        align-items: baseline;
+        padding: 32px 0;
+        border-top: 1px solid var(--line);
+      }
+      .type-row:last-child {
+        border-bottom: 1px solid var(--line);
+      }
+      .type-row .spec {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        color: var(--ink-faint);
+        text-transform: uppercase;
+        line-height: 1.7;
+      }
+      .type-row .spec b {
+        color: var(--ink);
+        font-weight: 500;
+      }
+      .sp-display {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 88px;
+        line-height: 1.1;
+        letter-spacing: -0.015em;
+      }
+      .sp-headline {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 56px;
+        line-height: 1.15;
+        letter-spacing: -0.008em;
+      }
+      .sp-h2 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 40px;
+        line-height: 1.2;
+        letter-spacing: -0.005em;
+      }
+      .sp-body {
+        font-family: var(--sans);
+        font-weight: 400;
+        font-size: 18px;
+        line-height: 1.6;
+        color: var(--ink-soft);
+        max-width: 60ch;
+      }
+      .sp-mono {
+        font-family: var(--mono);
+        font-size: 15px;
+        letter-spacing: 0.06em;
+        color: var(--ink-soft);
+      }
+
+      /* ═══ COMPONENTS ═══ */
+      .comp-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+      }
+      .comp {
+        border: 1px solid var(--line-soft);
+        border-radius: 16px;
+        padding: 32px;
+        min-height: 230px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        background: var(--panel);
+        box-shadow: 0 4px 24px rgba(20, 20, 19, 0.04);
+      }
+      .comp .cap {
+        font-family: var(--sans);
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--ink-soft);
+        margin-top: auto;
+      }
+      .comp .cap b {
+        color: var(--ink);
+        display: block;
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 18px;
+        margin-bottom: 5px;
+        letter-spacing: -0.005em;
+      }
+      /* accent underline / block demo */
+      .demo-accent {
+        margin-bottom: 24px;
+      }
+      .demo-accent .big {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 34px;
+        line-height: 1.2;
+        letter-spacing: -0.01em;
+      }
+      .demo-accent .big u {
+        text-decoration: underline;
+        text-decoration-thickness: 4px;
+        text-underline-offset: 0.08em;
+        text-decoration-color: var(--accent);
+        color: var(--accent);
+      }
+      .demo-accent .tabs {
+        display: flex;
+        gap: 10px;
+        margin-top: 18px;
+      }
+      .demo-accent .tabs i {
+        height: 18px;
+        border-radius: 3px;
+        background: var(--accent);
+      }
+      .demo-accent .tabs i.sand {
+        background: var(--sand);
+      }
+      /* sage dot cluster */
+      .demo-dots {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px;
+        width: 148px;
+        margin-bottom: 24px;
+      }
+      .demo-dots i {
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: var(--sage);
+      }
+      .demo-dots i.a {
+        background: var(--accent);
+      }
+      .demo-dots i.o {
+        opacity: 0.3;
+      }
+      /* index rows */
+      .demo-index {
+        margin-bottom: 22px;
+      }
+      .demo-index .row {
+        display: grid;
+        grid-template-columns: 40px 1fr auto;
+        gap: 16px;
+        align-items: baseline;
+        padding: 13px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .demo-index .row .ord {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--ink-faint);
+      }
+      .demo-index .row .nm {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 21px;
+        letter-spacing: -0.005em;
+      }
+      .demo-index .row.on .nm .u {
+        color: var(--accent);
+        text-decoration: underline;
+        text-decoration-thickness: 3px;
+        text-underline-offset: 0.1em;
+        text-decoration-color: var(--accent-soft);
+      }
+      .demo-index .row .mt {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-faint);
+      }
+      /* big serif figure */
+      .demo-figure {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      .demo-figure .fig {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 76px;
+        line-height: 0.95;
+        letter-spacing: -0.015em;
+      }
+      .demo-figure .fig.acc {
+        color: var(--accent);
+      }
+      .demo-figure .cap-l {
+        font-family: var(--sans);
+        font-size: 13px;
+        color: var(--ink-soft);
+        line-height: 1.4;
+        border-left: 1px solid var(--line);
+        padding-left: 14px;
+        max-width: 16ch;
+      }
+      /* h-bars */
+      .demo-bars {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 22px;
+      }
+      .demo-bars .b {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .demo-bars .b i {
+        height: 16px;
+        border-radius: 4px;
+        background: var(--sand);
+      }
+      .demo-bars .b i.lead {
+        background: var(--accent);
+      }
+      .demo-bars .b span {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-faint);
+      }
+      /* image field */
+      .demo-imgfield {
+        flex: 1;
+        min-height: 120px;
+        background: var(--sand);
+        border: 1px solid var(--line-soft);
+        border-radius: 14px;
+        position: relative;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .demo-imgfield .mk {
+        display: grid;
+        grid-template-columns: repeat(3, 12px);
+        gap: 10px;
+      }
+      .demo-imgfield .mk i {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--sage);
+        opacity: 0.55;
+      }
+      .demo-imgfield .mk i.a {
+        background: var(--accent);
+        opacity: 0.7;
+      }
+      /* hairline demo */
+      .demo-hair {
+        margin-bottom: 20px;
+      }
+      .demo-hair hr {
+        border: none;
+        border-top: 1px solid var(--line);
+        margin: 15px 0;
+      }
+      .demo-hair hr.acc {
+        border-top: 2px solid var(--accent);
+        width: 40%;
+        border-radius: 2px;
+      }
+
+      /* ═══ COMPOSITIONS ═══ */
+      .frames {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 28px;
+      }
+      .frame-wrap .fl {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .frame-wrap .fl b {
+        color: var(--ink);
+        font-weight: 500;
+      }
+      .frame {
+        aspect-ratio: 16 / 9;
+        background: var(--canvas);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        position: relative;
+        overflow: hidden;
+        container-type: size;
+      }
+      .frame .fchrome {
+        position: absolute;
+        left: 6cqw;
+        right: 6cqw;
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 2.3cqh;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+      }
+      .frame .fchrome.top {
+        top: 6cqh;
+      }
+      .frame .fchrome.bot {
+        bottom: 6cqh;
+        color: var(--ink-faint);
+      }
+      .fk {
+        font-family: var(--mono);
+        font-weight: 500;
+        font-size: 2.4cqh;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 1.2cqw;
+      }
+      .fk::before {
+        content: "";
+        width: 2.6cqw;
+        height: 1.2cqh;
+        border-radius: 0.3cqw;
+        background: var(--accent);
+      }
+      /* F1 cover */
+      .f-cover .h {
+        position: absolute;
+        left: 6cqw;
+        bottom: 15cqh;
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 8.4cqw;
+        line-height: 1.1;
+        letter-spacing: -0.015em;
+        max-width: 74cqw;
+      }
+      .f-cover .h .u {
+        color: var(--accent);
+        text-decoration: underline;
+        text-decoration-thickness: 0.4cqh;
+        text-underline-offset: 0.06em;
+        text-decoration-color: var(--accent-soft);
+      }
+      .f-cover .kk {
+        position: absolute;
+        left: 6cqw;
+        bottom: 44cqh;
+      }
+      .f-cover .sage {
+        position: absolute;
+        top: 12cqh;
+        right: 8cqw;
+        display: grid;
+        grid-template-columns: repeat(4, 2.2cqw);
+        gap: 2.2cqw;
+      }
+      .f-cover .sage i {
+        width: 2.2cqw;
+        height: 2.2cqw;
+        border-radius: 50%;
+        background: var(--sage);
+      }
+      .f-cover .sage i.a {
+        background: var(--accent);
+      }
+      .f-cover .sage i.o {
+        opacity: 0.35;
+      }
+      /* F2 index */
+      .f-index .rows {
+        position: absolute;
+        left: 6cqw;
+        top: 26cqh;
+        width: 60cqw;
+      }
+      .f-index .rows .r {
+        display: grid;
+        grid-template-columns: 6cqw 1fr;
+        gap: 2cqw;
+        align-items: baseline;
+        padding: 2.4cqh 0;
+        border-bottom: 0.14cqh solid var(--line);
+      }
+      .f-index .rows .r .o {
+        font-family: var(--mono);
+        font-size: 2.3cqh;
+        color: var(--ink-faint);
+      }
+      .f-index .rows .r .n {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 3.4cqh;
+        letter-spacing: -0.005em;
+      }
+      .f-index .rows .r.on .n .u {
+        color: var(--accent);
+        text-decoration: underline;
+        text-decoration-thickness: 0.3cqh;
+        text-underline-offset: 0.1em;
+        text-decoration-color: var(--accent-soft);
+      }
+      .f-index .hh {
+        position: absolute;
+        left: 6cqw;
+        top: 13cqh;
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 4.6cqw;
+        letter-spacing: -0.01em;
+      }
+      /* F3 statement */
+      .f-stmt .s {
+        position: absolute;
+        left: 6cqw;
+        top: 28cqh;
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 6.4cqw;
+        line-height: 1.14;
+        letter-spacing: -0.012em;
+        max-width: 80cqw;
+      }
+      .f-stmt .s .u {
+        color: var(--accent);
+        text-decoration: underline;
+        text-decoration-thickness: 0.4cqh;
+        text-underline-offset: 0.08em;
+        text-decoration-color: var(--accent-soft);
+      }
+      .f-stmt .att {
+        position: absolute;
+        left: 6cqw;
+        bottom: 13cqh;
+        font-family: var(--mono);
+        font-size: 2.2cqh;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--ink-faint);
+        border-top: 0.14cqh solid var(--line);
+        padding-top: 1.4cqh;
+      }
+      /* F4 data — big serif figure */
+      .f-data .hh {
+        position: absolute;
+        left: 6cqw;
+        top: 14cqh;
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 4cqw;
+        letter-spacing: -0.01em;
+        max-width: 60cqw;
+      }
+      .f-data .fig {
+        position: absolute;
+        left: 6cqw;
+        bottom: 13cqh;
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 20cqw;
+        line-height: 0.9;
+        letter-spacing: -0.02em;
+        color: var(--accent);
+      }
+      .f-data .figlab {
+        position: absolute;
+        right: 6cqw;
+        bottom: 15cqh;
+        width: 30cqw;
+        font-family: var(--sans);
+        font-size: 2.2cqh;
+        line-height: 1.45;
+        color: var(--ink-soft);
+        border-top: 0.14cqh solid var(--line);
+        padding-top: 1.4cqh;
+      }
+      /* F5 editorial */
+      .f-edit .txt {
+        position: absolute;
+        left: 6cqw;
+        top: 24cqh;
+        width: 38cqw;
+      }
+      .f-edit .txt .t {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 3.8cqw;
+        letter-spacing: -0.008em;
+        line-height: 1.16;
+      }
+      .f-edit .txt .b {
+        font-family: var(--sans);
+        font-size: 2cqh;
+        line-height: 1.55;
+        color: var(--ink-soft);
+        margin-top: 2.4cqh;
+      }
+      .f-edit .img {
+        position: absolute;
+        right: 6cqw;
+        top: 17cqh;
+        bottom: 17cqh;
+        width: 40cqw;
+        background: var(--sand);
+        border: 0.14cqh solid var(--line-soft);
+        border-radius: 2cqw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .f-edit .img .mk {
+        display: grid;
+        grid-template-columns: repeat(3, 2cqw);
+        gap: 1.8cqw;
+      }
+      .f-edit .img .mk i {
+        width: 2cqw;
+        height: 2cqw;
+        border-radius: 50%;
+        background: var(--sage);
+        opacity: 0.55;
+      }
+      .f-edit .img .mk i.a {
+        background: var(--accent);
+        opacity: 0.7;
+      }
+      /* F6 closing */
+      .f-close {
+        background: var(--ink);
+      }
+      .f-close .block {
+        position: absolute;
+        left: 6cqw;
+        top: 32cqh;
+        width: 8cqw;
+        height: 1cqh;
+        border-radius: 0.5cqh;
+        background: var(--accent);
+      }
+      .f-close .s {
+        position: absolute;
+        left: 6cqw;
+        top: 38cqh;
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 6.4cqw;
+        line-height: 1.12;
+        letter-spacing: -0.012em;
+        max-width: 70cqw;
+        color: var(--panel);
+      }
+      .f-close .s .u {
+        color: var(--accent-soft);
+        text-decoration: underline;
+        text-decoration-thickness: 0.4cqh;
+        text-underline-offset: 0.08em;
+        text-decoration-color: var(--accent);
+      }
+      .f-close .fchrome {
+        color: var(--ink-faint);
+      }
+      .f-close .m {
+        position: absolute;
+        left: 6cqw;
+        bottom: 13cqh;
+        font-family: var(--mono);
+        font-size: 2.2cqh;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--ink-faint);
+        border-top: 0.14cqh solid var(--ink-2);
+        padding-top: 1.4cqh;
+      }
+
+      /* ═══ PRINCIPLES ═══ */
+      .principles {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 64px;
+      }
+      .principles .col h3 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 26px;
+        letter-spacing: -0.01em;
+        padding-bottom: 16px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid var(--line);
+      }
+      .principles .col.do h3 {
+        color: var(--ink);
+      }
+      .principles .col.dont h3 {
+        color: var(--accent);
+      }
+      .principles ul {
+        list-style: none;
+      }
+      .principles li {
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        gap: 8px;
+        padding: 17px 0;
+        border-bottom: 1px solid var(--line-soft);
+        font-size: 15px;
+        line-height: 1.55;
+        color: var(--ink-soft);
+      }
+      .principles li b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .principles .do li::before {
+        content: "+";
+        font-family: var(--mono);
+        color: var(--sage);
+      }
+      .principles .dont li::before {
+        content: "×";
+        font-family: var(--mono);
+        color: var(--accent);
+      }
+
+      .footer {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 44px 96px 84px;
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+      }
+      @media (max-width: 900px) {
+        section {
+          padding: 76px 32px;
+        }
+        .swatches,
+        .comp-grid,
+        .frames,
+        .principles {
+          grid-template-columns: 1fr;
+        }
+        .cover .chrome-top,
+        .cover .chrome-bot,
+        .cover-inner {
+          padding-left: 32px;
+          padding-right: 32px;
+        }
+        .sage-cluster {
+          right: 32px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══════════ COVER ═══════════ -->
+    <section class="cover">
+      <div class="chrome-top mono">
+        <span>Claude Warm — Frame Preset</span>
+        <span>S01 / 06</span>
+        <span>Warm Editorial</span>
+      </div>
+      <div class="cover-inner">
+        <div class="sage-cluster" aria-hidden="true">
+          <i class="o"></i><i></i><i></i><i class="a"></i><i class="o"></i>
+          <i></i><i></i><i class="o"></i><i></i><i></i>
+          <i class="o"></i><i></i><i></i><i class="o"></i><i class="o"></i>
+        </div>
+        <span class="kicker">Design Preset · No. 15</span>
+        <h1>Warmth, calm,<br />and one <span class="u">terracotta</span>.</h1>
+        <p class="lede">
+          A warm literary-editorial identity rebuilt for the 1920×1080 frame — parchment paper, a
+          medium-weight serif, exclusively warm neutrals, and a single earthy terracotta accent used
+          warmly. Nothing cold, nothing clinical. Inspired by the Claude (Anthropic) design system.
+        </p>
+      </div>
+      <div class="cover-bot chrome-bot mono">
+        <span>Parchment · Warm ink · Terracotta</span>
+        <span>Serif display · Sans body</span>
+        <span>Vol. 01</span>
+      </div>
+    </section>
+
+    <!-- ═══════════ PALETTE ═══════════ -->
+    <section>
+      <div class="sec-head">
+        <span class="n">01</span>
+        <h2>Palette</h2>
+        <span class="meta">Warm neutrals + one terracotta</span>
+      </div>
+      <div class="swatches">
+        <div class="swatch">
+          <div class="chip" style="background: var(--canvas)"></div>
+          <div class="name">Parchment</div>
+          <div class="hex">#F5F4ED</div>
+          <div class="role">The warm paper ground — the emotional foundation, never a screen.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--panel)"></div>
+          <div class="name">Ivory</div>
+          <div class="hex">#FAF9F5</div>
+          <div class="role">The lightest elevated surface — gentle cards on parchment.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--sand)"></div>
+          <div class="name">Warm sand</div>
+          <div class="hex">#E8E6DC</div>
+          <div class="role">Button + prominent interactive surfaces; the soft cream hairline.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--ink)"></div>
+          <div class="name">Warm ink</div>
+          <div class="hex">#141413</div>
+          <div class="role">Near-black with an olive undertone — type + dark surfaces.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--ink-soft)"></div>
+          <div class="name">Olive grey</div>
+          <div class="hex">#5E5D59</div>
+          <div class="role">Secondary body text — every grey is warm, never cool blue-grey.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--accent)"></div>
+          <div class="name">Terracotta</div>
+          <div class="hex">#C96442</div>
+          <div class="role">The ONE brand accent — earthy, warm, used sparingly.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--accent-soft)"></div>
+          <div class="name">Coral</div>
+          <div class="hex">#D97757</div>
+          <div class="role">A lighter terracotta variant — small accents, soft underlines.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--sage)"></div>
+          <div class="name">Muted sage</div>
+          <div class="hex">#6A6F4E</div>
+          <div class="role">The quiet olive-green secondary — soft organic marks, low saturation.</div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--ink-2)"></div>
+          <div class="name">Warm charcoal</div>
+          <div class="hex">#30302E</div>
+          <div class="role">Dark containers and warm-dark chapter sections.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ TYPOGRAPHY ═══════════ -->
+    <section>
+      <div class="sec-head">
+        <span class="n">02</span>
+        <h2>Typography</h2>
+        <span class="meta">Serif display · sans body · size = hierarchy</span>
+      </div>
+      <div class="type-row">
+        <div class="spec"><b>Display-hero</b><br />Newsreader 500<br />8.4cqw · sentence case</div>
+        <div class="sp-display serif">A thoughtful companion</div>
+      </div>
+      <div class="type-row">
+        <div class="spec"><b>Headline</b><br />Newsreader 500<br />4.6cqw · 1.15 line-height</div>
+        <div class="sp-headline serif">Design radiates human warmth</div>
+      </div>
+      <div class="type-row">
+        <div class="spec"><b>H2</b><br />Newsreader 500<br />3.2cqw · 1.2 line-height</div>
+        <div class="sp-h2 serif">Every heading has the gravitas of a book title</div>
+      </div>
+      <div class="type-row">
+        <div class="spec"><b>Body</b><br />Inter 400<br />0.92cqw · 1.6 line-height</div>
+        <div class="sp-body">
+          Anthropic Serif carries the headlines with a single medium weight; Inter handles all body and
+          UI text with quiet efficiency. Body sets at a relaxed 1.6 line-height — a reading experience
+          closer to a book than a dashboard — with every neutral warmed by a yellow-brown undertone.
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="spec"><b>Mono chrome</b><br />JetBrains Mono 400<br />13px · 0.08em · UPPER</div>
+        <div class="sp-mono">S04 / 12 &nbsp;·&nbsp; SOURCE — INTERNAL / 2026 &nbsp;·&nbsp; № 06</div>
+      </div>
+    </section>
+
+    <!-- ═══════════ COMPONENTS ═══════════ -->
+    <section>
+      <div class="sec-head">
+        <span class="n">03</span>
+        <h2>Components</h2>
+        <span class="meta">Soft · warm · editorial</span>
+      </div>
+      <div class="comp-grid">
+        <div class="comp">
+          <div class="demo-accent">
+            <div class="big">One word set in <u>terracotta</u>.</div>
+            <div class="tabs">
+              <i style="width: 64px"></i>
+              <i class="sand" style="width: 40px"></i>
+              <i class="sand" style="width: 26px"></i>
+            </div>
+          </div>
+          <div class="cap"><b>Accent underline &amp; block</b>Terracotta used warmly — a soft hand-drawn underline or a small softly-cornered mark, never a hard signal bar.</div>
+        </div>
+
+        <div class="comp">
+          <div class="demo-dots" aria-hidden="true">
+            <i class="o"></i><i></i><i></i><i class="a"></i><i class="o"></i><i></i>
+            <i></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i>
+            <i class="o"></i><i></i><i></i><i class="o"></i><i></i><i></i>
+          </div>
+          <div class="cap"><b>Sage marks</b>The quiet muted-green secondary — a soft, organic dot cluster. Low saturation, always subordinate to terracotta.</div>
+        </div>
+
+        <div class="comp">
+          <div class="demo-index">
+            <div class="row"><span class="ord">01</span><span class="nm">A literary salon</span><span class="mt">§ 1.0</span></div>
+            <div class="row on"><span class="ord">02</span><span class="nm">Warmth is the <span class="u">rule</span></span><span class="mt">§ 2.0</span></div>
+            <div class="row"><span class="ord">03</span><span class="nm">One accent, used warmly</span><span class="mt">§ 3.0</span></div>
+          </div>
+          <div class="cap"><b>Index-row</b>A numbered serif contents row on a soft cream rule. One row may carry a terracotta word.</div>
+        </div>
+
+        <div class="comp">
+          <div class="demo-figure">
+            <div class="fig acc">64<span style="font-size: 40px">%</span></div>
+            <div class="cap-l">A book-title-scale serif figure — the warm way to show a stat.</div>
+          </div>
+          <div class="demo-bars">
+            <div class="b"><i class="lead" style="width: 100%"></i><span>80K</span></div>
+            <div class="b"><i style="width: 62%"></i><span>50K</span></div>
+            <div class="b"><i style="width: 30%"></i><span>24K</span></div>
+          </div>
+          <div class="cap"><b>Figure &amp; h-bars</b>A big serif numeral, or warm softly-rounded bars (terracotta leader, sand context). Length = real data.</div>
+        </div>
+
+        <div class="comp">
+          <div class="demo-imgfield" aria-hidden="true">
+            <div class="mk"><i></i><i class="a"></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="cap"><b>Image-field</b>The warm editorial-photo slot — an ivory panel, generously rounded, a soft sage mark until wired.</div>
+        </div>
+
+        <div class="comp">
+          <div class="demo-hair"><hr /><hr class="acc" /><hr /></div>
+          <div class="cap"><b>Hairline &amp; card</b>The soft warm-cream rule and this gentle rounded card (16px, cream border, whisper shadow) — soft, never clinical.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ COMPOSITIONS ═══════════ -->
+    <section>
+      <div class="sec-head">
+        <span class="n">04</span>
+        <h2>Compositions</h2>
+        <span class="meta">6 frame treatments · 16:9</span>
+      </div>
+      <div class="frames">
+        <!-- F1 cover -->
+        <div class="frame-wrap">
+          <div class="fl"><b>1 · Cover</b><span>serif title + soft sage cluster</span></div>
+          <div class="frame f-cover">
+            <div class="fchrome top"><span>Claude Warm</span><span>S01 / 06</span></div>
+            <div class="sage" aria-hidden="true">
+              <i class="o"></i><i></i><i class="a"></i><i class="o"></i>
+              <i></i><i></i><i class="o"></i><i></i>
+            </div>
+            <span class="fk kk">No. 15</span>
+            <div class="h">One <span class="u">terracotta.</span></div>
+            <div class="fchrome bot"><span>Warm editorial</span><span>Vol. 01</span></div>
+          </div>
+        </div>
+
+        <!-- F2 index -->
+        <div class="frame-wrap">
+          <div class="fl"><b>2 · Contents</b><span>numbered serif rows</span></div>
+          <div class="frame f-index">
+            <div class="fchrome top"><span>Contents</span><span>S02 / 06</span></div>
+            <div class="hh">Contents</div>
+            <div class="rows">
+              <div class="r"><span class="o">01</span><span class="n">A literary salon</span></div>
+              <div class="r on"><span class="o">02</span><span class="n">Warmth is the <span class="u">rule</span></span></div>
+              <div class="r"><span class="o">03</span><span class="n">One accent</span></div>
+            </div>
+            <div class="fchrome bot"><span>Index</span><span>№ 02</span></div>
+          </div>
+        </div>
+
+        <!-- F3 statement -->
+        <div class="frame-wrap">
+          <div class="fl"><b>3 · Pull-Quote</b><span>large serif quote</span></div>
+          <div class="frame f-stmt">
+            <div class="fchrome top"><span>Statement</span><span>S03 / 06</span></div>
+            <div class="s">Good taste, made <span class="u">legible</span>.</div>
+            <div class="att">Anthropic — Design Notes, 2026</div>
+          </div>
+        </div>
+
+        <!-- F4 data -->
+        <div class="frame-wrap">
+          <div class="fl"><b>4 · Data</b><span>a book-title serif figure</span></div>
+          <div class="frame f-data">
+            <div class="fchrome top"><span>Metric</span><span>S04 / 06</span></div>
+            <div class="hh">A single figure, set like a title.</div>
+            <div class="fig">3.2×</div>
+            <div class="figlab">Warmer reading pace than a typical dashboard measure.</div>
+          </div>
+        </div>
+
+        <!-- F5 editorial -->
+        <div class="frame-wrap">
+          <div class="fl"><b>5 · Editorial</b><span>soft image + serif text</span></div>
+          <div class="frame f-edit">
+            <div class="fchrome top"><span>Editorial</span><span>S05 / 06</span></div>
+            <div class="txt">
+              <div class="t">A magazine spread, not a slide.</div>
+              <div class="b">Serif heading and relaxed sans body hang from the left margin; the gently-rounded image-field sits opposite.</div>
+            </div>
+            <div class="img" aria-hidden="true">
+              <div class="mk"><i></i><i class="a"></i><i></i><i></i><i></i><i></i></div>
+            </div>
+            <div class="fchrome bot"><span>Fig. 05 — editorial photo</span><span>№ 05</span></div>
+          </div>
+        </div>
+
+        <!-- F6 closing -->
+        <div class="frame-wrap">
+          <div class="fl"><b>6 · Closing</b><span>warm-dark chapter close</span></div>
+          <div class="frame f-close">
+            <div class="block" aria-hidden="true"></div>
+            <div class="fchrome top"><span>Closing</span><span>S06 / 06</span></div>
+            <div class="s">Serve the reader <span class="u">warmly</span>.</div>
+            <div class="m">verysmallwoods.studio</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ PRINCIPLES ═══════════ -->
+    <section>
+      <div class="sec-head">
+        <span class="n">05</span>
+        <h2>Principles</h2>
+        <span class="meta">The rule &amp; the failure</span>
+      </div>
+      <div class="principles">
+        <div class="col do">
+          <h3>Do</h3>
+          <ul>
+            <li><span><b>Keep the ground warm.</b> Parchment or warm-dark; every neutral yellow-brown-toned. Never pure white or cool grey.</span></li>
+            <li><span><b>Serif display, sans body.</b> Newsreader 500, sentence case; Inter body at a relaxed 1.5–1.6.</span></li>
+            <li><span><b>Hold 40–55% open.</b> Editorial whitespace is an active counter-weight — let it breathe.</span></li>
+            <li><span><b>Build contrast from size.</b> One serif element at book-title scale; single weight throughout.</span></li>
+            <li><span><b>Use the one terracotta warmly.</b> A soft underline, a small block, or a single flagged word.</span></li>
+            <li><span><b>Soften everything.</b> Rounded cards (16–32px), whisper shadows, quiet sage marks.</span></li>
+          </ul>
+        </div>
+        <div class="col dont">
+          <h3>Don't</h3>
+          <ul>
+            <li><span><b>Use cool blue-grey.</b> No pure white, no cold neutral — the whole palette is warm.</span></li>
+            <li><span><b>Set headlines in sans, caps, or bold.</b> Weight-500 sentence-case serif is the ceiling.</span></li>
+            <li><span><b>Add a second saturated hue.</b> Terracotta is the only accent; keep the sage quiet.</span></li>
+            <li><span><b>Use sharp corners or hard shadows.</b> No gradient, no blur — softness is core.</span></li>
+            <li><span><b>Crowd the frame.</b> Don't drop body line-height below 1.4; the space IS the personality.</span></li>
+            <li><span><b>Use cold, geometric tech ornament.</b> Marks are organic and hand-drawn-feeling.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      <span>Claude Warm — Frame Preset</span>
+      <span>verysmallwoods · HyperFrames</span>
+      <span>Atoms sacred · Composition warm</span>
+    </div>
+  </body>
+</html>

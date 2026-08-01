@@ -24,14 +24,16 @@
 | daisy-days | 阳光花园粉彩，3px 炭笔描边，硬阴影，Fredoka + Quicksand |
 | editorial-forest | 绿/粉/奶油编辑三色，Source Serif 4 + JetBrains Mono，细线 |
 
-> 列表会变，以官网为准。
+> 官网列表会变，以官网为准。
 
-## 怎么用（选完之后）
+## 本 skill 扩展的设计
 
-视频本身走 **faceless-explainer** 的流程（文章/主题 → 无实拍讲解），它的 Step 2 就是「选一个 preset 生成 `frame.md`」：
+这些 preset 存在本仓库 `references/frame-presets/<slug>/`，跟官网 preset 同一套 `FRAME.md` 契约，用法完全一样，只是取用时要加 `--preset-dir` 指到本地目录（见下）。
 
-```bash
-node <faceless-explainer>/scripts/build-frame.mjs --preset <slug> --hyperframes .
-```
+| slug | 风格 |
+|---|---|
+| **swiss-minimalism** | 瑞士国际主义 / Müller-Brockmann：素白纸 + 近黑墨 + **单一信号红**，Inter Tight / Inter / JetBrains Mono，严格 12 列网格 + 12px 基线，左对齐右不齐，极端字号反差，同心弧 / 点阵几何。零阴影 · 零渐变 · 零圆角 |
+| **raycast-dark** | 暗色开发者工具（inspired by Raycast）：近黑蓝调 `#07080a` + macOS 多层阴影/内高光质感 + **信号红 `#FF6363` 点睛**，Inter（正字距）+ JetBrains Mono，键帽、命令面板行、对角红条纹。深度即身份 |
+| **claude-warm** | 暖色编辑风（inspired by Claude/Anthropic）：羊皮纸 `#f5f4ed` + 近黑墨 + **赤陶 `#c96442` 点睛** + 静默橄榄绿次色，Newsreader 衬线标题 + Inter + JetBrains Mono，书卷气行高、手绘感下划线、柔和卡片。温暖、文气 |
 
-`frame.md` 就是这一期的配色/字体/版式。之后逐帧搭画面都以它为准。详见 `references/video.md`。
+每个本地 preset 目录交付三件：`FRAME.md`（规范）、`frame-showcase.html`（预览页，浏览器直接打开看效果）、`caption-skin.html`（卡拉 OK 字幕皮肤）。

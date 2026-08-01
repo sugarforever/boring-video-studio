@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Claude Warm — Showcase</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=block"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #f5f4ed;
+      }
+      :root {
+        --canvas: #f5f4ed;
+        --panel: #faf9f5;
+        --sand: #e8e6dc;
+        --ink: #141413;
+        --ink-2: #30302e;
+        --ink-soft: #5e5d59;
+        --ink-faint: #87867f;
+        --accent: #c96442;
+        --accent-soft: #d97757;
+        --sage: #6a6f4e;
+        --line: #e8e6dc;
+        --line-soft: #f0eee6;
+        --serif: "Newsreader", Georgia, "Times New Roman", serif;
+        --sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+        --mono: "JetBrains Mono", ui-monospace, monospace;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--canvas);
+      }
+      .scene {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background-color: var(--canvas);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.4'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        background-size: 240px 240px;
+        background-blend-mode: multiply;
+        will-change: opacity, filter, transform;
+      }
+      #s2,
+      #s3,
+      #s4,
+      #s5,
+      #s6 {
+        opacity: 0;
+      }
+      #s6 {
+        background-color: var(--ink-2);
+        background-blend-mode: screen;
+      }
+      /* Ken-Burns layer — the "breathing page" */
+      .cam {
+        position: absolute;
+        inset: 0;
+        transform-origin: center center;
+        will-change: transform;
+      }
+      /* pre-hidden animated content (flash-free) */
+      .i0 {
+        opacity: 0;
+      }
+      /* oversized serif ghost type — editorial depth layer */
+      .ghost {
+        position: absolute;
+        font-family: var(--serif);
+        font-weight: 500;
+        color: var(--ink);
+        opacity: 0.055;
+        letter-spacing: -0.02em;
+        line-height: 0.78;
+        white-space: nowrap;
+        pointer-events: none;
+        user-select: none;
+      }
+      /* refined editorial folio (running head), replaces spec-sheet chrome */
+      .chrome {
+        position: absolute;
+        left: 110px;
+        right: 110px;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-family: var(--mono);
+        font-size: 18px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+      }
+      .chrome .no {
+        color: var(--ink);
+      }
+      .chrome.top {
+        top: 74px;
+      }
+      .credit {
+        position: absolute;
+        left: 110px;
+        bottom: 74px;
+        font-family: var(--mono);
+        font-size: 16px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+      }
+      .rule {
+        position: absolute;
+        left: 110px;
+        right: 110px;
+        height: 1px;
+        background: var(--line);
+        transform-origin: left center;
+      }
+      .kicker {
+        font-family: var(--mono);
+        font-weight: 500;
+        font-size: 22px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--accent);
+      }
+      .hl {
+        display: block;
+        line-height: 1.14;
+      }
+      .serif {
+        font-family: var(--serif);
+        font-weight: 500;
+        color: var(--ink);
+        letter-spacing: -0.01em;
+      }
+      .accent {
+        color: var(--accent);
+      }
+      .lede {
+        font-family: var(--sans);
+        font-weight: 400;
+        font-size: 29px;
+        line-height: 1.6;
+        color: var(--ink-soft);
+        max-width: 800px;
+      }
+      /* hand-drawn underline */
+      .ul {
+        position: absolute;
+        left: -2%;
+        bottom: -0.16em;
+        width: 104%;
+        height: 0.2em;
+        overflow: visible;
+      }
+      .ulp {
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 6;
+        stroke-linecap: round;
+        stroke-dasharray: 360;
+        stroke-dashoffset: 360;
+      }
+      /* sage dot cluster */
+      .sage-dots {
+        position: absolute;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
+      }
+      .sage-dots i {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--sage);
+        opacity: 0.55;
+      }
+      .sage-dots i.a {
+        background: var(--accent);
+        opacity: 1;
+      }
+
+      /* ghost type placement per scene */
+      .s-cover .ghost { font-size: 520px; left: -30px; bottom: -120px; }
+      .s-index .ghost { font-size: 560px; right: -40px; top: -60px; }
+      .s-quote .ghost { font-size: 760px; right: 40px; bottom: -260px; opacity: 0.05; }
+      .s-stat .ghost { font-size: 620px; right: -20px; top: 20px; }
+      .s-edit .ghost { font-size: 600px; left: 20px; bottom: -230px; }
+      .s-close .ghost { font-size: 640px; right: 60px; bottom: -170px; color: var(--panel); opacity: 0.07; }
+
+      /* ── S1 Cover ── */
+      .s-cover .head {
+        position: absolute;
+        left: 110px;
+        top: 330px;
+      }
+      .s-cover .kicker {
+        margin-bottom: 34px;
+      }
+      .s-cover h1 {
+        font-size: 154px;
+        line-height: 1.08;
+      }
+      .s-cover h1 .accent {
+        position: relative;
+      }
+      .s-cover .lede {
+        margin-top: 44px;
+      }
+      .s-cover .sage-dots {
+        top: 210px;
+        right: 150px;
+      }
+
+      /* ── S2 Contents ── */
+      .s-index .head {
+        position: absolute;
+        left: 110px;
+        top: 150px;
+      }
+      .s-index h2 {
+        font-size: 96px;
+      }
+      .s-index .kicker {
+        margin-bottom: 24px;
+      }
+      .s-index .rows {
+        position: absolute;
+        left: 110px;
+        top: 380px;
+        width: 1180px;
+      }
+      .s-index .r {
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        gap: 34px;
+        align-items: baseline;
+        padding: 30px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .s-index .r .o {
+        font-family: var(--mono);
+        font-size: 26px;
+        color: var(--ink-faint);
+      }
+      .s-index .r .n {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 52px;
+        color: var(--ink);
+        position: relative;
+        display: inline-block;
+      }
+      .s-index .r.on .o,
+      .s-index .r.on .n {
+        color: var(--accent);
+      }
+
+      /* ── S3 Pull-quote ── */
+      .s-quote .mark {
+        position: absolute;
+        left: 96px;
+        top: 210px;
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 340px;
+        line-height: 0.7;
+        color: var(--sand);
+        transform-origin: left top;
+      }
+      .s-quote .head {
+        position: absolute;
+        left: 150px;
+        top: 380px;
+        width: 1500px;
+      }
+      .s-quote h2 {
+        font-size: 150px;
+        line-height: 1.1;
+      }
+      .s-quote h2 em {
+        font-style: italic;
+        color: var(--accent);
+        position: relative;
+      }
+      .s-quote .att {
+        position: absolute;
+        left: 150px;
+        bottom: 170px;
+        font-family: var(--mono);
+        font-size: 22px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+      }
+
+      /* ── S4 Stat ── */
+      .s-stat .kicker {
+        position: absolute;
+        left: 110px;
+        top: 210px;
+      }
+      .s-stat .fig {
+        position: absolute;
+        left: 96px;
+        top: 300px;
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 460px;
+        line-height: 0.9;
+        letter-spacing: -0.02em;
+        color: var(--accent);
+      }
+      .s-stat .side {
+        position: absolute;
+        right: 130px;
+        top: 440px;
+        width: 620px;
+      }
+      .s-stat .side h3 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 66px;
+        line-height: 1.18;
+        color: var(--ink);
+      }
+      .s-stat .side p {
+        font-family: var(--sans);
+        font-size: 27px;
+        line-height: 1.6;
+        color: var(--ink-soft);
+        margin-top: 28px;
+      }
+
+      /* ── S5 Editorial ── */
+      .s-edit .txt {
+        position: absolute;
+        left: 110px;
+        top: 290px;
+        width: 720px;
+      }
+      .s-edit .kicker {
+        margin-bottom: 26px;
+      }
+      .s-edit h2 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 92px;
+        line-height: 1.14;
+        color: var(--ink);
+      }
+      .s-edit p {
+        font-family: var(--sans);
+        font-size: 28px;
+        line-height: 1.65;
+        color: var(--ink-soft);
+        margin-top: 34px;
+      }
+      .s-edit .underline {
+        color: var(--ink);
+        position: relative;
+        display: inline-block;
+      }
+      .card {
+        position: absolute;
+        right: 110px;
+        top: 230px;
+        width: 780px;
+        height: 620px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        box-shadow: 0 30px 70px rgba(48, 40, 30, 0.08);
+        overflow: hidden;
+      }
+      .card .ph {
+        position: absolute;
+        inset: 44px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: linear-gradient(160deg, #f3efe6, #ece8dd);
+        display: grid;
+        place-items: center;
+      }
+      .card .ph .glyph {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 38% 34%, var(--accent-soft), var(--accent));
+        box-shadow: 0 20px 44px rgba(201, 100, 66, 0.28);
+        transform-origin: center center;
+      }
+
+      /* ── S6 Closing (warm dark chapter) ── */
+      .s-close .head {
+        position: absolute;
+        left: 110px;
+        top: 380px;
+      }
+      .s-close h2 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 138px;
+        line-height: 1.08;
+        color: var(--panel);
+      }
+      .s-close h2 em {
+        font-style: italic;
+        color: var(--accent-soft);
+      }
+      .s-close .chrome {
+        color: #a7a49a;
+      }
+      .s-close .meta {
+        position: absolute;
+        left: 110px;
+        bottom: 160px;
+        font-family: var(--mono);
+        font-size: 22px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #a7a49a;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        padding-top: 22px;
+        width: 520px;
+        transform-origin: left center;
+      }
+      .s-close .sage-dots {
+        right: 150px;
+        bottom: 200px;
+      }
+      .s-close .sage-dots i {
+        opacity: 0.5;
+      }
+      .s-close .sage-dots i.a {
+        background: var(--accent-soft);
+        opacity: 1;
+      }
+      /* warm light leak */
+      .leak {
+        position: absolute;
+        top: -40%;
+        left: 0;
+        width: 60%;
+        height: 180%;
+        background: radial-gradient(closest-side, rgba(217, 119, 87, 0.22), rgba(217, 119, 87, 0));
+        pointer-events: none;
+        opacity: 0;
+        will-change: transform, opacity;
+      }
+      /* studio watermark */
+      .watermark {
+        position: absolute;
+        right: 110px;
+        bottom: 42px;
+        z-index: 60;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        font-family: var(--mono);
+        font-size: 16px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        opacity: 0.6;
+      }
+      .wm-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="32"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- ═══ S1 · COVER ═══ -->
+      <div id="s1" class="scene s-cover">
+        <div class="ghost cv-ghost" aria-hidden="true" data-layout-allow-overlap data-layout-allow-overflow>Warmth</div>
+        <div class="chrome top"><span class="i0 ct"><span class="no">Nº 01</span> &nbsp;/ VI</span><span class="i0 ct">Frontispiece</span></div>
+        <div class="rule r-top" style="top: 128px"></div>
+        <div class="cam">
+          <div class="sage-dots cv-dots" aria-hidden="true">
+            <i class="i0 cvd"></i><i class="i0 cvd"></i><i class="i0 cvd a"></i><i class="i0 cvd"></i><i class="i0 cvd"></i>
+            <i class="i0 cvd"></i><i class="i0 cvd"></i><i class="i0 cvd"></i><i class="i0 cvd"></i><i class="i0 cvd"></i>
+            <i class="i0 cvd"></i><i class="i0 cvd a"></i><i class="i0 cvd"></i><i class="i0 cvd"></i><i class="i0 cvd"></i>
+          </div>
+          <div class="head">
+            <div class="kicker cv-k i0">Design Preset · No. 16</div>
+            <h1 class="serif">
+              <span class="hl l1 i0">Warmth, calm,</span>
+              <span class="hl l2 i0">and one <span class="accent">terracotta<svg class="ul" viewBox="0 0 320 22" preserveAspectRatio="none" aria-hidden="true"><path class="ulp cv-ulp" d="M4 13 C 70 5, 150 19, 316 9" /></svg></span>.</span>
+            </h1>
+            <p class="lede cv-lede i0">The Claude design system, rebuilt for the 1920×1080 frame. Parchment paper, a serif that reads like a book, and one warm terracotta.</p>
+          </div>
+        </div>
+        <div class="credit i0 cb">After the Anthropic design language · Zürich of the mind · MMXXVI</div>
+      </div>
+
+      <!-- ═══ S2 · CONTENTS ═══ -->
+      <div id="s2" class="scene s-index">
+        <div class="ghost ix-ghost" aria-hidden="true" data-layout-allow-overlap data-layout-allow-overflow>Index</div>
+        <div class="chrome top"><span><span class="no">Nº 02</span> &nbsp;/ VI</span><span>Contents</span></div>
+        <div class="rule" style="top: 128px"></div>
+        <div class="cam">
+          <div class="head">
+            <div class="kicker ix-k i0">Contents</div>
+            <h2 class="serif ix-h i0">Four warm ideas.</h2>
+          </div>
+          <div class="rows">
+            <div class="r ir i0"><span class="o">01</span><span class="n">A warm foundation</span></div>
+            <div class="r ir on i0"><span class="o">02</span><span class="n">One serif voice<svg class="ul" viewBox="0 0 320 22" preserveAspectRatio="none" aria-hidden="true" style="bottom: 0.1em"><path class="ulp ix-ulp" d="M4 13 C 70 6, 150 18, 316 9" /></svg></span></div>
+            <div class="r ir i0"><span class="o">03</span><span class="n">Terracotta, sparingly</span></div>
+            <div class="r ir i0"><span class="o">04</span><span class="n">Generous negative space</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ S3 · PULL-QUOTE ═══ -->
+      <div id="s3" class="scene s-quote">
+        <div class="ghost qg-ghost" aria-hidden="true" data-layout-allow-overlap data-layout-allow-overflow>Voice</div>
+        <div class="chrome top"><span><span class="no">Nº 03</span> &nbsp;/ VI</span><span>The Voice</span></div>
+        <div class="rule" style="top: 128px"></div>
+        <div class="cam">
+          <div class="mark qm i0" aria-hidden="true" data-layout-allow-overlap>“</div>
+          <div class="head">
+            <h2 class="serif">
+              <span class="hl ql1 i0">Good taste,</span>
+              <span class="hl ql2 i0">made <em>legible<svg class="ul" viewBox="0 0 320 22" preserveAspectRatio="none" aria-hidden="true"><path class="ulp q-ulp" d="M4 12 C 70 5, 150 18, 316 8" /></svg></em>.</span>
+            </h2>
+          </div>
+          <div class="att qa i0">The Claude design system</div>
+        </div>
+      </div>
+
+      <!-- ═══ S4 · STAT ═══ -->
+      <div id="s4" class="scene s-stat">
+        <div class="ghost sg-ghost" aria-hidden="true" data-layout-allow-overlap data-layout-allow-overflow>Paper</div>
+        <div class="chrome top"><span><span class="no">Nº 04</span> &nbsp;/ VI</span><span>The Feeling</span></div>
+        <div class="rule" style="top: 128px"></div>
+        <div class="cam">
+          <div class="kicker st-k i0">More like paper</div>
+          <div class="fig serif i0"><span id="figv">0.0</span>×</div>
+          <div class="side st-side">
+            <h3 class="i0">The reading comfort of a printed page.</h3>
+            <p class="i0">Where most AI pages lean cold and futuristic, this one radiates human warmth — as if the interface itself has good taste.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ S5 · EDITORIAL ═══ -->
+      <div id="s5" class="scene s-edit">
+        <div class="ghost eg-ghost" aria-hidden="true" data-layout-allow-overlap data-layout-allow-overflow>Book</div>
+        <div class="chrome top"><span><span class="no">Nº 05</span> &nbsp;/ VI</span><span>The Layout</span></div>
+        <div class="rule" style="top: 128px"></div>
+        <div class="cam">
+          <div class="txt">
+            <div class="kicker ed-k i0">A companion, not a tool</div>
+            <h2 class="ed-h i0">Every heading has the gravitas of a book title.</h2>
+            <p class="ed-p i0">The serif breathes at a <span class="underline">tight-but-comfortable<svg class="ul" viewBox="0 0 320 18" preserveAspectRatio="none" aria-hidden="true" style="bottom: -0.1em"><path class="ulp ed-ulp" d="M3 10 C 70 4, 150 14, 317 7" /></svg></span> cadence; the body sets in a humanist sans, and the terracotta appears only where it earns attention.</p>
+          </div>
+          <div class="card ed-card i0">
+            <div class="ph"><div class="glyph"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ S6 · CLOSING ═══ -->
+      <div id="s6" class="scene s-close">
+        <div class="leak cl-leak" aria-hidden="true"></div>
+        <div class="ghost cg-ghost" aria-hidden="true" data-layout-allow-overlap data-layout-allow-overflow>Fin</div>
+        <div class="chrome top"><span><span class="no">Nº 06</span> &nbsp;/ VI</span><span>Colophon</span></div>
+        <div class="cam">
+          <div class="sage-dots cl-dots" aria-hidden="true">
+            <i class="i0 cld"></i><i class="i0 cld a"></i><i class="i0 cld"></i><i class="i0 cld"></i><i class="i0 cld"></i>
+            <i class="i0 cld"></i><i class="i0 cld"></i><i class="i0 cld"></i><i class="i0 cld a"></i><i class="i0 cld"></i>
+          </div>
+          <div class="head">
+            <h2 class="serif">
+              <span class="hl cl1 i0">Serve the reader</span>
+              <span class="hl cl2 i0"><em>warmly</em>.</span>
+            </h2>
+          </div>
+          <div class="meta cl-meta i0">claude-warm · HyperFrames</div>
+        </div>
+      </div>
+      <div class="watermark" aria-hidden="true"><span class="wm-dot"></span>Boring Video Studio</div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true, defaults: { ease: "power2.out" } });
+      const CALM = "power1.inOut";
+      const GLIDE = "sine.inOut";
+
+      /* ═══ TRANSITIONS (calm — outgoing + incoming animate together) ═══ */
+      function blurCross(outSel, inSel, T, dur) {
+        dur = dur || 0.9;
+        tl.to(outSel, { opacity: 0, filter: "blur(22px)", duration: dur, ease: CALM }, T);
+        tl.set(outSel, { filter: "blur(0px)" }, T + dur);
+        tl.fromTo(inSel, { opacity: 0, filter: "blur(22px)" }, { opacity: 1, filter: "blur(0px)", duration: dur, ease: CALM }, T);
+      }
+      function pagePush(outSel, inSel, T, dur) {
+        dur = dur || 0.85;
+        tl.set(inSel, { opacity: 1, yPercent: 100 }, T);
+        tl.to(outSel, { yPercent: -100, duration: dur, ease: "power2.inOut" }, T);
+        tl.to(inSel, { yPercent: 0, duration: dur, ease: "power2.inOut" }, T);
+        tl.set(outSel, { opacity: 0, yPercent: 0 }, T + dur);
+      }
+
+      /* ═══ Ken-Burns drift — the breathing page (each scene, seek-safe single tween) ═══ */
+      tl.fromTo("#s1 .cam", { scale: 1 }, { scale: 1.02, duration: 5.4, ease: GLIDE }, 0);
+      tl.fromTo("#s2 .cam", { scale: 1.02 }, { scale: 1, duration: 5.5, ease: GLIDE }, 5.2);
+      tl.fromTo("#s3 .cam", { scale: 1 }, { scale: 1.022, duration: 5.5, ease: GLIDE }, 10.5);
+      tl.fromTo("#s4 .cam", { scale: 1.02 }, { scale: 1, duration: 5.5, ease: GLIDE }, 15.7);
+      tl.fromTo("#s5 .cam", { scale: 1 }, { scale: 1.02, duration: 5.5, ease: GLIDE }, 20.9);
+      tl.fromTo("#s6 .cam", { scale: 1.022 }, { scale: 1, duration: 5.8, ease: GLIDE }, 26.2);
+
+      /* ═══ ghost type — slow independent drift (parallax against the Ken-Burns page) ═══ */
+      tl.fromTo(".cv-ghost", { xPercent: -2 }, { xPercent: 2, duration: 5.0, ease: GLIDE }, 0.2);
+      tl.fromTo(".ix-ghost", { yPercent: 2 }, { yPercent: -2, duration: 5.2, ease: GLIDE }, 5.4);
+      tl.fromTo(".qg-ghost", { xPercent: 2 }, { xPercent: -2, duration: 5.2, ease: GLIDE }, 10.7);
+      tl.fromTo(".sg-ghost", { yPercent: -2 }, { yPercent: 2, duration: 5.2, ease: GLIDE }, 15.9);
+      tl.fromTo(".eg-ghost", { xPercent: -2 }, { xPercent: 2, duration: 5.2, ease: GLIDE }, 21.1);
+      tl.fromTo(".cg-ghost", { yPercent: 2 }, { yPercent: -2, duration: 5.6, ease: GLIDE }, 26.4);
+
+      /* ═══ S1 · COVER (0) ═══ */
+      tl.fromTo(".r-top", { scaleX: 0 }, { scaleX: 1, duration: 1.0, ease: "power2.out" }, 0);
+      tl.fromTo(".ct", { opacity: 0 }, { opacity: 1, duration: 0.7, stagger: 0.08 }, 0.15);
+      tl.fromTo(".cvd", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.7, ease: "power2.out", stagger: 0.035 }, 0.4);
+      tl.fromTo(".cv-k", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.7 }, 0.7);
+      tl.fromTo([".l1", ".l2"], { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 1.0, ease: "power2.out", stagger: 0.18 }, 0.85);
+      tl.fromTo(".cv-ulp", { strokeDashoffset: 360 }, { strokeDashoffset: 0, duration: 0.9, ease: "power1.out" }, 1.9);
+      tl.fromTo(".cv-lede", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.85 }, 1.7);
+      tl.fromTo(".cb", { opacity: 0 }, { opacity: 1, duration: 0.7, stagger: 0.08 }, 1.9);
+      // sage accent dots twinkle (finite)
+      tl.to(".cv-dots i.a", { opacity: 0.45, duration: 1.3, ease: GLIDE, stagger: 0.25, yoyo: true, repeat: 2 }, 2.4);
+
+      blurCross("#s1", "#s2", 5.2);
+
+      /* ═══ S2 · CONTENTS (5.2) ═══ */
+      tl.fromTo(".ix-k", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7 }, 5.3);
+      tl.fromTo(".ix-h", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.85 }, 5.45);
+      tl.fromTo(".ir", { opacity: 0, y: 34 }, { opacity: 1, y: 0, duration: 0.8, stagger: 0.16 }, 5.7);
+      tl.fromTo(".ix-ulp", { strokeDashoffset: 360 }, { strokeDashoffset: 0, duration: 0.8, ease: "power1.out" }, 7.1);
+
+      pagePush("#s2", "#s3", 10.5);
+
+      /* ═══ S3 · PULL-QUOTE (10.5) ═══ */
+      tl.fromTo(".qm", { opacity: 0, scale: 0.75 }, { opacity: 1, scale: 1, duration: 1.1, ease: "sine.out" }, 10.6);
+      tl.fromTo([".ql1", ".ql2"], { opacity: 0, y: 42 }, { opacity: 1, y: 0, duration: 1.0, ease: "power2.out", stagger: 0.18 }, 10.75);
+      tl.fromTo(".q-ulp", { strokeDashoffset: 360 }, { strokeDashoffset: 0, duration: 0.9, ease: "power1.out" }, 12.1);
+      tl.fromTo(".qa", { opacity: 0 }, { opacity: 1, duration: 0.8 }, 12.4);
+
+      blurCross("#s3", "#s4", 15.7);
+
+      /* ═══ S4 · STAT (15.7) — serif count-up ═══ */
+      tl.fromTo(".st-k", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7 }, 15.8);
+      tl.fromTo(".s-stat .fig", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.95, ease: "power2.out" }, 15.95);
+      tl.fromTo(".st-side h3", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.85 }, 16.3);
+      tl.fromTo(".st-side p", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.8 }, 16.55);
+      (function () {
+        var proxy = { v: 0 };
+        var el = document.getElementById("figv");
+        tl.fromTo(proxy, { v: 0 }, { v: 3.2, duration: 1.3, ease: "power2.out", onUpdate: function () { el.textContent = proxy.v.toFixed(1); } }, 16.05);
+      })();
+
+      pagePush("#s4", "#s5", 20.9);
+
+      /* ═══ S5 · EDITORIAL (20.9) — underline draw + breathing glyph ═══ */
+      tl.fromTo(".ed-k", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7 }, 21.0);
+      tl.fromTo(".ed-h", { opacity: 0, y: 32 }, { opacity: 1, y: 0, duration: 0.9, ease: "power2.out" }, 21.15);
+      tl.fromTo(".ed-p", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.8 }, 21.45);
+      tl.fromTo(".ed-card", { opacity: 0, y: 46 }, { opacity: 1, y: 0, duration: 0.95, ease: "power2.out" }, 21.25);
+      tl.fromTo(".ed-ulp", { strokeDashoffset: 360 }, { strokeDashoffset: 0, duration: 0.85, ease: "power1.out" }, 22.3);
+      // glyph breathes (finite)
+      tl.fromTo(".ed-card .glyph", { scale: 0.75, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.9, ease: "sine.out" }, 21.7);
+      tl.to(".ed-card .glyph", { scale: 1.07, duration: 1.7, ease: GLIDE, yoyo: true, repeat: 1 }, 22.8);
+
+      blurCross("#s5", "#s6", 26.2);
+
+      /* ═══ S6 · CLOSING (26.2) — warm-dark chapter, light leak ═══ */
+      tl.fromTo(".cld", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.7, ease: "power2.out", stagger: 0.06 }, 26.4);
+      tl.fromTo([".cl1", ".cl2"], { opacity: 0, y: 42 }, { opacity: 1, y: 0, duration: 1.0, ease: "power2.out", stagger: 0.18 }, 26.5);
+      tl.fromTo(".cl-meta", { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.8, ease: "power2.out" }, 27.3);
+      // warm light leak sweeps once
+      tl.fromTo(".cl-leak", { x: -500, opacity: 0 }, { x: 300, opacity: 0.9, duration: 1.6, ease: "sine.inOut" }, 26.6);
+      tl.to(".cl-leak", { x: 1500, opacity: 0, duration: 2.2, ease: "sine.inOut" }, 28.35);
+      // closing accent dots twinkle (finite)
+      tl.to(".cl-dots i.a", { opacity: 0.5, duration: 1.3, ease: GLIDE, stagger: 0.25, yoyo: true, repeat: 2 }, 28.0);
+
+      tl.to({}, { duration: 32 }, 0);
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

@@ -7,6 +7,10 @@ description: 小木头的个人视频流水线。基于一个主题，一篇文�
 
 **视频本体委托给 HyperFrames，不在这里重讲。** 入口是 `/hyperframes`（核心入口，把「文章/主题 → 无实拍讲解」路由到 `/faceless-explainer` 去搭画面、逐帧、渲染）。任何视频生成上的不确定 → 先读 `/hyperframes`。
 
+视频内容优先用**动效、图形、图表、动画**表达，而不是静态文字。优先使用以下 HyperFrames skills：
+> - **`/hyperframes-animation`** —— 设计并处理动效。
+> - **`/hyperframes-creative`** —— 让画面「高级」而非「像幻灯」的设计方向：`references/video-composition.md`（视频不是网页：尺度、分层、幽灵字、纹理、填满画面）+ `references/house-style.md`（避开 AI 味、中性色染主色）。
+
 **本 skill 是它之上的一层编排，相对 faceless 只补三件事：**
 
 1. **设计由用户选择** - 见 `references/designs.md`。
