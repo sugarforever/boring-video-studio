@@ -10,7 +10,7 @@
 
 唯一的 skill 是 **`verysmallwoods-video`**(在 `skills/`),当**编排者**:你给一个选题,它一路产到整套能直接发的物料,而不只是一个 mp4。它自带一套可扩展的 **HyperFrames 设计预设**(配色 / 字体 / 版式 / 字幕皮肤),决定成片的整体观感。下面是三套预设的演示成片 —— 真转场 + 逐帧动效,不是「会动的 PPT」,点封面看 30 秒:
 
-| [![Swiss Minimalism](demo/posters/swiss.jpg)](demo/swiss-showcase/renders/swiss-showcase.mp4) | [![Raycast Dark](demo/posters/raycast.jpg)](demo/raycast-showcase/renders/raycast-showcase.mp4) | [![Claude Warm](demo/posters/claude.jpg)](demo/claude-showcase/renders/claude-showcase.mp4) |
+| [![Swiss Minimalism](demo/posters/swiss.jpg)](https://youtu.be/VQhtHXWUViE) | [![Raycast Dark](demo/posters/raycast.jpg)](https://youtu.be/KtlchbTKO_Q) | [![Claude Warm](demo/posters/claude.jpg)](https://youtu.be/_2I6qFP7Tks) |
 |:--:|:--:|:--:|
 | **Swiss Minimalism** · 网格 + 信号红 | **Raycast Dark** · 暗色 + macOS 质感 | **Claude Warm** · 羊皮纸 + 衬线 + 赤陶 |
 
