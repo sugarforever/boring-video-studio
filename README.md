@@ -1,4 +1,4 @@
-# boring-video-studio
+# Boring Video Studio
 
 **`verysmallwoods-video`** - 小木头的个人视频流水线 Agent Skill。一个主题、一篇文章，或一份口播稿 → 一整套可发布物料：**视频成片 + 五比例封面 + 平台文案 + 博客 + 推文**，一次会话交付。视频本体用 [HyperFrames](https://www.hyperframes.dev)（HTML 即视频）搭合成、逐帧动效、渲染，本地零成本。
 
