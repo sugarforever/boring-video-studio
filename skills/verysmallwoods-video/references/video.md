@@ -22,10 +22,12 @@
 
 本 skill 在其上只补几条 faceless 没有的**用户口径**：
 
+- **STORYBOARD 必建（铁律）** —— 每期视频都要写 `STORYBOARD.md`，**哪怕只有一个场景**。它是分场景审校与「改一处不重渲全片」的计划账本：一格一个 frame，Studio 渲成联系表可逐帧审、逐帧评论（`.hyperframes/frame-comments.json`）。faceless 里它可能被当作可选或对单场景省略 —— 本 skill 把它收成硬约定，不许跳过。格式见 `/hyperframes-core` 的 `references/storyboard-format.md`。
 - **设计** —— 用 Step 0 选定的 preset（默认 `blockframe`），见 `references/designs.md`。
 - **口播稿** —— 按用户的写作/口播偏好写；偏好来自上下文 / 记忆 / 会话里的风格 skill。
 - **旁白** —— 见 `references/audio.md`（自录 或 TTS，由用户选）。
 - **重排到真实 cue** —— 拿到真实音频 + SRT 后，把每帧内部披露重排到真实 cue 时间轴；否则动效走完会定格、旁白在静态画面上继续讲。做法见 `references/audio.md`。
+- **预览 —— 渲染前必问（铁律）** —— `check` 通过后、渲染前，**显式询问用户是否要在 Studio 预览**。用户不要预览 → 跳过，直接进渲染；用户要预览 → 启动 `npx hyperframes preview`（后台常驻），把 Studio URL 交给用户：整片走 `http://localhost:<port>/#project/<name>`，看 storyboard 联系表走 `http://localhost:<port>/?view=storyboard#project/<name>`。等用户看完给反馈（改则读 `frame-comments.json` 走修订轮，见「STORYBOARD 必建」）再渲染。**不要 check 一过就自动渲染。**
 - **字幕不烧进成片** —— 用户在 YouTube 上字幕；成片留底部字幕安全区即可。
 - **帧率** —— 按动效规格智能判定，报给用户，可被指定覆盖。判定后告知用户：选择的帧率，依据以及不同帧率对视频产出的影响。用户明确指定帧率时以用户为准。
 - **渲染** —— 1080p{fps} high 先出保底，磁盘够再出 4K master（`--resolution landscape-4k --fps {fps}`）。`{fps}` 取上一条的判定结果。

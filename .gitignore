@@ -12,6 +12,12 @@
 *.wav
 /tmp/
 
+# HyperFrames per-project generated artifacts (regenerable — commit source only)
+.hyperframes/
+.thumbnails/
+snapshots/
+renders/
+
 # python
 __pycache__/
 *.pyc

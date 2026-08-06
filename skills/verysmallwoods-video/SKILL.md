@@ -32,12 +32,12 @@ description: 小木头的个人视频流水线。基于一个主题，一篇文�
 一个选题 = 一个项目目录（当前工作目录下，命名 `<YYYYMMDD-slug>`）
 
 - Step 0 · 定选题、问两个选择（设计 + 旁白来源）→ `references/designs.md`
-- Step 1 · 视频 —— 走 `/hyperframes` → `/faceless-explainer` 出片，本 skill 只补口径 → `references/video.md`
+- Step 1 · 视频 —— 走 `/hyperframes` → `/faceless-explainer` 出片，本 skill 只补口径；**每期必建 STORYBOARD.md（含单场景，不许跳过）** → `references/video.md`
 - Step 2 · 旁白接入 → `references/audio.md`
 - Step 3 · 生成五比例封面 → `references/covers.md`
 - Step 4 · 生成平台文案 → `references/platform-copy.md`
 - Step 5 · 博客 + 推文 → `references/blog-and-tweet.md`
-- Step 6 · 验收 + 渲染 - 对交付清单逐项核，1080p 先出、再出 4K master
+- Step 6 · 验收 + 渲染 - 对交付清单逐项核；**渲染前必问用户是否 Studio 预览**（不要 → 跳过；要 → 启动预览服务、交 URL、等反馈），确认后 1080p 先出、再出 4K master
 
 ## 参考
 
