@@ -4,10 +4,19 @@
 
 1. 用户自行录制，并提供音频文件和 SRT
 2. TTS 合成：
-    - HyperFrames 内置的 TTS 服务
-    - 用户安装的 Skill 提供的 TTS 服务
+    - **ListenHub TTS（首选）** —— 见 `references/listenhub-tts/README.md`。原生 `/v1/speech`
+      引擎自带字幕（文字＝输入原文、零识别错），一个 `LISTENHUB_API_KEY` 出 mp3 + SRT。
+      **支持用户自己的克隆声音**：克隆声音在 speakers 列表里以 `voice-clone-` 打头，拿它的
+      `speakerId` 走同一条链路即可（要「听起来像我」走这条）。
+    - HyperFrames 内置的 TTS 服务（中文不支持，慎用）。
+    - 用户安装的其它 TTS skill。
 
-用户提供的 SRT 文件，基于口播稿内容校对、核准（只改术语/人名/同音字，时间戳不动）。
+> **中文口播优先 ListenHub**（HyperFrames 自带 Kokoro 不支持中文）。它给的 SRT 正是下面
+> 「接入成片」切段/对齐要的时间轴事实源。挑音色 / 克隆声音 / 多音字 / 停顿 / 提速全在
+> `references/listenhub-tts/README.md`。
+
+用户提供的（或 ListenHub speech 路出的）SRT，基于口播稿内容校对、核准（只改术语/人名/同音字，
+时间戳不动）。
 
 ## 接入成片（切段 + 对齐 + 重排节奏）
 
