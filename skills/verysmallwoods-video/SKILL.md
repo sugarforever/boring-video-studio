@@ -16,7 +16,7 @@ description: 小木头的个人视频流水线。基于一个主题，一篇文�
 1. **设计由用户选择** - 见 `references/designs.md`。
 2. **旁白增加一个「自录」选项** —— faceless 默认走 TTS；这里额外提供**用户自行录制**这条路（用户给音频 + SRT，你校对、切段、对齐、重排节奏）。见 `references/audio.md`。
 3. **生成发布素材** —— faceless 只出视频；这里补齐**五比例封面 + YouTube/Bilibili 文案 + 博客 + 推文**。见 `references/covers.md` / `platform-copy.md` / `blog-and-tweet.md`。
-4. **真实终端演示** —— STORYBOARD 需要展示真实命令执行、CLI 输出或 TUI 操作时，调用 `/record-terminal` 录制素材；纯装饰或概念性的终端画面继续用 HyperFrames 动效。接入时点与资产契约见 `references/video.md`。
+4. **真实终端演示** —— 当 STORYBOARD 要求展示真实命令执行、CLI 输出或 TUI 操作时，按以下契约接入 `/record-terminal`。
 
 开局把 ① ② 两个选择先问用户。
 
