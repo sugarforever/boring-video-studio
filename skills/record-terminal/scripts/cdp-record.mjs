@@ -22,9 +22,9 @@
 //     { "do": "wait", "ms": 2000 },
 //     { "do": "press", "key": "Enter" },             // exactly one submission, never retried
 //     { "do": "waitText", "text": "Installed", "timeout": 60000 },
-//     { "do": "waitNoText", "text": "Working", "timeout": 120000 },
+//     { "do": "waitNoText", "text": "Working", "timeout": 120000 }, // must stay absent settleMs (default 1500)
 //     { "do": "wait", "ms": 2500 },
-//     { "do": "stop" }
+//     { "do": "stop" }                            // "start" may take its own "out" to split a take
 //   ]
 // }
 //
@@ -81,18 +81,22 @@ let ffmpeg;
 let ticker;
 let started = 0;
 let written = 0;
+let current;
 
 cdp.on("Page.screencastFrame", async (event) => {
   latest = Buffer.from(event.data, "base64");
   await cdp.send("Page.screencastFrameAck", { sessionId: event.sessionId }).catch(() => {});
 });
 
-async function start() {
+async function start(target = out) {
+  latest = undefined;
+  written = 0;
+  current = target;
   ffmpeg = spawn("ffmpeg", [
     "-v", "error", "-y",
     "-f", "image2pipe", "-framerate", String(fps), "-c:v", "png", "-i", "-",
     "-c:v", "libx264", "-preset", "slow", "-crf", String(crf), "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an",
-    out,
+    target,
   ], { stdio: ["pipe", "inherit", "inherit"] });
   await cdp.send("Page.startScreencast", { format: "png", maxWidth: width, maxHeight: height, everyNthFrame: 1 });
   while (!latest) await page.waitForTimeout(20);
@@ -108,7 +112,7 @@ async function stop() {
   await cdp.send("Page.stopScreencast");
   ffmpeg.stdin.end();
   await new Promise((resolve, reject) => ffmpeg.on("close", (code) => (code === 0 ? resolve() : reject(new Error(`ffmpeg exited ${code}`)))));
-  console.log(`wrote ${out}: ${written} frames, ${(written / fps).toFixed(1)} s`);
+  console.log(`wrote ${current}: ${written} frames, ${(written / fps).toFixed(1)} s`);
   ffmpeg = undefined;
 }
 
@@ -120,14 +124,32 @@ try {
       case "press": await page.keyboard.press(step.key); break;
       case "wait": await page.waitForTimeout(step.ms); break;
       case "waitText": await waitFor((t) => t.includes(step.text), step.timeout ?? 60000, `"${step.text}"`); break;
-      case "waitNoText": await waitFor((t) => !t.includes(step.text), step.timeout ?? 60000, `no "${step.text}"`); break;
+      case "waitNoText": {
+        // A TUI can blank a busy indicator between steps (e.g. between two tool calls), so require
+        // the text to stay absent for settleMs before treating the app as idle.
+        const settle = step.settleMs ?? 1500;
+        const until = Date.now() + (step.timeout ?? 60000);
+        let quietSince;
+        while (true) {
+          if (Date.now() > until) throw new Error(`timed out waiting for no "${step.text}"`);
+          if ((await screenText()).includes(step.text)) quietSince = undefined;
+          else if ((quietSince ??= Date.now()) + settle <= Date.now()) break;
+          await page.waitForTimeout(150);
+        }
+        break;
+      }
       case "screenshot": await page.screenshot({ path: step.path }); break;
-      case "start": await start(); break;
+      case "start": await start(step.out); break;
       case "stop": await stop(); break;
       default: throw new Error(`unknown step ${step.do}`);
     }
   }
   if (ffmpeg) await stop();
+} catch (error) {
+  // Leave evidence of the failed state next to the output before tearing down.
+  await page.screenshot({ path: `${out}.fail.png` }).catch(() => {});
+  console.error(`step failed; screenshot at ${out}.fail.png`);
+  throw error;
 } finally {
   if (ffmpeg) { clearInterval(ticker); ffmpeg.stdin.end(); }
   await browser.close();
