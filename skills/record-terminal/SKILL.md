@@ -1,11 +1,11 @@
 ---
 name: record-terminal
-description: Use when recording terminal command execution for a video; use ttyd to present a real local shell in Chrome for capture.
+description: Use when recording terminal command execution for a video; use ttyd to present a real local shell in a browser and capture the page viewport (CDP by default, native window capture as fallback).
 ---
 
 # Record terminal
 
-Present a real local shell in Chrome with `ttyd`, then operate that browser terminal so commands and output appear in the recording.
+Present a real local shell in a browser with `ttyd`, then operate that browser terminal so commands and output appear in the recording. By default, capture the page viewport through the Chrome DevTools Protocol. Native window capture is the fallback.
 
 ## When this applies
 
@@ -19,7 +19,7 @@ Do **not** use it when the terminal only needs to *look* like a terminal: static
 2. Run `command -v ttyd`. When it is missing, tell the user that `ttyd` is required, show the relevant install command (`brew install ttyd` on macOS or the system package manager on Linux), and resume after it becomes available.
 3. Choose an unused local port, normally `7681`, and the loopback interface (`lo0` on macOS, `lo` on Linux).
 4. Use a disposable or otherwise safe environment for commands that install packages, edit configuration, or mutate state. Keep secrets and unrelated user data out of the terminal, command history, and environment.
-5. Separate capture and delivery paths. Use names such as `*-window-raw.mov` for source capture and `*-clean-1080p.mp4` for the cropped deliverable. Never overwrite an accepted take while recording or transcoding a replacement.
+5. Separate capture and delivery paths. Use names such as `*-cdp-4k.mp4` or `*-window-raw.mov` for source capture, and `*-clean-1080p.mp4` for the deliverable. Never overwrite an accepted take while recording or transcoding a replacement.
 
 ## Start the terminal
 
@@ -39,7 +39,39 @@ ttyd \
 
 Adapt the interface and shell to the host. The loopback bind keeps the writable shell local; one-client and exit-on-disconnect options give the recording session a bounded lifetime.
 
-## Prepare Chrome and the target window
+When the shell is started from a scrubbed environment (`env -i ...`), set `LANG=en_US.UTF-8`. Otherwise zsh echoes typed CJK as `<00ad>`-style escapes, even though command output renders correctly. Add `-t disableResizeOverlay=true -t disableLeaveAlert=true` so no size overlay or leave dialog enters the frame.
+
+## Choose the capture path
+
+| | CDP viewport capture (default) | Native window capture |
+|---|---|---|
+| Frame | Page viewport only; no crop | Chrome window; crop tabs, toolbar, shadow |
+| Resolution | Any viewport size; true 3840×2160 text rendering | Bounded by the display, ~3024 px wide on a 14" Retina |
+| Pointer, banners, other apps | Cannot appear | Pointer is recorded when it crosses the window; banners must be dismissed |
+| Host screen during the take | Free; headless browser, no focus stealing | Window must stay unminimized on its Space; pointer kept away |
+| Permissions | None | macOS Screen Recording |
+| Limits | Only what the page renders | Also works for native apps and system UI |
+
+Use CDP viewport capture for ttyd shots. Fall back to native window capture only when the shot needs something outside the page.
+
+## CDP viewport capture
+
+`scripts/cdp-record.mjs` drives headless Chromium with `playwright-core`. It loads the ttyd page at the target resolution and runs a JSON step list: `type`, `paste`, `press`, `wait`, `waitText`, `waitNoText`, `screenshot`, `start`, `stop`. Steps before `start` are off-camera setup. `waitText` and `waitNoText` read the xterm.js buffer that ttyd exposes as `window.term`, so each step waits on real terminal state instead of fixed sleeps.
+
+Between `start` and `stop` it runs `Page.startScreencast` with lossless PNG frames, resamples them to a constant frame rate, and pipes them into ffmpeg (`libx264`, CRF 14 by default). The file is complete a moment after `stop`; there is no separate assembly pass.
+
+```bash
+npm i playwright-core && npx playwright install chromium   # once
+node scripts/cdp-record.mjs shot.json
+```
+
+For a 4K master, use a 3840×2160 viewport with the ttyd font around 40 px (~160×45 cells). Headless screencast frames are delivered in CSS pixels, so raise the viewport, not `deviceScaleFactor`. Derive the 1080p deliverable by downscaling the master.
+
+Put setup such as sourcing credentials, starting the TUI, seeding context, and a final `clear` before `start`, so none of it is on camera. The step list is also the take's script: exact inputs, one `press Enter` per submission, and explicit waits on the signal that proves the point.
+
+## Native window capture
+
+Use this path only when the shot needs something CDP cannot see.
 
 1. Open `http://127.0.0.1:<port>/` with the available Chrome browser-control tool. Size the browser so its page viewport has the intended composition and enough terminal rows for the complete output.
 2. Verify the visible path and round trip with `printf 'recording-ready\n'; pwd`.
@@ -51,7 +83,7 @@ Window capture is independent of foreground focus when the recorder locks onto a
 
 ## Record the full take
 
-1. Start capture to a new `*-window-raw.mov` path. On macOS, prefer a fixed-duration `screencapture` invocation and let it end naturally; an interrupted capture may not produce a valid file.
+1. Start capture to a new path. With CDP, this is the `start` step. With native window capture, write a new `*-window-raw.mov`; on macOS, prefer a fixed-duration `screencapture` invocation and let it end naturally, because an interrupted capture may not produce a valid file.
 2. Enter every on-camera command through the browser terminal. Type visibly, character by character, at roughly 100–150 ms per character by default; slow down further when readability calls for it.
 3. Before pressing Enter, compare the rendered command with the intended command. Pay special attention to punctuation and shell-significant text such as `npm:@scope/package`, quotes, backslashes, pipes, redirects, and environment assignments. For fragile commands, type stable segments and paste the exact special fragment rather than trusting character-by-character automation.
 4. After the full command has been visually verified, wait two seconds before pressing Enter. Apply this to every command, including short commands such as `vi hello.py`, so the audience can read it before execution replaces the prompt.
@@ -72,9 +104,9 @@ When the shot runs an agent or other TUI inside the terminal (for example a codi
 
 Terminal text is read at video size, not at Retina window size. Size the page viewport near the delivery width in CSS pixels, or raise the font size, so body text stays readable after scaling to 1920×1080. When the key signal is small, such as a single status line, note it for a punch-in during editing.
 
-## Crop the page viewport
+## Crop the page viewport (native window capture)
 
-Treat the raw Chrome-window recording as source footage. The deliverable contains only the ttyd page viewport: remove tabs, the address bar, bookmarks, window chrome, and borders.
+CDP output is already the page viewport; skip this section for it. Treat the raw Chrome-window recording as source footage. The deliverable contains only the ttyd page viewport: remove tabs, the address bar, bookmarks, window chrome, and borders.
 
 Determine the crop from a frame of the actual take rather than assuming fixed browser offsets. Crop first, then scale proportionally and pad with the terminal background color to the target frame, normally 1920×1080. Never stretch the terminal to force a 16:9 result.
 
