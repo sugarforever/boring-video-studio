@@ -3,7 +3,10 @@
 ```markdown
 ---
 source_beats: BEATS.md
+source_beats_digest: sha256:<BEATS artifact_digest>
 source_narration: NARRATION.md
+source_narration_digest: sha256:<NARRATION artifact_digest>
+artifact_digest: sha256:<digest>
 concept: One sentence naming the visual world
 continuity: What carries through the whole film
 ---
@@ -24,6 +27,8 @@ continuity: What carries through the whole film
 
 Two or three sentences describing what the viewer experiences.
 ```
+
+Compute `artifact_digest` as SHA-256 of the complete scenes file after removing only the `artifact_digest:` line.
 
 ## Scene audit
 
