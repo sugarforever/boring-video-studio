@@ -46,4 +46,6 @@ When the video structure exposes a missing fact, viewpoint, argument step, or co
 
 Beat IDs are stable interfaces. Preserve them through revisions and assign a new ID when inserting a beat.
 
-`BEATS.md` is complete when another writer can draft the narration without inventing content, and every beat is a medium-specific arrangement of the approved article rather than a new argument.
+**REQUIRED SUB-SKILL:** Use `artifact-preview` for `BEATS.md` before declaring it complete and after every later source change.
+
+`BEATS.md` is complete when another writer can draft the narration without inventing content, every beat is a medium-specific arrangement of the approved article rather than a new argument, and the `artifact-preview` completion criterion is satisfied for `BEATS.preview.html`.

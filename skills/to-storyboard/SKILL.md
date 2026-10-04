@@ -24,4 +24,6 @@ Turn `SCENES.md` and `NARRATION.md` into HyperFrames `STORYBOARD.md`. Scenes def
 6. Treat canonical HyperFrames fields as authoritative. A `boring_*` extra supplements the contract; it never restates a canonical field.
 7. Audit the sequence: every narration anchor is covered by one or more shot moments, intentionally silent moments carry no anchor, frame boundaries follow the rules above, the action is legible without reading the narration, and estimated duration accommodates both speech and action.
 
-The storyboard is complete when every frame is an independently buildable block, its shot moments fully describe the scene event, and every transition connects actual end and start states. HyperFrames owns sketching and storyboard review after handoff.
+**REQUIRED SUB-SKILL:** Use `artifact-preview` for `STORYBOARD.md` before declaring it complete and after every later source change. Present it for inspection without starting or replacing HyperFrames' later sketching and storyboard review.
+
+The storyboard is complete when every frame is an independently buildable block, its shot moments fully describe the scene event, every transition connects actual end and start states, and the `artifact-preview` completion criterion is satisfied for `STORYBOARD.preview.html`. HyperFrames owns sketching and storyboard review after handoff.

@@ -39,4 +39,6 @@ Compute `artifact_digest` as SHA-256 of the complete narration file after removi
 
 Every material fact, viewpoint, and conclusion must trace through its beat to the approved article. When speech needs content the article does not establish, immediately return `content/ARTICLE.md` to `status: draft` and revise it there; return `content/TOPIC.md` to `draft` too when the change affects a locked topic decision. Renew the approvals defined by those upstream files, update `BEATS.md` to match, and only then use the content in narration. `BEATS.md` has no separate approval state in this workflow.
 
-The draft is complete when it is ready for visual planning, every material sentence traces to both a beat and the approved article, and no later visual has been prematurely prescribed. The selected HyperFrames workflow owns review timing and the voice-ready narration version after handoff.
+**REQUIRED SUB-SKILL:** Use `artifact-preview` for `NARRATION.md` before declaring it complete and after every later source change. Present it for inspection without starting or replacing HyperFrames' later voice-review loop.
+
+The draft is complete when it is ready for visual planning, every material sentence traces to both a beat and the approved article, no later visual has been prematurely prescribed, and the `artifact-preview` completion criterion is satisfied for `NARRATION.preview.html`. The selected HyperFrames workflow owns review timing and the voice-ready narration version after handoff.
