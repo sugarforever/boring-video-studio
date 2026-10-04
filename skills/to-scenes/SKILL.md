@@ -18,4 +18,6 @@ Turn `BEATS.md` and `NARRATION.md` into `SCENES.md`. A scene is a small event in
 7. Classify every scene's feasibility using the capability envelope, naming dependencies and fallbacks where required.
 8. Run the scene audit in the format reference. If narration changes after scenes exist, revise every affected scene, refresh `source_narration_digest`, recompute the scenes `artifact_digest`, and repeat the audit before completion.
 
-`SCENES.md` is complete when every beat has a feasible visual event, the film has deliberate variation and continuity, and a storyboard artist can choose shots without inventing the direction.
+**REQUIRED SUB-SKILL:** Use `artifact-preview` for `SCENES.md` before declaring it complete and after every later source change. When this stage changes `NARRATION.md`, use `artifact-preview` for that source too.
+
+`SCENES.md` is complete when every beat has a feasible visual event, the film has deliberate variation and continuity, a storyboard artist can choose shots without inventing the direction, and the `artifact-preview` completion criterion is satisfied for `SCENES.preview.html` and any `NARRATION.preview.html` refreshed by this stage.

@@ -20,14 +20,14 @@ Install `boring-video` and its planning stages:
 
 ```bash
 npx skills add sugarforever/boring-video-studio \
-  --skill boring-video develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video
+  --skill boring-video artifact-preview develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video
 ```
 
 Add `--global` to make the skills available across projects:
 
 ```bash
 npx skills add sugarforever/boring-video-studio --global \
-  --skill boring-video develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video
+  --skill boring-video artifact-preview develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video
 ```
 
 Video production requires HyperFrames and its local dependencies. Check the environment with:
@@ -54,9 +54,17 @@ For a content-driven video, the skill asks for any missing production choices an
 6. `to-storyboard` translates the scenes into buildable shots.
 7. `to-video` hands the complete plan and optional ListenHub narration to the appropriate HyperFrames workflow.
 
+Each artifact-producing stage uses `artifact-preview` to create and proactively present a self-contained HTML review view beside its authoritative Markdown file.
+
 An existing complete article can start at `to-spec-beats` after the user explicitly confirms it as the content master. Later artifacts are resumable only when their lineage traces to that approved article.
 
 You can also invoke an individual stage when you already have its input:
+
+Install an individual stage together with its preview dependency, for example:
+
+```bash
+npx skills add sugarforever/boring-video-studio --skill artifact-preview to-scenes
+```
 
 ```text
 $to-scenes Redesign the visual direction for this narration.

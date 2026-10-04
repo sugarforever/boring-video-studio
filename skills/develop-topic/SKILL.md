@@ -87,4 +87,6 @@ Until then, keep all writing inside `RESEARCH.md`, experiment reports, and the d
 
 A later material change to a locked decision returns `TOPIC.md` to `draft` and makes downstream article approval stale. Copy edits, examples, and title changes that preserve meaning do not revoke approval.
 
-The topic is complete when `TOPIC.md` is approved, every material claim points to sufficient evidence, remaining open questions are non-blocking and visible, and an article writer can draft without inventing facts, experiments, author position, argument, or scope.
+**REQUIRED SUB-SKILL:** Use `artifact-preview` for `content/TOPIC.md` whenever it is ready for review and after every later source change.
+
+The topic is complete when `TOPIC.md` is approved, every material claim points to sufficient evidence, remaining open questions are non-blocking and visible, an article writer can draft without inventing facts, experiments, author position, argument, or scope, and the `artifact-preview` completion criterion is satisfied for `content/TOPIC.preview.html`.

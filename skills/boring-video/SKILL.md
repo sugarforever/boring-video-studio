@@ -35,6 +35,8 @@ voice:
 
 Compute `approved_digest` as SHA-256 of the complete file after removing only the `approved_digest:` line. Do not manufacture an article merely to satisfy the chain for direct-production work; load `/hyperframes` and let its current intent layer own intake and workflow selection.
 
+When this intake creates or adapts `content/ARTICLE.md`, **REQUIRED SUB-SKILL:** Use `artifact-preview` for that file and satisfy its completion criterion for `content/ARTICLE.preview.html` before starting `/to-spec-beats`.
+
 For content-driven work, ask one compact question for any missing production choices:
 
 1. **Presentation:** faceless, footage, screen capture, talking head, or mixed media?
