@@ -1,11 +1,13 @@
 ---
 name: record-terminal
-description: Use when recording terminal command execution for a video; use ttyd to present a real local shell in Chrome for capture.
+description: Use when a video must show terminal commands, CLI output, TUI behavior, or code being entered on screen.
 ---
 
 # Record terminal
 
-Present a real local shell in Chrome with `ttyd`, then operate that browser terminal so commands and output appear in the recording.
+Choose between a real `ttyd` capture and an evidence-backed HTML replay. Read [`references/terminal-presentation.md`](references/terminal-presentation.md) before planning or producing the shot; it owns the choice and the shared fidelity contract.
+
+Continue below when that reference selects real capture.
 
 ## Prepare
 

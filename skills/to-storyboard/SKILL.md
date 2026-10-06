@@ -21,6 +21,7 @@ Turn `SCENES.md` and `NARRATION.md` into HyperFrames `STORYBOARD.md`. Scenes def
    - handoff to the next moment or frame.
 4. Use canonical metadata wherever the current contract already carries the meaning. Put the document-level `boring_source_scenes_digest`, `boring_source_narration_digest`, and `boring_artifact_digest` exactly once as unknown keys in the global YAML frontmatter, where the canonical parser preserves them under `globals.extra`. Compute `boring_artifact_digest` as SHA-256 of the complete storyboard file after removing only that single global frontmatter line. Frame-level workflow extras, such as `boring_scene_id`, remain on their frames and never carry document digests.
 5. Use the scene's world, hero, event, continuity, rhythm, and feasibility as constraints. Preserve the cognitive job from `BEATS.md`.
+   - When a frame shows code entry, shell commands, CLI output, database output, or a TUI, read [`../record-terminal/references/terminal-presentation.md`](../record-terminal/references/terminal-presentation.md), choose real capture or HTML replay, and make that treatment explicit in the shot moments.
 6. Treat canonical HyperFrames fields as authoritative. A `boring_*` extra supplements the contract; it never restates a canonical field.
 7. Audit the sequence: every narration anchor is covered by one or more shot moments, intentionally silent moments carry no anchor, frame boundaries follow the rules above, the action is legible without reading the narration, and estimated duration accommodates both speech and action.
 
