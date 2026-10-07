@@ -1,14 +1,6 @@
 # Terminal and code presentation
 
-Use one of two treatments. Both must preserve what actually happened; they differ in how the event reaches the frame.
-
-## Choose the treatment
-
-Choose **real capture** when live behavior is evidence: an interactive TUI, shell completion, ANSI/progress behavior, latency, mouse interaction, or a failure whose timing matters. Return to `record-terminal/SKILL.md` and capture the real shell through `ttyd`.
-
-Choose **HTML replay** when the audience needs a controlled, legible explanation of commands, output, or code entry and the interaction itself is not the claim. Replay is a reconstruction from evidence, not invented terminal footage.
-
-If one sequence needs both, separate the shots: preserve the live interaction in real capture and use replay for readable excerpts.
+The default treatment is a deterministic, high-fidelity HTML replay in a dark iTerm-inspired terminal. It reconstructs a real execution for video; it does not invent terminal footage. Use another visual treatment when the user asks for one.
 
 ## Evidence-first replay
 
@@ -21,10 +13,37 @@ The replay is ready only when every visible command and result is traceable to e
 
 ## Frame fidelity
 
-- Give the terminal or editor most of the frame. Use an actual monospace face for ASCII code, prompts, and tables; add a language-appropriate fallback for glyphs the mono face lacks. Disable ligatures where they can change character widths.
+- Give the terminal or editor 90–95% of the frame. Use an actual monospace face for ASCII code, prompts, and tables; add a language-appropriate fallback for glyphs the mono face lacks. Disable ligatures where they can change character widths.
 - Preserve whitespace with preformatted layout. Keep aligned data in one font run and at one size. Test the widest command, code line, and table row at delivery resolution.
 - Meet the project's accessibility target for foreground, muted text, selection, and cursor contrast. Decorative window controls must not resemble output.
 - Prefer intentional path redaction or horizontal cropping to scaling text below readable size.
+
+## Default dark style
+
+Use these defaults when the user has not requested a different shell or visual identity. Adapt sizes proportionally for other delivery resolutions.
+
+| Element | Default |
+| --- | --- |
+| Window | `#101217` background, `#343942` border |
+| Title bar | 58 px at 1080p, `#1a1d23` background, `#30343c` 1 px bottom rule |
+| Title | `#aeb5bf`, 20 px, weight 400 |
+| Window dots | 14 px, visually subordinate to content |
+| Surface | 28 px vertical / 30 px horizontal padding, `#e7e9ed` foreground |
+| Font | `"iTerm Monaco", Monaco, "Noto Sans SC", monospace` |
+| Text | weight 400, letter spacing 0; 24–29 px at 1080p; line height 1.30–1.42 |
+| Command | `#f4f4f5`, weight 400 |
+| Muted output | `#a2aab3` |
+| Username | `#57e35a` |
+| Path | `#6f8cff` |
+| Git branch | `#2bd4d4` |
+| Prompt glyph | `#df5ac8` |
+| Active cursor | `#65e5c2` |
+
+Keep the title inside the title bar. Do not add a persistent vertical name strip. When a frame or evidence label is useful, place a compact label at the lower right, above masks and clipped surfaces, with enough inset to remain inside the delivery safe area.
+
+Use the same window chrome, font stack, weight, spacing, and base palette for simulated `vi` or editor views. Syntax accents default to keyword `#fe90e8`, function `#c0f7fe`, string `#99e885`, comment or line number `#7c8794`, and focused line `rgba(247,203,70,.15)` with a `#f7cb46` inset marker. Show only the code needed for the explanation; use explicit jumps, folds, or omissions instead of shrinking a long file below readable size.
+
+These values are a coherent starting style, not project truth. A user-selected theme may replace them as a set; preserve monospace alignment, readable contrast, safe areas, and terminal/editor consistency.
 
 ## Coding animation
 
@@ -39,4 +58,4 @@ Place code at its final coordinates from the first frame. Reveal characters in p
 
 Inspect snapshots during the first line, within a long line, immediately after a newline, near the final character, and after completion. Confirm caret position, indentation, clipping, wrapping, and absence of horizontal movement or reflow.
 
-Then inspect every terminal state against the saved evidence and run the production workflow's lint, runtime, layout, motion, and contrast checks. The treatment is complete only when intermediate typing states and final output pass.
+Then inspect every terminal state against the saved evidence. At delivery resolution, verify font fallback, weight consistency, prompt alignment, table columns, widest lines, label stacking, masks, and safe areas. Run the production workflow's lint, runtime, layout, motion, and contrast checks. The treatment is complete only when intermediate typing states and final output pass.
