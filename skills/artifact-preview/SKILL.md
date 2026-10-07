@@ -14,6 +14,7 @@ After writing a durable Markdown artifact, or after any later source change once
 1. Compute the source file's SHA-256 digest.
 2. Create or refresh `<basename>.preview.html` beside the source file.
 3. Build a review header containing the artifact title, source path, source status value verbatim when present (otherwise `not declared`), and digest; add a table of contents for multi-section documents.
+   - Include the review scope supplied by the owning skill. Use an honest label such as content-structure review, direction review, or shot-plan review. State what the page can validate and which visual or motion qualities require rendered evidence later.
 4. Render frontmatter as metadata and every Markdown heading section as semantic HTML: headings, paragraphs, lists, tables, code blocks, and safe links. Preserve approval state, open checks, evidence links, stable IDs, and lineage fields that affect review. A raw-source appendix is optional; a `<pre>` dump is not the primary review surface.
 5. Label the page as derived review material.
 6. Use one self-contained HTML file with inline CSS and optional inline JavaScript. It must need no server, build step, network request, external font, stylesheet, script, image, or other local file.
@@ -29,6 +30,8 @@ Present the rendered page through the host's native HTML or browser preview when
 The presentation branch succeeds only when the opening tool confirms success or the host renders a clickable link or URI. Plain unlinked path text is not presentation.
 
 Presenting a preview never records approval. Only the approval rule in the artifact-owning skill can change status or approval metadata. A later source change makes the preview stale.
+
+A semantic HTML rendering of prose is not a visual prototype, styleframe, motion proof, or animatic. Do not describe it as one or use it to claim that composition, typography, animation, pacing, or transitions have been reviewed.
 
 ## Completion criterion
 
