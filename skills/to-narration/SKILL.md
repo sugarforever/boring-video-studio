@@ -41,4 +41,4 @@ Every material fact, viewpoint, and conclusion must trace through its beat to th
 
 **REQUIRED SUB-SKILL:** Use `artifact-preview` for `NARRATION.md` before declaring it complete and after every later source change. Present it for inspection without starting or replacing HyperFrames' later voice-review loop.
 
-The draft is complete when it is ready for visual planning, every material sentence traces to both a beat and the approved article, no later visual has been prematurely prescribed, and the `artifact-preview` completion criterion is satisfied for `NARRATION.preview.html`. The selected HyperFrames workflow owns review timing and the voice-ready narration version after handoff.
+The draft is complete when it is ready for visual planning, every material sentence traces to both a beat and the approved article, no later visual has been prematurely prescribed, and the `artifact-preview` completion criterion is satisfied for `NARRATION.preview.html`. The shared HyperFrames project owns review timing and the voice-ready narration version once `/to-scenes` begins.

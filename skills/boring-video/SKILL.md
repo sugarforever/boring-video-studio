@@ -5,7 +5,7 @@ description: Use when developing a content-driven video from a topic, research b
 
 # Boring video
 
-Orchestrate video pre-production as a chain of durable artifacts, then hand the approved plan to HyperFrames. Content is established and approved before it is adapted for speech or visuals; each skill owns one conversion.
+Orchestrate content development and a progressively refined HyperFrames project as one chain. Content is established before it is adapted for speech or visuals; scene direction begins the renderable project, storyboard turns it into an animatic, and production continues it.
 
 ## Intake
 
@@ -54,9 +54,9 @@ For content-driven work, start at the first missing or explicitly revised artifa
 2. `/to-article` → approved `content/ARTICLE.md`
 3. `/to-spec-beats` → `BEATS.md`
 4. `/to-narration` → `NARRATION.md`
-5. `/to-scenes` → `SCENES.md`
-6. `/to-storyboard` → `STORYBOARD.md`
-7. `/to-video` → HyperFrames handoff
+5. `/to-scenes` → `SCENES.md`, shared HyperFrames project, and visual direction board
+6. `/to-storyboard` → `STORYBOARD.md` and a full animatic in that project
+7. `/to-video` → production continuation in that project
 
 Finish each skill's completion criterion before advancing. A downstream finding returns to the artifact that owns the decision, then propagates forward.
 
@@ -68,4 +68,4 @@ Presentation and workflow are separate decisions. Collect the presentation inten
 
 ## Done
 
-Content-driven pre-production is complete when the applicable approved content artifacts and four planning artifacts agree and satisfy their owners. The wrapper run is complete when `/to-video` has transferred the applicable project truth, plus the confirmed voice branch, into the selected HyperFrames project.
+Content-driven planning is complete when the applicable approved content artifacts, four planning artifacts, direction board, and seekable animatic agree and satisfy their owners. The wrapper run is complete when `/to-video` continues the reviewed HyperFrames project with the confirmed voice branch through the selected production workflow.

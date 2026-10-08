@@ -7,14 +7,14 @@ Text describes intent; pixels and time reveal the result. Keep semantic artifact
 Use these labels when presenting review material:
 
 - `BEATS.preview.html`: **content-structure review** — claims, evidence, order, cognitive jobs, and duration budgets.
-- `SCENES.preview.html`: **direction review** — worlds, events, continuity, rhythm, feasibility, and visual risks.
-- `STORYBOARD.preview.html`: **shot-plan review** — buildable frames, shot moments, narration coverage, transitions, and timing intent.
+- `SCENES.preview.html`: **visual direction board** — semantic scene intent plus rendered Hero or Start/Hero/End states chosen to expose each scene's risks.
+- `STORYBOARD.preview.html`: **animatic review** — semantic shot traceability plus playable, seekable timing and motion from the shared project.
 
-These semantic previews never demonstrate final composition, typography, animation, pacing, or transitions. Do not ask the user to approve those qualities from prose.
+`BEATS.preview.html` remains semantic. Scene and storyboard previews may support visual decisions only through rendered evidence attributable to the current shared-project revision; their prose sections alone prove none of those qualities.
 
 ## Gate 1: pixel proof
 
-Before detailed animation, render representative styleframes at delivery aspect ratio. Choose the smallest set that covers the video's visual grammar and its declared risks, such as:
+During scene direction, render at delivery aspect ratio from the shared HyperFrames project. Give every scene the smallest set that exposes its visual decision: one Hero state when sufficient, Start/Hero/End when a change must be judged, and more only for a named risk. Across the film, cover risks such as:
 
 - opening or cover transition;
 - explanatory bridge or diagram;
@@ -22,21 +22,21 @@ Before detailed animation, render representative styleframes at delivery aspect 
 - terminal, editor, database table, or other evidence surface;
 - closing CTA.
 
-Use real fonts, colors, frame chrome, labels, code or terminal evidence, and approximate final copy. Review the rendered pixels at delivery resolution and at the likely viewing size. This gate decides hierarchy, density, spacing, contrast, font behavior, and safe areas. A contact sheet may aid comparison, but each frame must also be inspectable at full size.
+Use real fonts, colors, frame chrome, labels, source code, terminal evidence, and near-final copy wherever they determine the result. Review the rendered pixels at delivery resolution and at the likely viewing size. This gate decides hierarchy, density, spacing, contrast, font behavior, and safe areas. A contact sheet may aid comparison, but each frame must also be inspectable at full size. Generic boxes do not close risks involving text, code, terminals, or component behavior.
 
 When the user selects or rejects a direction, record the decision in project state before motion work expands it.
 
 ## Gate 2: motion proof
 
-Animate a short, seekable representative sequence using the actual runtime. Cover every motion grammar that will repeat or is expensive to change: entry and exit, camera move, transition, typing or terminal reveal, caret behavior, scrolling, and any occlusion or masking boundary.
+While turning the same project into the storyboard animatic, implement every motion grammar that will repeat or is expensive to change: entry and exit, camera move, transition, typing or terminal reveal, code highlighting, caret behavior, scrolling, and any occlusion or masking boundary.
 
 Use final coordinates and realistic content lengths. Make the proof long enough to judge reading time and action order, not merely an easing demo. Inspect the beginning, intermediate states, transition boundary, and end. The gate passes only when the user can play or scrub the result and judge motion directly.
 
-Scale approved patterns to the remaining scenes. A later scene with a new visual or motion grammar returns to the relevant proof gate before that grammar is repeated.
+Apply approved patterns across the full animatic. A later scene with a new visual or motion grammar returns to the relevant proof gate before that grammar is repeated.
 
 ## Gate 3: rough animatic
 
-Assemble the complete video with low-cost visuals, provisional audio or narration timing, and real scene durations before fine polish. It must be playable and seekable across the whole timeline. Placeholder art is acceptable when it preserves composition and timing; placeholder timing is not.
+Complete the storyboard stage with low-cost visuals, provisional audio or narration timing, and real scene durations before fine polish. It must be playable and seekable across the whole timeline in the same project used for scene proofs. Placeholder art is acceptable when it preserves composition and timing; placeholder timing is not.
 
 Review:
 

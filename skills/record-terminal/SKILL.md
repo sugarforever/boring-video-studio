@@ -7,7 +7,7 @@ description: Use when a video must show terminal commands, CLI output, TUI behav
 
 Build an evidence-backed HTML replay. Run the real commands first, preserve their complete input and output, then reconstruct the terminal or editor at high fidelity for deterministic, legible video playback.
 
-Read [`references/terminal-presentation.md`](references/terminal-presentation.md) before planning or producing the shot. It owns the evidence contract, default dark terminal style, code-entry behavior, and verification.
+Read [`references/terminal-presentation.md`](references/terminal-presentation.md) and [`../boring-video/references/hyperframes-review-project.md`](../boring-video/references/hyperframes-review-project.md) before planning or producing the shot. The first owns evidence and code-entry behavior; the second owns the shared project and font contract.
 
 Use the reference's default style when the user has not chosen another terminal treatment. User-provided brand, shell, font, prompt, or accessibility requirements override the defaults while the evidence and alignment requirements remain in force.
 
