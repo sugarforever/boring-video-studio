@@ -5,7 +5,7 @@ description: Use when a video must show terminal commands, CLI output, TUI behav
 
 # Record terminal
 
-Build an evidence-backed HTML replay. Run the real commands first, preserve their complete input and output, then reconstruct the terminal or editor at high fidelity for deterministic, legible video playback.
+Build an evidence-backed HTML replay. Plan and execute one ordered terminal session, preserve its real shell and editor state transitions, then reconstruct them at high fidelity for deterministic, legible video playback.
 
 Read [`references/terminal-presentation.md`](references/terminal-presentation.md) and [`../boring-video/references/hyperframes-review-project.md`](../boring-video/references/hyperframes-review-project.md) before planning or producing the shot. The first owns evidence and code-entry behavior; the second owns the shared project and font contract.
 

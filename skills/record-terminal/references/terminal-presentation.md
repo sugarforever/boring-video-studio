@@ -4,16 +4,33 @@ The default treatment is a deterministic, high-fidelity HTML replay in a dark iT
 
 Use the shared font contract in [`../../boring-video/references/hyperframes-review-project.md`](../../boring-video/references/hyperframes-review-project.md). This reference adds terminal and editor behavior without duplicating that contract.
 
+## Session plan
+
+Plan one continuous terminal session before designing shots. List each real input or operation in order, the visible state it produces, its evidence source, and how that state exits. Execute the plan step by step and let the replay preserve those state transitions.
+
+When an existing script is inspected and then run, use this causal sequence unless the real workflow requires another editor or command:
+
+1. enter the intended working directory and run any commands needed to establish visible context;
+2. run `vi <real-path>` and show the real file contents;
+3. perform the planned editor navigation or scrolling so the relevant code becomes visible;
+4. run `:q` to return to the same shell session;
+5. execute the complete real command, such as `node <real-path>`;
+6. show that execution's stdout, stderr, and exit result in their actual order.
+
+Represent editor input, navigation, scrolling, shell input, output, and exits as ordered manifest events. A single window may move between shell and editor states, but code, shell commands, and output remain temporally distinct states rather than simultaneous terminal-styled panels.
+
+If the execution result also needs a designed chart, card, diagram, or other visualization, make that a subsequent video element sourced from the captured output or generated file. Keep it outside the terminal replay and preserve its evidence link.
+
 ## Evidence-first replay
 
 1. Run the commands against the intended code, working directory, data, and environment. Save the complete command, stdout, stderr, exit code, and any timing evidence before designing the frame.
-2. Create an evidence manifest beside the saved streams. For each replay event, record its source file or execution record, ordering, redactions, and presentation-only chrome. The manifest is the boundary between real shell or source evidence and HyperFrames replay.
+2. Create an evidence manifest beside the saved streams. For each shell or editor event, record its type, input or operation, source file or execution record, ordering, visible result, exit condition, redactions, and presentation-only chrome. The manifest is the boundary between real shell or source evidence and HyperFrames replay.
 3. Reconcile the replay line by line with that evidence. Preserve command order, prompts, whitespace, wrapping, exit or status results, ANSI meaning, and table shape. For databases, preserve nulls, headers, separators, column widths, and row counts.
 4. Redact secrets and machine-specific paths consistently without changing semantic output. Keep execution context such as the captured working directory in the manifest; when the frame needs to prove it, run and show `pwd` instead of adding a synthetic `cwd:` label.
 5. Prove secret presence with a real non-disclosing command appropriate to the variable, such as `echo "OPENAI_API_KEY is ${OPENAI_API_KEY:+set}"`; never render the value. Show its real output rather than a synthetic status badge.
 6. Keep the evidence and manifest outside the rendered frame unless the storyboard calls for them.
 
-The replay is ready only when every visible command, stdout line, stderr line, and exit result is traceable through the manifest to real evidence or explicitly disclosed as presentation chrome.
+The replay is ready only when every visible editor state, navigation step, command, stdout line, stderr line, and exit result is traceable through the ordered manifest to real evidence or explicitly disclosed as presentation chrome.
 
 ## Frame fidelity
 
