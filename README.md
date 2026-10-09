@@ -16,19 +16,23 @@ The existing `verysmallwoods-video` skill remains available as the complete Very
 
 ## Installation
 
-Install `boring-video` and its planning stages:
+Install `boring-video`, its planning stages, and the setup verifier:
 
 ```bash
 npx skills add sugarforever/boring-video-studio \
-  --skill boring-video artifact-preview develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video record-terminal
+  --skill setup-boring-video-skills boring-video artifact-preview develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video record-terminal
 ```
 
 Add `--global` to make the skills available across projects:
 
 ```bash
 npx skills add sugarforever/boring-video-studio --global \
-  --skill boring-video artifact-preview develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video record-terminal
+  --skill setup-boring-video-skills boring-video artifact-preview develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video record-terminal
 ```
+
+The repository groups these coordinated skills under `skills/boring-video/`, but installation exposes their existing names as a flat skill set. `verysmallwoods-video` stays at `skills/verysmallwoods-video/` and can be installed independently.
+
+After installation, invoke `$setup-boring-video-skills` once to verify the complete set and run the HyperFrames environment check. Repository maintainers can link every skill into local Claude and Agent Skills directories with `scripts/link-skills.sh`.
 
 Video production requires HyperFrames and its local dependencies. Check the environment with:
 
