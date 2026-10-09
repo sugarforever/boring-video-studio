@@ -13,6 +13,7 @@ Turn an approved `content/ARTICLE.md` into `BEATS.md`: the video's factual and n
 2. Inherit the audience, thesis, and scope from the approved article and topic contract when present. Define only the audience's prior knowledge, desired change in understanding, target duration, and the video's selection from the approved scope.
 3. Build the reverse-iceberg arc: hook in viewer language, value or answer by beat two, then evidence, mechanism, implications, and close. Reorder, compress, or omit article material for the medium while preserving meaning and boundaries.
 4. Give every beat one cognitive job. Split beats that require two independent realizations; remove beats whose job does not trace to the approved thesis.
+   - Keep visual treatments, camera moves, animation, composition, and scene elements out of beats. Record only content facts needed by later stages. A visual idea discovered here moves to `SCENES.md`; it does not become part of the beat contract.
 5. Write `BEATS.md` beside `content/` using this shape:
 
 ```markdown
@@ -46,6 +47,6 @@ When the video structure exposes a missing fact, viewpoint, argument step, or co
 
 Beat IDs are stable interfaces. Preserve them through revisions and assign a new ID when inserting a beat.
 
-**REQUIRED SUB-SKILL:** Use `artifact-preview` for `BEATS.md` before declaring it complete and after every later source change.
+**REQUIRED SUB-SKILL:** Use `artifact-preview` for `BEATS.md` before declaring it complete and after every later source change. Present this as a **content-structure review**: it can approve the learning arc, claims, evidence, and duration budget, but never visual execution.
 
 `BEATS.md` is complete when another writer can draft the narration without inventing content, every beat is a medium-specific arrangement of the approved article rather than a new argument, and the `artifact-preview` completion criterion is satisfied for `BEATS.preview.html`.

@@ -20,14 +20,14 @@ Install `boring-video` and its planning stages:
 
 ```bash
 npx skills add sugarforever/boring-video-studio \
-  --skill boring-video artifact-preview develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video
+  --skill boring-video artifact-preview develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video record-terminal
 ```
 
 Add `--global` to make the skills available across projects:
 
 ```bash
 npx skills add sugarforever/boring-video-studio --global \
-  --skill boring-video artifact-preview develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video
+  --skill boring-video artifact-preview develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video record-terminal
 ```
 
 Video production requires HyperFrames and its local dependencies. Check the environment with:
@@ -60,14 +60,10 @@ An existing complete article can start at `to-spec-beats` after the user explici
 
 You can also invoke an individual stage when you already have its input:
 
-Install an individual stage together with its preview dependency, for example:
+Install an individual stage together with the Skills it invokes. For example, `to-storyboard` always uses `artifact-preview`; add `record-terminal` when the storyboard contains terminal, CLI, database, or TUI shots:
 
 ```bash
-npx skills add sugarforever/boring-video-studio --skill artifact-preview to-scenes
-```
-
-```text
-$to-scenes Redesign the visual direction for this narration.
+npx skills add sugarforever/boring-video-studio --skill artifact-preview record-terminal to-storyboard
 ```
 
 ```text
