@@ -32,7 +32,7 @@ npx skills add sugarforever/boring-video-studio --global \
 
 The repository groups these coordinated skills under `skills/boring-video/`, but installation exposes their existing names as a flat skill set. `verysmallwoods-video` stays at `skills/verysmallwoods-video/` and can be installed independently.
 
-After installation, invoke `$setup-boring-video-skills` once to verify the complete set and run the HyperFrames environment check. Repository maintainers can link every skill into local Claude and Agent Skills directories with `scripts/link-skills.sh`.
+After installation, invoke `$setup-boring-video-skills` once to verify the complete set and run the HyperFrames environment check.
 
 Video production requires HyperFrames and its local dependencies. Check the environment with:
 
