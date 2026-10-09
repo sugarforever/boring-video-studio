@@ -6,10 +6,33 @@ Use this reference when reconstructing terminal or editor appearance. The defaul
 
 - Give the terminal 90–95% of the frame.
 - Preserve whitespace with preformatted layout and keep aligned data in one font run and size.
-- Use `JetBrains Mono` for Latin code, prompts, and tables with explicit `Noto Sans SC` fallback for Chinese glyphs.
 - Disable ligatures where they alter character widths.
 - Prefer intentional path redaction, real wrapping, or horizontal cropping to unreadably small text.
 - Keep the terminal surface opaque and avoid added black drop shadows.
+
+## Font contract
+
+Terminal and full-screen TUI surfaces own their font stack independently of the surrounding video:
+
+| Role | Family | Weights |
+| --- | --- | --- |
+| Commands, Latin code, prompts, output, and tables | `JetBrains Mono` | 400, 700 |
+| Chinese glyph fallback inside terminal surfaces | `Noto Sans SC` | 400, 700 |
+
+Use shared terminal tokens:
+
+```css
+:root {
+  --terminal-font: "JetBrains Mono", "Noto Sans SC", monospace;
+}
+
+.terminal-window {
+  font-family: var(--terminal-font);
+  font-synthesis: none;
+}
+```
+
+Before review, inspect representative Latin, Chinese, normal, and emphasized runs in the rendered terminal. Confirm both families and every used weight are loaded, Chinese fallback resolves to `Noto Sans SC`, and aligned content retains equal character widths.
 
 ## Default macOS iTerm treatment
 
@@ -32,4 +55,4 @@ Use this reference when reconstructing terminal or editor appearance. The defaul
 
 Keep the title inside the macOS window bar. Video annotations live visibly outside the terminal window. Application state, working directory, environment verification, and execution results appear through real terminal interaction rather than terminal-internal badges or labels.
 
-At delivery resolution, inspect prompt alignment, line height, widest commands and output, Chinese fallback, loaded font weights, opaque coverage, and safe areas.
+At delivery resolution, inspect prompt alignment, line height, widest commands and output, resolved font families and weights, opaque coverage, and safe areas.

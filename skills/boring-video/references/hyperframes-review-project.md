@@ -24,7 +24,6 @@ Unless project design truth overrides the typography, use these roles:
 | --- | --- | --- |
 | Chinese body and labels | `Noto Sans SC` | 400, 700, 800, 900 as used |
 | English interface headings | `Montserrat` | 700 |
-| Code, commands, terminal output | `JetBrains Mono` | 400, 700 |
 
 Define shared CSS tokens rather than component-local stacks:
 
@@ -32,15 +31,14 @@ Define shared CSS tokens rather than component-local stacks:
 :root {
   --font-zh: "Noto Sans SC", sans-serif;
   --font-en: Montserrat, "Noto Sans SC", sans-serif;
-  --font-code: "JetBrains Mono", "Noto Sans SC", monospace;
 }
 
 html { font-synthesis: none; }
 ```
 
-Chinese glyphs keep an explicit `Noto Sans SC` fallback even inside code or terminal surfaces. A brand family may replace the defaults; retain a verified Chinese fallback and disable synthetic faces.
+Chinese glyphs keep an explicit `Noto Sans SC` fallback. A brand family may replace the defaults; retain a verified Chinese fallback and disable synthetic faces. Terminal and full-screen TUI surfaces follow the independent font contract owned by `record-terminal`.
 
-Before review, inspect rendered output and the browser's resolved font for representative Chinese, Latin, code, and emphasized text. Confirm every used family and weight is actually loaded, not merely named in CSS, and verify monospace alignment at delivery resolution.
+Before review, inspect rendered output and the browser's resolved font for representative Chinese, Latin, and emphasized text. Confirm every used family and weight is actually loaded, not merely named in CSS.
 
 ## Scene direction board
 

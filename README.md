@@ -60,7 +60,7 @@ An existing complete article can start at `to-spec-beats` after the user explici
 
 You can also invoke an individual stage when you already have its input:
 
-Install an individual stage together with its referenced dependencies, for example:
+Install an individual stage together with the Skills it invokes. For example, `to-storyboard` always uses `artifact-preview`; add `record-terminal` when the storyboard contains terminal, CLI, database, or TUI shots:
 
 ```bash
 npx skills add sugarforever/boring-video-studio --skill artifact-preview record-terminal to-storyboard

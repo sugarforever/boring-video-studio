@@ -25,6 +25,6 @@ When an existing script is inspected and then executed, preserve this causal str
 6. type and submit the real execution command;
 7. reveal its evidenced output and returned prompt.
 
-For Vim, this may be `vi <real-path>`, navigation or scrolling, `:q`, then a command such as `node <real-path>`. Vim is an example of the branch, not the universal editor or runtime.
+For Vim, this may be `vi <real-path>`, navigation or scrolling, `:q`, then the real execution command. Vim is an example of the branch, not the universal editor or runtime.
 
 Code, the later shell command, and its output occupy successive application states. They are not simultaneous panels. Seek directly into entry, navigation, exit, shell return, and execution to verify each state independently.

@@ -48,6 +48,8 @@ Record the answers in the HyperFrames `BRIEF.md`. In agent-executed work, propos
 
 ## Chain
 
+Before `/to-scenes` starts the renderable project, read [`references/hyperframes-review-project.md`](references/hyperframes-review-project.md). Pass its project identity and review state forward through `SCENES.md`, `STORYBOARD.md`, and the HyperFrames project manifest; downstream skills consume those artifacts rather than this internal reference.
+
 For content-driven work, start at the first missing or explicitly revised artifact:
 
 1. `/develop-topic` → `content/RESEARCH.md`, experiment reports, and approved `content/TOPIC.md`

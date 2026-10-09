@@ -2,13 +2,10 @@
 
 Reconstruct an executed terminal session as a deterministic, evidence-backed application state machine. The replay presents what actually happened in the terminal; it does not invent execution or flatten a session into a static terminal-shaped composition.
 
-Use the shared font contract in [`../../boring-video/references/hyperframes-review-project.md`](../../boring-video/references/hyperframes-review-project.md).
-
 Read conditional references only when their branch applies:
 
 - For the default macOS iTerm/zsh appearance or another terminal theme, read [`terminal-visual-style.md`](terminal-visual-style.md).
 - When the session enters Vim, `less`, `man`, a database client, or another full-screen terminal application, read [`fullscreen-tui.md`](fullscreen-tui.md).
-- When an API request embeds a local binary or image through shell tools, read [`binary-request-replay.md`](binary-request-replay.md).
 
 ## Ordered session
 
@@ -41,6 +38,8 @@ For each shell, editor, or TUI event, record:
 Evidence timing records what happened; presentation timing controls how long the video types, reveals, or holds that evidence. Editing presentation timing never changes command order, output content, or exit status.
 
 Reconcile the replay line by line with the manifest. Preserve prompts, whitespace, wrapping, ANSI meaning, stdout/stderr order, exit results, and structured-output shape. Preserve database nulls, headers, separators, column widths, and row counts.
+
+For multi-command pipelines, preserve tested variable assignments, quoting, redirection, pipes, expansion, tool errors, and prompt returns. Keep structured responses as their actual text or formatted JSON inside the terminal. A designed interpretation belongs to the subsequent non-terminal element described above.
 
 Redact secrets and machine-specific paths consistently without changing semantic output. Keep captured working-directory evidence in the manifest; when the frame needs to prove it, run and show `pwd`. Prove secret presence with a real non-disclosing command appropriate to the environment, such as `echo "OPENAI_API_KEY is ${OPENAI_API_KEY:+set}"`, and show its actual output.
 

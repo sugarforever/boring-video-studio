@@ -9,7 +9,7 @@ Turn `BEATS.md` and `NARRATION.md` into `SCENES.md`. A scene is a small event in
 
 ## Process
 
-1. Read both inputs, the applicable design truth, [`references/hyperframes-capability-envelope.md`](references/hyperframes-capability-envelope.md), and [`../boring-video/references/hyperframes-review-project.md`](../boring-video/references/hyperframes-review-project.md). Recompute the beats and narration artifact digests; continue only when the narration's `source_digest` matches the current beats and both stored artifact digests match their files. The envelope constrains feasibility without prescribing implementation. Treat narration as revisable evidence, not a locked timeline.
+1. Read both inputs, the applicable design truth, and [`references/hyperframes-capability-envelope.md`](references/hyperframes-capability-envelope.md). Recompute the beats and narration artifact digests; continue only when the narration's `source_digest` matches the current beats and both stored artifact digests match their files. The envelope constrains feasibility without prescribing implementation. Treat narration as revisable evidence, not a locked timeline.
 2. Find a physical or spatial expression for each abstract beat: give the concept a body, put it in a world, and cause a visible state change.
 3. Group beats that belong to one continuous event; split a beat when its explanation requires distinct visual events.
 4. Design the film as a whole: establish a continuity object or motion, vary worlds and shot scales, place visual peaks, and name the rhythm.
@@ -19,7 +19,7 @@ Turn `BEATS.md` and `NARRATION.md` into `SCENES.md`. A scene is a small event in
 8. Classify every scene's feasibility using the capability envelope, naming dependencies and fallbacks where required.
 9. Run the scene audit in the format reference. If narration changes after scenes exist, revise every affected scene, refresh `source_narration_digest`, recompute the scenes `artifact_digest`, mark affected rendered proof stale, and repeat the audit before completion.
 
-Read [`../artifact-preview/references/visual-review-gates.md`](../artifact-preview/references/visual-review-gates.md). Resolve the visual grammar and declared scene risks with the shared project's rendered direction board before advancing.
+Resolve the visual grammar and declared scene risks with the shared project's rendered direction board before advancing. Record project identity, revision, source digests, proof paths, aspect ratio, reviewed risks, and decisions in project state and `SCENES.md`.
 
 **REQUIRED SUB-SKILL:** Use `artifact-preview` for `SCENES.md` before declaring it complete and after every later source change. When this stage changes `NARRATION.md`, use `artifact-preview` for that source too. Build `SCENES.preview.html` as a **visual direction board**: pair the semantic scene contract with inspectable renders from the shared HyperFrames project. Do not represent unrendered prose as visual evidence.
 
