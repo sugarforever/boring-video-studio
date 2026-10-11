@@ -1,6 +1,9 @@
-# Terminal visual style
+# Fallback terminal visual style
 
-Use this reference when reconstructing terminal or editor appearance. The default is a high-fidelity macOS iTerm/zsh treatment; user-provided terminal, shell, brand, or accessibility requirements may replace it as a coherent system.
+Use this reference when no fitting registry component supplies the terminal
+visual shell. The fallback is a high-fidelity macOS iTerm/zsh treatment;
+user-provided terminal, shell, brand, or accessibility requirements may replace
+it as a coherent system.
 
 ## Frame fidelity
 
