@@ -93,6 +93,14 @@ Keep terminal appearance in
 [`terminal-visual-style.md`](terminal-visual-style.md). When a full-screen
 application appears, also apply [`fullscreen-tui.md`](fullscreen-tui.md).
 
+Before implementing the terminal UI, use `hyperframes-registry` to search for
+the current terminal components. Inspect `terminal-simulator` when it is
+available. When its treatment fits the shot, reuse its window chrome and layout
+as the visual shell, then replace its static editor, command, and output content
+with the ledger-driven terminal surface. When it does not fit, build the shell
+from the visual-style reference. In both branches, terminal content and state
+continue to come exclusively from the replay ledger.
+
 The content surface is a deterministic reducer over ledger events:
 
 ```text
