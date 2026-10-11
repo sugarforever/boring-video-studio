@@ -1,6 +1,9 @@
-# Terminal visual style
+# Fallback terminal visual style
 
-Use this reference when reconstructing terminal or editor appearance. The default is a high-fidelity macOS iTerm/zsh treatment; user-provided terminal, shell, brand, or accessibility requirements may replace it as a coherent system.
+Use this reference when no fitting registry component supplies the terminal
+visual shell. The fallback is a high-fidelity macOS iTerm/zsh treatment;
+user-provided terminal, shell, brand, or accessibility requirements may replace
+it as a coherent system.
 
 ## Frame fidelity
 
@@ -53,6 +56,6 @@ Before review, inspect representative Latin, Chinese, normal, and emphasized run
 | Prompt glyph | `#df5ac8` |
 | Active cursor | `#65e5c2` |
 
-Keep the title inside the macOS window bar. Video annotations live visibly outside the terminal window. Application state, working directory, environment verification, and execution results appear through real terminal interaction rather than terminal-internal badges or labels.
+Keep the title inside the macOS window bar.
 
 At delivery resolution, inspect prompt alignment, line height, widest commands and output, resolved font families and weights, opaque coverage, and safe areas.
