@@ -53,6 +53,6 @@ Before review, inspect representative Latin, Chinese, normal, and emphasized run
 | Prompt glyph | `#df5ac8` |
 | Active cursor | `#65e5c2` |
 
-Keep the title inside the macOS window bar. Video annotations live visibly outside the terminal window. Application state, working directory, environment verification, and execution results appear through real terminal interaction rather than terminal-internal badges or labels.
+Keep the title inside the macOS window bar.
 
 At delivery resolution, inspect prompt alignment, line height, widest commands and output, resolved font families and weights, opaque coverage, and safe areas.

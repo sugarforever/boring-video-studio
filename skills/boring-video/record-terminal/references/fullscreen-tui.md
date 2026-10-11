@@ -11,7 +11,7 @@ Extend the core `child_app` state only with states the real application needs, s
 - `tui_command`: its command line or input mode is active;
 - `tui_exit`: its real exit action is visible before control returns to the shell.
 
-The outer terminal window remains stable while the child application controls the content area. Reconstruct its real buffer, cursor, viewport, status region, and command area from source and manifest events.
+The outer terminal window remains stable while the child application controls the content area. Convert the captured buffer, source-backed content, cursor, viewport, status region, and command area into replay-ledger events or evidenced snapshots, then reconstruct the application solely from ledger state.
 
 ## Inspect-then-run branch
 
