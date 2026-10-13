@@ -1,6 +1,6 @@
 # HyperFrames review project
 
-Use one HyperFrames project from scene direction through final production. Create or select it during `/to-scenes`, record its path and revision in the planning artifacts, and evolve that same project in `/to-storyboard` and `/to-video`. A stage may simplify fidelity, but it does not rebuild an approved visual language in a second project.
+Use one HyperFrames project from scene direction through final production. Create or select it during `/to-scenes`, record its path and revision in the planning artifacts, leave it unchanged while `/to-storyboard` plans frames, and continue it during `/to-video`. A stage does not rebuild an approved visual language in a second project.
 
 ## Shared project state
 
@@ -11,7 +11,7 @@ Keep a review manifest in project state with:
 - source artifact digests;
 - font sources and loaded families/weights;
 - scene-to-frame or scene-to-composition mapping;
-- proof and animatic artifact paths, durations, reviewed risks, and decisions;
+- rendered-proof paths, reviewed risks, and decisions;
 - evidence-manifest paths for terminal, code, data, or other factual replays.
 
 A source or design change that invalidates a reviewed image or timeline marks the affected proof stale. Re-render the smallest affected scope and update its decision record.
@@ -40,7 +40,7 @@ Chinese glyphs keep an explicit `Noto Sans SC` fallback. A brand family may repl
 
 Before review, inspect rendered output and the browser's resolved font for representative Chinese, Latin, and emphasized text. Confirm every used family and weight is actually loaded, not merely named in CSS.
 
-## Scene direction board
+## Scene rendered evidence
 
 During `/to-scenes`, build near-final 16:9 pixels in the shared project. Each scene gets the smallest evidence set that exposes its visual decision:
 
@@ -50,21 +50,21 @@ During `/to-scenes`, build near-final 16:9 pixels in the shared project. Each sc
 
 Use real fonts, near-final copy, real source code, and evidence-backed terminal or data surfaces. A generic placeholder box cannot approve a scene whose risk is typography, code, terminal fidelity, density, or component behavior. The board may remain low fidelity in non-risk areas.
 
-`SCENES.preview.html` is the review surface for these rendered states. It pairs each scene's concise direction and risks with inspectable delivery-aspect-ratio frames from the shared project. Embed local renders as data URLs when a self-contained preview is required. Prose alone does not complete this stage.
+`SCENES.md` is the review surface for these rendered states. Pair each scene's concise direction and risks with Markdown image references to inspectable delivery-aspect-ratio frames from the shared project. Identify each render's state ID and project revision. Prose alone does not complete this stage.
 
-## Storyboard animatic
+## Storyboard plan
 
-During `/to-storyboard`, extend the same project into a complete, playable, seekable low-fidelity animatic. It represents real scene duration and the observable start, action, hold, and end states, including:
+During `/to-storyboard`, translate scene decisions into HyperFrames-native frame boundaries and ordered shot moments in `STORYBOARD.md`. Plan:
 
-- entrances, exits, holds, camera moves, and transitions;
-- deterministic typing, code highlighting, terminal output, scrolling, and caret behavior;
-- narration timing or a provisional timing track;
-- continuity at every cut and transition boundary.
+- approximate offsets for entrances, actions, holds, camera moves, and transitions;
+- narration anchors or intentionally silent moments;
+- deterministic behavior required from typing, code, terminal, data, or UI evidence;
+- continuity expectations at every cut and transition boundary.
 
-All time-dependent state derives from composition time. Scrubbing to the same timestamp must reproduce the same frame without accumulated DOM state or live timers. Placeholder art is acceptable only where it preserves composition, action, and timing; placeholder timing is not.
+Keep new frames at `status: outline`. This stage records the project and proof revision it inherits but does not implement composition HTML, mutate the project, or claim that planned timing has been played.
 
-`STORYBOARD.preview.html` is the animatic review surface. It must let the reviewer play and seek the shared-project timeline and inspect representative boundary states. A prose shot list may accompany it but cannot substitute for it.
+`STORYBOARD.md` is the review surface for the plan. HyperFrames production implements it, and HyperFrames Studio becomes the review surface for actual timing, motion, transitions, and scrubbing after the composition exists.
 
 ## Production continuation
 
-During `/to-video`, open the project recorded by the planning artifacts and continue from its reviewed revision. Promote low-fidelity assets and repeated motion systems in place. Preserve approved layout, typography, camera logic, transitions, timing, and evidence lineage unless a recorded revision reopens the relevant gate.
+During `/to-video`, open the project recorded by the planning artifacts and continue from its reviewed revision. Build the canonical storyboard's `outline` frames, advance their statuses as the canonical HyperFrames contract permits, and use Studio for playable review. Preserve approved layout, typography, camera logic, planned transitions, and evidence lineage unless a recorded revision reopens the relevant gate.

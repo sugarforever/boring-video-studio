@@ -47,6 +47,6 @@ When the video structure exposes a missing fact, viewpoint, argument step, or co
 
 Beat IDs are stable interfaces. Preserve them through revisions and assign a new ID when inserting a beat.
 
-**REQUIRED SUB-SKILL:** Use `artifact-preview` for `BEATS.md` before declaring it complete and after every later source change. Present this as a **content-structure review**: it can approve the learning arc, claims, evidence, and duration budget, but never visual execution.
+Before presenting `BEATS.md` or any later revision, follow [`../boring-video/references/markdown-review.md`](../boring-video/references/markdown-review.md). Present the authoritative Markdown for content-structure review: it can approve the learning arc, claims, evidence, and duration budget, but never visual execution.
 
-`BEATS.md` is complete when another writer can draft the narration without inventing content, every beat is a medium-specific arrangement of the approved article rather than a new argument, and the `artifact-preview` completion criterion is satisfied for `BEATS.preview.html`.
+`BEATS.md` is complete when another writer can draft the narration without inventing content, every beat is a medium-specific arrangement of the approved article rather than a new argument, and the Markdown review completion criterion is satisfied.

@@ -13,7 +13,6 @@ The following skills must be discoverable by name:
 
 ```text
 boring-video
-artifact-preview
 develop-topic
 to-article
 to-spec-beats
@@ -33,7 +32,7 @@ setup-boring-video-skills
 
    ```bash
    npx skills add sugarforever/boring-video-studio \
-     --skill setup-boring-video-skills boring-video artifact-preview develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video record-terminal
+     --skill setup-boring-video-skills boring-video develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video record-terminal
    ```
 
 4. Confirm that the `hyperframes` skill is available, then run `npx hyperframes doctor`. HyperFrames owns production and is a hard dependency for the later stages.

@@ -10,7 +10,7 @@ artifact_digest: sha256:<digest>
 concept: One sentence naming the visual world
 continuity: What carries through the whole film
 hyperframes_project: Path to the shared review and production project
-hyperframes_revision: Revision containing the current direction board
+hyperframes_revision: Revision containing the current rendered proofs
 ---
 
 ## Scene 01 — Title
@@ -26,10 +26,12 @@ hyperframes_revision: Revision containing the current direction board
 - rhythm: Quick hit, development, hold, or release
 - audio_intent: Narration emphasis and meaningful sound opportunity
 - feasibility: Envelope class, named dependency, and fallback when required
-- proof: Hero or Start/Hero/End render IDs, selected by what must be judged
+- proof: Markdown image references or media links for the Hero or Start/Hero/End render IDs, selected by what must be judged
 - visual_risks: Typography, density, evidence surface, motion, continuity, or other risks the proof resolves
 
 Two or three sentences describing what the viewer experiences.
+
+Embed each declared proof below the scene with Markdown image syntax or link its supported media file. Give every reference the render ID, state, and current HyperFrames project revision; keep the media beside the project rather than encoding it into a parallel review document.
 ```
 
 Compute `artifact_digest` as SHA-256 of the complete scenes file after removing only the `artifact_digest:` line.

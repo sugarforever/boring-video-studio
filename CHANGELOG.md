@@ -8,6 +8,7 @@ tag(如 `v0.1.0`)用于标记发版节点,方便对照。
 
 ## [Unreleased]
 
+- **Boring Video planning review** - Markdown is now the only authoritative review artifact. The workflow no longer installs or generates `artifact-preview` HTML files; Codex opens the canonical Markdown and Git review carries line comments. Scene proof renders are referenced from `SCENES.md`, `to-storyboard` now stops at HyperFrames-native frame planning, and HyperFrames Studio owns playable timeline and motion review during production.
 - **仓库结构** —— 六个 skill 按**三层职责**归入 `skills/<category>/` 子目录(参考
   [mattpocock/skills](https://github.com/mattpocock/skills) 的组织方式):`orchestration/`
   (blockframe-video、finance-stock-video)、`building-blocks/`(producing-video、

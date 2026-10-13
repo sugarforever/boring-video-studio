@@ -57,6 +57,6 @@ Until then, do not create `BEATS.md`. A request to continue production does not 
 
 A material revision to `TOPIC.md` returns the article to `draft`. A material revision to an approved article also returns it to `draft`; copy edits, title changes, and examples that preserve the approved meaning do not.
 
-**REQUIRED SUB-SKILL:** Use `artifact-preview` for `content/ARTICLE.md` whenever it is ready for review and after every later source change.
+Before presenting `content/ARTICLE.md` or any later revision, follow [`../boring-video/references/markdown-review.md`](../boring-video/references/markdown-review.md). Keep the canonical Markdown path as the current version and apply review feedback there.
 
-The article is complete when it is approved, reads independently, every material statement traces to the approved content contract and sufficient evidence, a video planner can reorganize it without inventing facts, viewpoints, argument, or scope, and the `artifact-preview` completion criterion is satisfied for `content/ARTICLE.preview.html`.
+The article is complete when it is approved, reads independently, every material statement traces to the approved content contract and sufficient evidence, a video planner can reorganize it without inventing facts, viewpoints, argument, or scope, and the Markdown review completion criterion is satisfied.
