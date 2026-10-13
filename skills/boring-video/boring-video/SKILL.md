@@ -5,7 +5,7 @@ description: Use when developing a content-driven video from a topic, research b
 
 # Boring video
 
-Orchestrate content development and a progressively refined HyperFrames project as one chain. Content is established before it is adapted for speech or visuals; scene direction begins the renderable project, storyboard turns it into an animatic, and production continues it.
+Orchestrate content development and a progressively refined HyperFrames project as one chain. Content is established before it is adapted for speech or visuals; scene direction establishes rendered visual evidence, storyboard plans buildable frames, and HyperFrames owns production and playable review.
 
 ## Intake
 
@@ -35,7 +35,7 @@ voice:
 
 Compute `approved_digest` as SHA-256 of the complete file after removing only the `approved_digest:` line. Do not manufacture an article merely to satisfy the chain for direct-production work; load `/hyperframes` and let its current intent layer own intake and workflow selection.
 
-When this intake creates or adapts `content/ARTICLE.md`, **REQUIRED SUB-SKILL:** Use `artifact-preview` for that file and satisfy its completion criterion for `content/ARTICLE.preview.html` before starting `/to-spec-beats`.
+When this intake creates or adapts `content/ARTICLE.md`, read [`references/markdown-review.md`](references/markdown-review.md) and present that authoritative Markdown before starting `/to-spec-beats`.
 
 For content-driven work, ask one compact question for any missing production choices:
 
@@ -56,9 +56,9 @@ For content-driven work, start at the first missing or explicitly revised artifa
 2. `/to-article` → approved `content/ARTICLE.md`
 3. `/to-spec-beats` → `BEATS.md`
 4. `/to-narration` → `NARRATION.md`
-5. `/to-scenes` → `SCENES.md`, shared HyperFrames project, and visual direction board
-6. `/to-storyboard` → `STORYBOARD.md` and a full animatic in that project
-7. `/to-video` → production continuation in that project
+5. `/to-scenes` → `SCENES.md`, shared HyperFrames project, and rendered visual evidence referenced from the Markdown
+6. `/to-storyboard` → HyperFrames-native `STORYBOARD.md`
+7. `/to-video` → production continuation and Studio review in that project
 
 Finish each skill's completion criterion before advancing. A downstream finding returns to the artifact that owns the decision, then propagates forward.
 
@@ -70,4 +70,4 @@ Presentation and workflow are separate decisions. Collect the presentation inten
 
 ## Done
 
-Content-driven planning is complete when the applicable approved content artifacts, four planning artifacts, direction board, and seekable animatic agree and satisfy their owners. The wrapper run is complete when `/to-video` continues the reviewed HyperFrames project with the confirmed voice branch through the selected production workflow.
+Content-driven planning is complete when the applicable approved content artifacts, four planning artifacts, and referenced visual evidence agree and satisfy their owners. The wrapper run is complete when `/to-video` continues the reviewed HyperFrames project with the confirmed voice branch through the selected production workflow and HyperFrames Studio owns the playable timeline review.

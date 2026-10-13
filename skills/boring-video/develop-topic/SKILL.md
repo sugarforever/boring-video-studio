@@ -87,6 +87,6 @@ Until then, keep all writing inside `RESEARCH.md`, experiment reports, and the d
 
 A later material change to a locked decision returns `TOPIC.md` to `draft` and makes downstream article approval stale. Copy edits, examples, and title changes that preserve meaning do not revoke approval.
 
-**REQUIRED SUB-SKILL:** Use `artifact-preview` for `content/TOPIC.md` whenever it is ready for review and after every later source change.
+Before presenting `content/TOPIC.md` or any later revision, follow [`../boring-video/references/markdown-review.md`](../boring-video/references/markdown-review.md). Keep the canonical Markdown path as the current version and apply review feedback there.
 
-The topic is complete when `TOPIC.md` is approved, every material claim points to sufficient evidence, remaining open questions are non-blocking and visible, an article writer can draft without inventing facts, experiments, author position, argument, or scope, and the `artifact-preview` completion criterion is satisfied for `content/TOPIC.preview.html`.
+The topic is complete when `TOPIC.md` is approved, every material claim points to sufficient evidence, remaining open questions are non-blocking and visible, an article writer can draft without inventing facts, experiments, author position, argument, or scope, and the Markdown review completion criterion is satisfied.

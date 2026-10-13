@@ -20,14 +20,14 @@ Install `boring-video`, its planning stages, and the setup verifier:
 
 ```bash
 npx skills add sugarforever/boring-video-studio \
-  --skill setup-boring-video-skills boring-video artifact-preview develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video record-terminal
+  --skill setup-boring-video-skills boring-video develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video record-terminal
 ```
 
 Add `--global` to make the skills available across projects:
 
 ```bash
 npx skills add sugarforever/boring-video-studio --global \
-  --skill setup-boring-video-skills boring-video artifact-preview develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video record-terminal
+  --skill setup-boring-video-skills boring-video develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video record-terminal
 ```
 
 The repository groups these coordinated skills under `skills/boring-video/`, but installation exposes their existing names as a flat skill set. `verysmallwoods-video` stays at `skills/verysmallwoods-video/` and can be installed independently.
@@ -58,16 +58,16 @@ For a content-driven video, the skill asks for any missing production choices an
 6. `to-storyboard` translates the scenes into buildable shots.
 7. `to-video` hands the complete plan and optional ListenHub narration to the appropriate HyperFrames workflow.
 
-Each artifact-producing stage uses `artifact-preview` to create and proactively present a self-contained HTML review view beside its authoritative Markdown file.
+Every planning stage maintains one authoritative Markdown artifact at a stable path. Codex opens that file directly for reading and uses the source or diff review surface for line comments; Git holds its history. Rendered images and media remain evidence referenced from Markdown, while HyperFrames Studio owns playable timeline and motion review.
 
 An existing complete article can start at `to-spec-beats` after the user explicitly confirms it as the content master. Later artifacts are resumable only when their lineage traces to that approved article.
 
 You can also invoke an individual stage when you already have its input:
 
-Install an individual stage together with the Skills it invokes. For example, `to-storyboard` always uses `artifact-preview`; add `record-terminal` when the storyboard contains terminal, CLI, database, or TUI shots:
+Install an individual stage together with the Skills it invokes. For example, add `record-terminal` when the storyboard contains terminal, CLI, database, or TUI shots:
 
 ```bash
-npx skills add sugarforever/boring-video-studio --skill artifact-preview record-terminal to-storyboard
+npx skills add sugarforever/boring-video-studio --skill record-terminal to-storyboard
 ```
 
 ```text
