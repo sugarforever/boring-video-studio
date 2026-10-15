@@ -90,9 +90,11 @@ continuing command cycle has exactly one shell-return event.
 ## Gate 4: Reconstruct in HyperFrames
 
 Before implementing terminal UI, use `hyperframes-registry` to find the current
-terminal components. Reuse a fitting component as the visual shell when its
-content surface can be driven exclusively by the replay ledger. Otherwise use
-the fallback in [`terminal-visual-style.md`](terminal-visual-style.md). When a
+terminal components. When the user or project supplies no terminal style, use
+the default profile in [`terminal-visual-style.md`](terminal-visual-style.md).
+Reuse a fitting component only when its visual shell can implement that selected
+profile and its content surface can be driven exclusively by the replay ledger;
+otherwise build the profile directly. When a
 full-screen application appears, also apply
 [`fullscreen-tui.md`](fullscreen-tui.md).
 
