@@ -17,6 +17,11 @@ User-provided terminal, shell, brand, font, or accessibility requirements
 replace the default styling as a coherent visual system. The evidence,
 event-order, prompt, and seek-safety contract remains unchanged.
 
+When no terminal style is specified, use the classic iTerm-like default in
+[`references/terminal-visual-style.md`](references/terminal-visual-style.md).
+Registry components may implement that profile, but do not replace it with a
+different visual treatment merely because a component exists.
+
 Real screen-recorded footage is a separate branch. Use it only when the user
 explicitly requests captured footage; otherwise produce the evidence-backed
 HyperFrames replay.

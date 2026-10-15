@@ -1,9 +1,11 @@
-# Fallback terminal visual style
+# Default terminal visual style
 
-Use this reference when no fitting registry component supplies the terminal
-visual shell. The fallback is a high-fidelity macOS iTerm/zsh treatment;
-user-provided terminal, shell, brand, or accessibility requirements may replace
-it as a coherent system.
+Use this profile when the user or project does not specify a terminal visual
+system. It is the skill's classic macOS iTerm-like presentation default, not a
+claim about iTerm's factory shell prompt. A fitting registry component may
+implement this profile; it does not override the profile. User-provided
+terminal, shell, brand, or accessibility requirements may replace it as a
+coherent system.
 
 ## Frame fidelity
 
@@ -57,5 +59,21 @@ Before review, inspect representative Latin, Chinese, normal, and emphasized run
 | Active cursor | `#65e5c2` |
 
 Keep the title inside the macOS window bar.
+
+### Default prompt
+
+Use this visible shape when the project supplies no prompt convention:
+
+```text
+<user>@<host> <short-path> > <command>
+```
+
+Use stable, non-sensitive values appropriate to the project, for example
+`alex@mac ~/project > npm test`. Show the user and host, a shortened working
+directory (`~` plus the project-relative path), one space, the `>` prompt glyph,
+and one trailing space before the command. Omit environment badges, timestamps,
+Git status, and decorative prompt segments unless the project requires them.
+This presentation default does not authorize changing the command, output, or
+causal order established by the captured evidence.
 
 At delivery resolution, inspect prompt alignment, line height, widest commands and output, resolved font families and weights, opaque coverage, and safe areas.
