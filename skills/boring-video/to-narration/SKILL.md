@@ -10,7 +10,7 @@ Turn `BEATS.md` into `NARRATION.md`: the spoken version of the approved article 
 ## Process
 
 1. Read `BEATS.md`, its approved `content/ARTICLE.md` source, the cited evidence needed for accuracy, and the resolved voice sources recorded by the article. Recompute the article approval digest and beats artifact digest; require them to match the stored article `approved_digest`, beats `source_digest`, and beats `artifact_digest`. Load every applicable writing-style skill or document that is available. Preserve each beat's job, claim, and handoff.
-2. Write for the ear: one thought per sentence, concrete subjects and verbs, spoken transitions, and terminology explained at first use. Preserve the author's voice while adapting reading prose into speech.
+2. Write narration in natural, easy-to-say language. Use concrete subjects, actions, and changes to make events clear, so listeners can follow and understand the account as it unfolds. Preserve the author's voice while adapting reading prose into speech.
 3. Let visuals carry visible structure, comparison, and transformation. The narration supplies meaning the image cannot communicate alone.
 4. Mark paragraph-to-beat boundaries without adding visual instructions. Put unresolved pronunciation or factual questions in an `Open checks` section.
 5. Write `NARRATION.md`:
