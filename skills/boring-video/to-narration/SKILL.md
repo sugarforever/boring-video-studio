@@ -11,28 +11,29 @@ Turn `BEATS.md` into `NARRATION.md`: the spoken version of the approved article 
 
 1. Read `BEATS.md`, its approved `content/ARTICLE.md` source, the cited evidence needed for accuracy, and the resolved voice sources recorded by the article. Recompute the article approval digest and beats artifact digest; require them to match the stored article `approved_digest`, beats `source_digest`, and beats `artifact_digest`. Load every applicable writing-style skill or document that is available. Preserve each beat's job, claim, and handoff.
 2. Write narration in natural, easy-to-say language. Use concrete subjects, actions, and changes to make events clear, so listeners can follow and understand the account as it unfolds. Preserve the author's voice while adapting reading prose into speech.
+   When describing setup, configuration, or a later restart, distinguish the normal user path from project-specific restrictions and identify the actual change from earlier steps. Verify command aliases or script expansion before naming a different mechanism; carry exact commands and UI paths into scene planning rather than packing them into speech.
 3. Let visuals carry visible structure, comparison, and transformation. The narration supplies meaning the image cannot communicate alone.
 4. Mark paragraph-to-beat boundaries without adding visual instructions. Put unresolved pronunciation or factual questions in an `Open checks` section.
 5. Write `NARRATION.md`:
 
-```markdown
----
-source: BEATS.md
-source_digest: sha256:<BEATS artifact_digest>
-content_source: content/ARTICLE.md
-content_digest: sha256:<ARTICLE approved_digest>
-artifact_digest: sha256:<digest>
-status: draft
-target_duration: ...
----
+   ```markdown
+   ---
+   source: BEATS.md
+   source_digest: sha256:<BEATS artifact_digest>
+   content_source: content/ARTICLE.md
+   content_digest: sha256:<ARTICLE approved_digest>
+   artifact_digest: sha256:<digest>
+   status: draft
+   target_duration: ...
+   ---
 
-## B01 — Title
+   ## B01 — Title
 
-<a id="b01-p01"></a>
-Spoken paragraph.
-```
+   <a id="b01-p01"></a>
+   Spoken paragraph.
+   ```
 
-Compute `artifact_digest` as SHA-256 of the complete narration file after removing only the `artifact_digest:` line. Downstream stages must recompute it before use.
+   Compute `artifact_digest` as SHA-256 of the complete narration file after removing only the `artifact_digest:` line. Downstream stages must recompute it before use.
 
 6. Give every paragraph a stable `<beat-id>-pNN` anchor. Preserve anchors when rewriting that paragraph; assign a new anchor when inserting one.
 7. Read it aloud or estimate at the user's known speaking rate. Revise until every beat fits its budget and the full draft fits the target.

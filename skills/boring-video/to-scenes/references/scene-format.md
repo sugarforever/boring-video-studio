@@ -29,6 +29,14 @@ hyperframes_revision: Revision containing the current rendered proofs
 - proof: Markdown image references or media links for the Hero or Start/Hero/End render IDs, selected by what must be judged
 - visual_risks: Typography, density, evidence surface, motion, continuity, or other risks the proof resolves
 
+For screen evidence or explanatory visual sequences, read [`screen-evidence.md`](screen-evidence.md) and add a `screen_contract`:
+
+- `viewer_question`: What the viewer should understand or be able to repeat.
+- `cue_evidence`: Narration anchor → exact source state or explanatory relationship → visible interval.
+- `temporal_structure`: Causal, operational, comparison, concurrent, or inspection structure, with meaningful state dependencies and what remains visible. Storyboard shot moments supply numeric timing under the referenced contract.
+- `framing`: Full view, detail, inset, or diagram, with the inspection purpose of each crop or move.
+- `setup_delta`: For configuration or repeated startup, the normal path, observed restriction, and behavior-changing differences from the earlier setup; omit when irrelevant.
+
 When the scene contains a demonstration, add a `demo_contract`:
 
 - `content`: The exact ordered actions, inputs, outputs, states, and stopping point the viewer will see.
@@ -44,13 +52,14 @@ Compute `artifact_digest` as SHA-256 of the complete scenes file after removing 
 
 ## Scene audit
 
-- Each scene contains an event with a visible state change.
+- Each scene contains an event with a visible state change or a declared result/topology inspection whose readable hold serves the viewer question.
 - The hero, world, and event express the beat rather than decorate it.
-- Adjacent scenes vary at least two of world, scale, camera behavior, action, and rhythm.
+- Adjacent scenes vary at least two of world, scale, camera behavior, action, and rhythm where the sequence permits; record intentional matched views or inspection holds instead of adding cosmetic motion.
 - The full film includes establishing, medium, and detail scales where the content supports them.
 - Continuity fields form an unbroken chain or name an intentional cut.
 - Feasibility identifies expensive or uncertain treatments before storyboarding.
 - Each proof set is the smallest set that exposes its scene's declared risks; scenes are not mechanically assigned three frames.
 - Typography, code, terminal, and component risks use real or near-final material rather than generic placeholders.
+- Screen scenes satisfy the viewing contract in `screen-evidence.md`; their proof set exposes the stated framing, evidence, and reveal risks.
 - Every demonstration specifies its complete visible content, truth mode, and code-surface labels; its presentation does not imply stronger evidence than the declared mode.
 - Every beat ID appears in at least one scene and every narration anchor remains owned by its beat.
