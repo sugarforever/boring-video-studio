@@ -30,7 +30,9 @@ Explicit self-corrections can change a name, number or negation; retain the corr
 
 ## Place and execute cuts
 
-Use word times from the analyzed source WAV's raw transcript. Put boundaries in gaps around the abandoned attempt; preserve the preceding and following word's full attack/tail and a short breathing margin. Waveform or FFmpeg `silencedetect` can corroborate gaps; silence alone does not establish that speech is disposable. Retain normal pauses outside the retry.
+Use raw word times to locate candidates, then measure boundaries in the analyzed source WAV. Recognition timestamps can precede or follow the actual sound. Put boundaries in verified gaps around the abandoned attempt; preserve the preceding and following word's full attack/tail and a short breathing margin. Waveform or FFmpeg `silencedetect` can corroborate gaps; silence alone does not establish that speech is disposable. Retain normal pauses outside the retry.
+
+For head or tail trimming, inspect the complete opening or closing sound and its surrounding silence. Place the boundary within that silence, leaving a quiet lead-in or tail; an uncertain breath, mouth sound or partial syllable stays intact pending audio review. Compare source and output around the boundary to distinguish an existing sound from clipping or processing changes. The helper fades interior joins only, so the file opening needs its own boundary check.
 
 Write `retake-cuts.json` as an ordered, nonoverlapping array in **source seconds**, with a reason per interval. Example: a discarded attempt occupies 9.02–12.56 seconds and the replacement speech begins near 13.92; gaps around these words permit:
 
@@ -65,8 +67,8 @@ Compare the new transcript with retained content and check subtitle timing again
 
 ## Audio acceptance
 
-Review each join with enough surrounding speech to assess missing attacks/tails, clicks and unnatural pauses. Inspect the complete final audio for missed retries, including intervals previously transcribed fluently. Add these results to the existing coverage record, distinguishing audio understanding from signal measurements.
+Review the opening, ending and each join with enough surrounding speech to assess missing attacks/tails, clicks and unnatural pauses. Inspect the complete final audio for missed retries, including intervals previously transcribed fluently. Add these results to the existing coverage record, distinguishing audio understanding from signal measurements.
 
-**Reviewed delivery:** the final audio has complete spoken-audio review coverage, every join has been checked, and reported issues are resolved. State the reviewing method rather than claiming perfect detection.
+**Reviewed delivery:** the final audio has complete spoken-audio review coverage, its opening, ending and every join have been checked, and reported issues are resolved. State the reviewing method rather than claiming perfect detection.
 
 **Draft pending audio review:** spoken-audio coverage is incomplete, a join remains unchecked, or an issue is unresolved. Deliver the supported edits with local previews and exact pending ranges; label the result “待听审的剪辑草稿” in the user-facing response. Subtitle correctness and successful technical checks alone do not upgrade that status.
