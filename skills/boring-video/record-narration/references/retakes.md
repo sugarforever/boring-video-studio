@@ -4,21 +4,27 @@ Review every continuous narration take after the first transcription. The agent 
 
 ## Evidence and coverage
 
-Establish whether the current environment can actually analyze spoken audio, such as through an audio-capable model or human listening. Playback, waveform inspection and another speech-to-text pass are different capabilities; report which was used.
+Discover available tools for spoken-audio analysis and establish whether they can actually analyze the recording, such as through an audio-capable model or human listening. Locating retries and their boundaries is agent work; proceed from the supplied audio and original script without requiring author-provided word lists or timestamps. Playback, waveform inspection and another speech-to-text pass are different capabilities; report which was used.
 
-The original transcript locates candidates, the script supplies intended meaning, and acoustic measurements help place boundaries. Speech recognition can omit or merge repeated syllables and partial-word restarts. Treat fluent transcription as a candidate-generation result, not evidence that its corresponding audio is free of retries. Preserve raw recognition until editing decisions are recorded.
+The recording establishes what the author said; the script provides topic and terminology context, the original transcript locates candidates, and acoustic measurements help place boundaries. Speech recognition can omit or merge repeated syllables and partial-word restarts. Treat fluent transcription as a candidate-generation result, not evidence that its corresponding audio is free of retries. Preserve raw recognition until editing decisions are recorded.
 
 In `REVIEW.md`, record the source audio path and duration, inspected time ranges, method and evidence for each range, and the remaining coverage gaps. Check whole-sentence restarts, short repeated words or syllables, abandoned word openings, immediate self-corrections, and restarts after a pause. Preserve deliberate emphasis and legitimate repetition.
 
-Inspect every user-reported interval with its surrounding speech, even when recognition shows no repeat. Record the reported issue, local evidence and disposition. If a report identifies final-output time, use the edit map to locate the source interval. A report is resolved only by a supported keep/remove decision or an explicit pending question, not by a clean transcript.
+Inspect every user-reported interval with its surrounding speech, even when recognition shows no repeat. Record the reported issue, local evidence and disposition. If a report identifies final-output time, use the edit map to locate the source interval. A report is resolved only by a supported keep/remove decision or a specific unresolved issue with its evidence and capability gap, not by a clean transcript.
 
-When spoken-audio analysis is unavailable, continue safe, supported edits and export timestamped local previews for uncertain passages. Retain ambiguous audio; report uninspected ranges without inventing listening results. Repeated transcription may add evidence but does not close an audio-review coverage gap.
+When spoken-audio analysis is unavailable, continue safe, supported edits and export timestamped local previews for uncertain passages. Report the missing capability rather than asking the author to locate repeated syllables as a workaround. Retain ambiguous audio; report uninspected ranges without inventing listening results. Repeated transcription may add evidence but does not close an audio-review coverage gap.
 
 ## Decide what survives
 
-Map each candidate to a script passage. Record source start/end, recognized words, completeness, available audio evidence and a keep/remove/pending decision. A partial sentence followed by a replacement that repeats its beginning and continues is strong retry evidence. Check short retries locally even when both attempts were collapsed into one recognized word.
+Map each candidate to the spoken narrative; use the script passage where one exists. Off-script speech still needs the same review. Record source start/end, recognized words, completeness, available audio evidence and a keep/remove/pending decision. A partial sentence followed by a replacement that repeats its beginning and continues is strong retry evidence. Check short retries locally even when both attempts were collapsed into one recognized word.
 
-Prefer a complete attempt consistent with the intended meaning; preserve recorded paraphrases. The latest attempt is a candidate, not a rule: numbers, negations and names can change between attempts. When the evidence cannot distinguish a correction from a meaning change, retain alternatives and identify a targeted question. Vocal naturalness requires audio evidence.
+Classify the candidate by how the speech progresses:
+
+- **Retry:** an abandoned attempt is replaced by another rendering of the same thought. Keep the complete, coherent attempt and remove only the discarded speech, preserving unique content.
+- **Improvisation:** the author adds an explanation, changes an example or wording, or omits scripted material while continuing coherently. Retain it and subtitle the actual speech; closeness to the script does not rank an attempt higher.
+- **Intent conflict:** incompatible substantive statements remain without a clear spoken correction. Preserve the alternatives and flag the specific meaning decision. Ask the author only when their intended claim is needed to decide the edit, rather than to identify which syllable was repeated.
+
+Explicit self-corrections can change a name, number or negation; retain the corrected expression when the speech makes that replacement clear. The last attempt is not automatically preferred, and vocal naturalness requires audio evidence.
 
 **Decisions recorded:** each candidate and user report has a disposition, evidence and source interval; unique intended content stays in order, and inspected versus uninspected coverage is explicit. This permits a draft export, not a claim that all retries are removed.
 

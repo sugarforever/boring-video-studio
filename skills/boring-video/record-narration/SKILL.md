@@ -5,7 +5,7 @@ description: Record your own narration from a script using a local browser telep
 
 # Record Narration
 
-Produce human-recorded narration and reviewed, timed subtitles from an existing UTF-8 script. Resolve bundled paths relative to this skill's directory; run the commands below there with absolute project paths. Preserve original takes, intended speech and speaking speed. Remove abandoned retries when a complete replacement is identifiable. Denoising, general pause compression and TTS are outside this workflow.
+Produce human-recorded narration and reviewed, timed subtitles from an existing UTF-8 script. Resolve bundled paths relative to this skill's directory; run the commands below there with absolute project paths. Treat recorded speech as the content authority and the script as context for recognition and progression. Preserve original takes, coherent improvisation and speaking speed. Remove abandoned retries when a complete replacement is identifiable. Denoising, general pause compression and TTS are outside this workflow.
 
 ## 1. Establish the session
 
@@ -52,7 +52,7 @@ For every continuous narration take, read [retakes.md](references/retakes.md) an
 
 ## 5. Correct recognition against the script
 
-Read the complete script snapshot and transcript. Correct clear misrecognitions, terminology and punctuation; recorded speech determines the words. Preserve spoken paraphrases and omissions. Resolve uncertain names, numbers, negations or substantial differences through audio evidence or a targeted user question. Keep unresolved cues unchanged and list their IDs, times and questions in `REVIEW.md`.
+Read the complete script snapshot and final transcript. Correct recognition errors and punctuation using audio evidence and context; preserve intelligible spoken wording, including off-script additions, omissions and changed examples. A difference from the script alone is not a recognition error. Apply the author-intent and capability rules in the retake reference to unresolved passages, and record their IDs, times and disposition in `REVIEW.md`.
 
 Write `corrections.json` as an array of changed cue IDs and replacement text; use `[]` if no changes are needed. For example, when cue 3 clearly misrecognized the spoken product name:
 
