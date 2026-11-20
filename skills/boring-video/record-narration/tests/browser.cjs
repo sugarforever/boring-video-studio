@@ -5,13 +5,14 @@ const { spawn, execFileSync } = require('node:child_process');
 const { mkdtempSync, writeFileSync, readFileSync, rmSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const path = require('node:path');
+const python = process.env.NARRATION_PYTHON || 'python3';
 const assert = require('node:assert/strict');
 (async () => {
   const root = mkdtempSync(path.join(tmpdir(), 'narration-browser-'));
   const skill = path.resolve(__dirname, '..');
   const script = path.join(root, 'script.txt');
   writeFileSync(script, '今天测试口播录音。\n\n照着读，可以暂停和继续。\n<img src=x onerror=alert(1)>\n' + '这是需要慢慢朗读的口播内容。\n'.repeat(30));
-  const server = spawn('python3', [path.join(skill, 'scripts/recorder.py'), '--script', script, '--session', path.join(root, 'session'), '--port', '0', '--no-open']);
+  const server = spawn(python, [path.join(skill, 'scripts/recorder.py'), '--script', script, '--session', path.join(root, 'session'), '--port', '0', '--no-open']);
   let browser;
   try {
     const url = await new Promise((resolve, reject) => {
@@ -33,6 +34,7 @@ const assert = require('node:assert/strict');
     await page.goto(url);
     await page.waitForFunction(() => !document.querySelector('#record').disabled);
     assert.equal(await page.locator('#script img').count(), 0);
+    assert.equal(await page.locator('#waveform').count(), 1);
     await page.locator('#font').fill('44');
     await page.locator('#font').dispatchEvent('input');
     assert.equal(await page.locator('#script').evaluate(el => getComputedStyle(el).fontSize), '44px');
@@ -52,17 +54,30 @@ const assert = require('node:assert/strict');
     await page.locator('#stop').click();
     await page.waitForFunction(() => !document.querySelector('#finish').disabled);
     assert.equal(await page.locator('audio').evaluate(el => el.src.startsWith('blob:')), true);
-    await page.locator('audio').evaluate(el => el.play());
+    await page.waitForFunction(() => document.querySelector('#waveform').dataset.ready === 'true');
+    const box = await page.locator('#waveform').boundingBox();
+    await page.mouse.move(box.x + box.width * .2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * .6, box.y + box.height / 2, {steps: 8});
+    await page.mouse.up();
+    await page.waitForFunction(() => !document.querySelector('#playSelection').disabled);
+    assert.match(await page.locator('#selection').textContent(), /秒/);
+    await page.locator('#playSelection').click();
+    await page.locator('audio').evaluate(el => el.pause());
+    await page.locator('audio').evaluate(el => { el.currentTime = 0; return el.play(); });
     await page.waitForFunction(() => document.querySelector('audio').currentTime > .1);
     await page.locator('audio').evaluate(el => el.pause());
     await page.locator('#finish').click();
     await page.waitForFunction(() => document.querySelector('#message').textContent.includes('已交接'));
     let state = JSON.parse(readFileSync(path.join(root, 'session/session.json')));
     assert.equal(state.status, 'ready');
+    assert.equal(state.takes[0].capture.autoGainControl, false);
+    assert.equal(state.takes[0].capture.noiseSuppression, false);
+    assert.equal(state.takes[0].capture.echoCancellation, false);
     const audio = path.join(root, 'session', state.audio);
     // Streaming WebM often has no duration header. Decode before measuring.
     execFileSync('ffprobe', ['-v', 'error', audio]);
-    execFileSync('python3', [path.join(skill, 'scripts/process_audio.py'), 'prepare', '--session', path.join(root, 'session'), '--output', path.join(root, 'processed')]);
+    execFileSync(python, [path.join(skill, 'scripts/process_audio.py'), 'prepare', '--session', path.join(root, 'session'), '--output', path.join(root, 'processed')]);
     const duration = Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1', path.join(root, 'processed/narration.wav')]).toString());
     assert.ok(duration > 2 && duration < 5, `pause removed from audio duration: ${duration}`);
     // A failed upload must block later chunks so interrupted recovery has a valid prefix.

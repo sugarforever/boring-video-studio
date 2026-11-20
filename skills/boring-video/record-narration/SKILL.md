@@ -22,7 +22,7 @@ python3 scripts/recorder.py --script /absolute/path/NARRATION.md \
   --session /absolute/path/project/narration/recording-YYYYMMDD-HHMMSS --port 0
 ```
 
-Give the user the printed browser URL, including its token fragment, and the session path. Ask them to choose a microphone, start recording, stop and listen, then select a take and click “使用选中版本，交给 Codex”. They can pause/resume or record another whole take. Microphone permission and recording controls belong to the user.
+Give the user the printed browser URL, including its token fragment, and the session path. Ask them to choose a microphone, start recording, stop and listen, then select a take and click “使用选中版本，交给 Codex”. They can pause/resume or record another whole take. After saving, they can drag across the waveform and play that selection to inspect short retries. Microphone permission and recording controls belong to the user.
 
 Leave the service running and yield the chat while they record. Explain that they must return and say “录好了，继续处理”; the page saves a handoff file but does not send a chat message. If opening, saving or recording fails, read [recovery.md](references/recovery.md).
 
@@ -30,7 +30,7 @@ Leave the service running and yield the chat while they record. Explain that the
 
 ## 3. Prepare audio and transcribe
 
-Use an existing compatible environment when available. Recording needs Python 3.10+; processing needs `ffmpeg` and `ffprobe`; transcription uses `faster-whisper>=1.1,<2` in a Python 3.11/3.12 virtual environment outside the skill directory. If dependencies are missing, or only part of processing succeeded, read [recovery.md](references/recovery.md).
+Use an existing compatible environment when available. Recording needs Python 3.10+; processing needs `ffmpeg` and `ffprobe`, plus this skill’s `requirements.txt` installed in a Python 3.11/3.12 virtual environment outside the skill directory. If dependencies are missing, or only part of processing succeeded, read [recovery.md](references/recovery.md).
 
 Tell the user that first use may download model weights; audio processing and transcription run locally. Choose the spoken language (`zh` for Chinese, `auto` when uncertain) and a new output directory:
 
@@ -40,7 +40,7 @@ Tell the user that first use may download model weights; audio processing and tr
   --transcribe --language zh
 ```
 
-This normalizes loudness and transcribes the resulting `narration.wav`. Use `scripts/process_audio.py --help` and its subcommand help for alternate inputs or model settings.
+This uses ffmpeg-normalize to measure and apply a uniform gain, then transcribes `narration.wav`. Preserve the loudness report: peak headroom can require a quieter target. A dynamic fallback stops export rather than amplifying quiet passages separately. Normalization preserves relative levels; it does not remove noise. Use `scripts/process_audio.py --help` and its subcommand help for alternate inputs or model settings.
 
 **Ready for editing:** the WAV is decodable and has positive duration; `transcript.raw.json` contains nonempty timed cues, and `subtitles.raw.srt` exists. Retain raw outputs. A failed transcription is unfinished work, even if audio normalization succeeded.
 

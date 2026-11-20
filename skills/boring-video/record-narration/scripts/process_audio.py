@@ -8,6 +8,8 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tempfile
+from importlib.metadata import version
 
 
 def write_json(path, value):
@@ -87,20 +89,43 @@ def prepare(source, output):
     target = output / 'narration.wav'
     if target.exists():
         raise FileExistsError(f'已有处理后的音频，使用新输出目录或继续 transcribe：{target}')
-    temp = output / 'narration.partial.wav'
-    command = ['ffmpeg', '-nostdin', '-v', 'error', '-n', '-i', str(source), '-map', '0:a:0',
-               '-af', 'loudnorm=I=-16:TP=-1.5:LRA=11', '-ar', '48000', '-ac', '1', '-c:a', 'pcm_s16le', str(temp)]
     try:
-        subprocess.run(command, check=True, capture_output=True)
+        from ffmpeg_normalize import FFmpegNormalize, FFmpegNormalizeError
+    except ImportError as error:
+        raise RuntimeError('需要 ffmpeg-normalize：在处理用的虚拟环境执行 pip install -r <skill-dir>/requirements.txt') from error
+    with tempfile.TemporaryDirectory(prefix='.prepare-', dir=output) as tmp:
+        decoded = Path(tmp)/'decoded.wav'
+        temp = Path(tmp)/'normalized.wav'
+        # Decode first: streaming WebM has no reliable duration header, and
+        # loudness must be measured after the same resampling/downmix as export.
+        subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-n', '-i', str(source),
+                        '-map', '0:a:0', '-ar', '48000', '-ac', '1', '-c:a', 'pcm_s16le', str(decoded)],
+                       check=True, capture_output=True)
+        normalizer = FFmpegNormalize(target_level=-16, true_peak=-1.5,
+            keep_loudness_range_target=True, auto_lower_loudness_target=True,
+            audio_codec='pcm_s16le', sample_rate=48000, audio_channels=1,
+            video_disable=True, subtitle_disable=True, metadata_disable=True, progress=False)
+        normalizer.add_media_file(str(decoded), str(temp))
+        try:
+            normalizer.run_normalization()
+        except FFmpegNormalizeError as error:
+            raise RuntimeError(f'ffmpeg-normalize 处理失败：{error}') from error
+        stats = list(normalizer.media_files[0].get_stats())
+        modes = [item.get('ebu_pass2', {}).get('normalization_type') for item in stats]
+        if not modes or any(mode != 'linear' for mode in modes):
+            raise RuntimeError('响度处理未保持线性，已停止导出以免抬高安静片段。保留原录音并检查输入。')
         probe = json.loads(subprocess.check_output(['ffprobe', '-v', 'error', '-show_format', '-of', 'json', str(temp)]))
         duration = float(probe['format']['duration'])
         if not math.isfinite(duration) or duration <= 0:
             raise ValueError('录音没有可用音频')
+        for item in stats:
+            item['input_file'] = str(source)
+            item['output_file'] = str(target)
         temp.replace(target)
-    finally:
-        temp.unlink(missing_ok=True)
     write_json(output / 'processing.json', {'source': str(source), 'audio': str(target), 'duration': duration,
-               'status': 'normalized', 'filters': 'loudnorm=I=-16:TP=-1.5:LRA=11',
+               'status': 'normalized', 'normalization': {'engine': 'ffmpeg-normalize',
+               'version': version('ffmpeg-normalize'), 'mode': 'linear', 'target_lufs': -16,
+               'true_peak_db': -1.5, 'auto_lower_target': True, 'stats': stats},
                'cuts': [], 'speed': 1.0, 'denoise': False})
     return target
 

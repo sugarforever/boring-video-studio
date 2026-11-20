@@ -6,7 +6,21 @@ sessionStorage.setItem(key, token);
 history.replaceState(null, '', location.pathname);
 let recorder, stream, context, analyser, levelData, takeId, chunks = [], nextUpload = 0, uploadQueue = Promise.resolve();
 let busy = false, selected = null, started = 0, elapsed = 0, scrollOn = false, lastFrame = 0, scrollCarry = 0;
-let playerURL, backupURL;
+let playerURL, backupURL, activeRegion;
+const regions = WaveSurfer.Regions.create();
+const waveform = WaveSurfer.create({container: '#waveform', media: $('player'),
+  height: 90, waveColor: '#8b9e83', progressColor: '#c6e7a5', cursorColor: '#edf2ec',
+  plugins: [regions]});
+regions.enableDragSelection({color: 'rgba(198,231,165,.22)'});
+function selection(region) {
+  activeRegion = region;
+  regions.getRegions().filter(item => item !== region).forEach(item => item.remove());
+  $('selection').textContent = `${region.start.toFixed(2)} - ${region.end.toFixed(2)} 秒`;
+  $('playSelection').disabled = busy || recorder?.state === 'recording' || recorder?.state === 'paused';
+}
+regions.on('region-created', selection);
+regions.on('region-updated', selection);
+$('playSelection').addEventListener('click', () => activeRegion?.play(true));
 const message = text => { $('message').textContent = text; };
 async function api(path, body) {
   const headers = {'X-Recorder-Token': token};
@@ -27,6 +41,8 @@ function controls() {
   $('pause').disabled = busy || !active;
   $('stop').disabled = busy || !active;
   $('mic').disabled = busy || active;
+  waveform.setOptions({interact: !busy && !active});
+  $('playSelection').disabled = busy || active || !activeRegion;
   $('finish').disabled = busy || active || !selected;
   document.querySelectorAll('#takes button').forEach(button => { button.disabled = busy || active; });
 }
@@ -36,7 +52,15 @@ async function preview(take) {
   const blob = await response.blob();
   if (playerURL) URL.revokeObjectURL(playerURL);
   playerURL = URL.createObjectURL(blob);
+  $('player').pause();
+  activeRegion = null; regions.clearRegions(); $('playSelection').disabled = true;
+  $('selection').textContent = '拖动波形选择试听范围';
+  $('waveform').dataset.ready = 'false';
   $('player').src = playerURL;
+  try {
+    await waveform.loadBlob(blob);
+    $('waveform').dataset.ready = 'true';
+  } catch (error) { message(`波形加载失败，仍可用播放器试听：${error.message}`); }
   selected = take.id;
   document.querySelectorAll('[data-take]').forEach(button => {
     button.setAttribute('aria-pressed', String(button.dataset.take === selected));
@@ -109,10 +133,10 @@ function release() {
   analyser = null; context = null; $('level').value = 0;
 }
 $('record').addEventListener('click', async () => {
-  busy = true; controls();
+  busy = true; $('player').pause(); controls();
   try {
     const mic = $('mic').value;
-    stream = await navigator.mediaDevices.getUserMedia({audio: mic ? {deviceId: {exact: mic}} : true});
+    stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1, ...(mic ? {deviceId: {exact: mic}} : {})}});
     await microphones();
     const mime = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus'].find(type => MediaRecorder.isTypeSupported(type));
     if (!mime) throw new Error('此浏览器不支持可保存的录音格式，请使用 Chrome 或 Safari。');
@@ -122,7 +146,9 @@ $('record').addEventListener('click', async () => {
     analyser = context.createAnalyser(); analyser.fftSize = 256;
     context.createMediaStreamSource(stream).connect(analyser);
     levelData = new Uint8Array(analyser.fftSize);
-    const take = await api('/api/takes', {mime}); takeId = take.id;
+    const settings = stream.getAudioTracks()[0].getSettings();
+    const capture = Object.fromEntries(['sampleRate', 'channelCount', 'echoCancellation', 'noiseSuppression', 'autoGainControl'].filter(key => key in settings).map(key => [key, settings[key]]));
+    const take = await api('/api/takes', {mime, capture}); takeId = take.id;
     chunks = []; nextUpload = 0; elapsed = 0; started = performance.now(); uploadQueue = Promise.resolve();
     recorder.addEventListener('dataavailable', event => {
       if (!event.data.size) return;

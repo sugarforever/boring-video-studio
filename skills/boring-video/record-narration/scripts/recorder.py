@@ -56,12 +56,16 @@ class Store:
     def take(self, take_id):
         return next(t for t in self.data['takes'] if t['id'] == take_id)
 
-    def create(self, mime):
+    def create(self, mime, capture=None):
+        if capture is not None and not isinstance(capture, dict):
+            raise ValueError('无效的录音设备设置')
         base = mime.split(';')[0]
         if base not in MIMES:
             raise ValueError('不支持的录音格式')
         with self.lock:
-            take = {'id': uuid.uuid4().hex, 'mime': mime, 'complete': False}
+            take = {'id': uuid.uuid4().hex, 'mime': mime, 'complete': False,
+                    'capture': {key: value for key, value in (capture or {}).items()
+                                if key in ('sampleRate', 'channelCount', 'echoCancellation', 'noiseSuppression', 'autoGainControl')}}
             (self.root / 'takes' / take['id']).mkdir(parents=True)
             self.data['takes'].append(take)
             self.data['status'] = 'recording'
@@ -147,12 +151,15 @@ def make_server(store, port=8765):
 
         def do_GET(self):
             path = urlparse(self.path).path
-            if path in ('/', '/recorder.js'):
+            static = {'/': ('index.html', 'text/html; charset=utf-8'), '/recorder.js': ('recorder.js', 'text/javascript'),
+                      '/vendor/wavesurfer.min.js': ('vendor/wavesurfer.min.js', 'text/javascript'),
+                      '/vendor/regions.min.js': ('vendor/regions.min.js', 'text/javascript')}
+            if path in static:
                 # UI token is supplied in the URL fragment; never embedded in a public response.
                 if self.headers.get('Host') != f'127.0.0.1:{self.server.server_port}':
                     return self.respond({'error': 'Invalid host'}, 403)
-                name = 'index.html' if path == '/' else 'recorder.js'
-                return self.respond((ASSETS / name).read_bytes(), mime='text/html; charset=utf-8' if path == '/' else 'text/javascript')
+                name, mime = static[path]
+                return self.respond((ASSETS / name).read_bytes(), mime=mime)
             if not self.authorized():
                 return self.respond({'error': 'Unauthorized'}, 403)
             if path == '/api/state':
@@ -180,7 +187,7 @@ def make_server(store, port=8765):
                     return self.respond(store.chunk(match[1], int(match[2]), raw))
                 body = json.loads(raw)
                 if path == '/api/takes':
-                    return self.respond(store.create(body['mime']))
+                    return self.respond(store.create(body['mime'], body.get('capture')))
                 if path == '/api/ready':
                     return self.respond(store.ready(body['take']))
                 match = re.fullmatch(r'/api/takes/([a-f0-9]{32})/finalize', path)

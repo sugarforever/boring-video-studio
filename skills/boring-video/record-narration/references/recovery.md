@@ -22,12 +22,12 @@ Install FFmpeg on macOS with `brew install ffmpeg` when Homebrew is available. F
 
 ```bash
 python3.11 -m venv /absolute/path/project/.venv-narration
-/absolute/path/project/.venv-narration/bin/python -m pip install 'faster-whisper>=1.1,<2'
+/absolute/path/project/.venv-narration/bin/python -m pip install -r /absolute/path/skill/requirements.txt
 ```
 
 Python 3.12 is also suitable. If installation or model download fails, report the actual failure and retain any completed audio. A local model directory can be passed with `--model` when network downloads are unavailable.
 
-**Recovered:** the selected interpreter imports `faster_whisper`, and `ffmpeg` and `ffprobe` are available to the processing command.
+**Recovered:** the selected interpreter imports `faster_whisper` and `ffmpeg_normalize`, and `ffmpeg` and `ffprobe` are available to the processing command.
 
 ## WAV exists but transcription failed
 
