@@ -1,0 +1,74 @@
+---
+name: record-narration
+description: Record your own narration from a script using a local browser teleprompter, or resume a recording session through audio normalization and script-assisted subtitle correction.
+---
+
+# Record Narration
+
+Produce human-recorded narration and reviewed, timed subtitles from an existing UTF-8 script. Resolve bundled paths relative to this skill's directory; run the commands below there with absolute project paths. Preserve whole takes, speaking speed and content. Automatic cuts, denoising and TTS are outside this workflow.
+
+## 1. Establish the session
+
+Resolve the script and project directory from the request. For a new recording, choose `<project>/narration/recording-YYYYMMDD-HHMMSS`. For a continuation, locate the previously supplied session path before creating anything new. Its `script.txt` snapshot is the recording's reference even if the original draft has changed.
+
+**Ready to proceed:** the script and session path are known, and a continuation uses the existing session rather than a replacement.
+
+## 2. Open the recorder and let the user record
+
+Start a long-running process and retain its process handle:
+
+```bash
+python3 scripts/recorder.py --script /absolute/path/NARRATION.md \
+  --session /absolute/path/project/narration/recording-YYYYMMDD-HHMMSS --port 0
+```
+
+Give the user the printed browser URL, including its token fragment, and the session path. Ask them to choose a microphone, start recording, stop and listen, then select a take and click “使用选中版本，交给 Codex”. They can pause/resume or record another whole take. Microphone permission and recording controls belong to the user.
+
+Leave the service running and yield the chat while they record. Explain that they must return and say “录好了，继续处理”; the page saves a handoff file but does not send a chat message. If opening, saving or recording fails, read [recovery.md](references/recovery.md).
+
+**Recording submitted:** after the user resumes, `session.json` has status `ready`, its selected take is complete, and `handoff.json` names that same take and an existing audio file. Otherwise report the current state and help them finish selecting/submitting; a verbal “done” alone is insufficient. Once submitted, processing can continue without the recorder service.
+
+## 3. Prepare audio and transcribe
+
+Use an existing compatible environment when available. Recording needs Python 3.10+; processing needs `ffmpeg` and `ffprobe`; transcription uses `faster-whisper>=1.1,<2` in a Python 3.11/3.12 virtual environment outside the skill directory. If dependencies are missing, or only part of processing succeeded, read [recovery.md](references/recovery.md).
+
+Tell the user that first use may download model weights; audio processing and transcription run locally. Choose the spoken language (`zh` for Chinese, `auto` when uncertain) and a new output directory:
+
+```bash
+/path/to/venv/bin/python scripts/process_audio.py prepare \
+  --session /absolute/path/session --output /absolute/path/processed-v1 \
+  --transcribe --language zh
+```
+
+This normalizes loudness and transcribes the resulting `narration.wav`. Use `scripts/process_audio.py --help` and its subcommand help for alternate inputs or model settings.
+
+**Ready for correction:** the WAV is decodable and has positive duration; `transcript.raw.json` contains nonempty timed cues, and `subtitles.raw.srt` exists. Retain raw outputs. A failed transcription is unfinished work, even if audio normalization succeeded.
+
+## 4. Correct recognition against the script
+
+Read the complete script snapshot and transcript. Correct clear misrecognitions, terminology and punctuation; recorded speech determines the words. Preserve spoken paraphrases and omissions. Resolve uncertain names, numbers, negations or substantial differences through audio evidence or a targeted user question. Keep unresolved cues unchanged and list their IDs, times and questions in `REVIEW.md`.
+
+Write `corrections.json` as an array of changed cue IDs and replacement text; use `[]` if no changes are needed. For example, when cue 3 clearly misrecognized the spoken product name:
+
+```json
+[{"id": 3, "text": "然后交给 Codex 处理。"}]
+```
+
+Apply the reviewed changes:
+
+```bash
+python3 scripts/process_audio.py correct \
+  --transcript /absolute/path/processed-v1/transcript.raw.json \
+  --corrections /absolute/path/processed-v1/corrections.json \
+  --output /absolute/path/processed-v1/reviewed
+```
+
+**Correction complete:** every cue has been considered; reviewed cue IDs and times match the raw cues, all text changes have evidence, and unresolved differences are documented. The corrected JSON's `segments` contain reviewed text; its `words` retain raw recognition evidence. Downstream subtitles must use the reviewed segments or exported SRT.
+
+## 5. Verify and hand off
+
+Read the exported subtitles and check increasing, nonoverlapping cue times within the final WAV's duration, allowing only millisecond rounding at the end. Record the changes, unresolved questions, and verification performed in `REVIEW.md`. Distinguish measured checks from listening; state whether human playback is still needed.
+
+Deliver clickable absolute paths to the final WAV, `reviewed/subtitles.srt`, `reviewed/transcript.corrected.json`, script snapshot and review notes. Keep original takes and chunks available. Pass these artifacts to the next production step; replacing an existing project's audio requires the user's requested scope to cover that change.
+
+**Delivery complete:** audio and reviewed subtitles are usable together, with any remaining review needs stated explicitly.

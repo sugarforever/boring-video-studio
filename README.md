@@ -73,3 +73,53 @@ npx skills add sugarforever/boring-video-studio --skill record-terminal to-story
 ```text
 $to-storyboard Turn SCENES.md into a HyperFrames storyboard.
 ```
+
+## Record your own narration
+
+`record-narration` provides a local browser teleprompter and microphone recorder,
+multiple takes, playback, interruption recovery, and selected-take handoff to the
+agent. The bundled processing CLI normalizes loudness with FFmpeg, generates
+local Whisper subtitles, and applies agent-reviewed recognition corrections
+without changing subtitle timing. Original recordings are retained.
+
+```bash
+npx skills add sugarforever/boring-video-studio --skill record-narration
+```
+
+```text
+$record-narration Record my voice reading /absolute/path/NARRATION.md.
+```
+
+Run directly from a checkout:
+
+```bash
+python3 skills/boring-video/record-narration/scripts/recorder.py \
+  --script /absolute/path/NARRATION.md \
+  --session /absolute/path/project/narration/session-01 --port 0
+```
+
+Recording uses Python 3.10+ and Chrome or Safari. Processing additionally needs
+FFmpeg; local transcription uses a Python 3.11/3.12 environment with
+`pip install 'faster-whisper>=1.1,<2'`. Model weights download on first use;
+recorded audio stays local. After selecting a take and submitting it in the page,
+return to the chat and ask the agent to continue. V1 preserves speaking speed and
+content; automatic noise reduction and semantic cutting are deferred.
+
+See [the skill](skills/boring-video/record-narration/SKILL.md) for processing and
+subtitle correction commands.
+
+Development checks:
+
+```bash
+python3 -m unittest discover -s skills/boring-video/record-narration/tests -v
+node --check skills/boring-video/record-narration/assets/recorder.js
+```
+
+The optional Chrome integration test uses Playwright and a synthetic microphone;
+it covers scrolling, pause/resume, playback, failed uploads, recovery and handoff.
+Install Playwright in a temporary directory, then run:
+
+```bash
+PLAYWRIGHT_MODULE=/absolute/path/node_modules/playwright \
+  node skills/boring-video/record-narration/tests/browser.cjs
+```
