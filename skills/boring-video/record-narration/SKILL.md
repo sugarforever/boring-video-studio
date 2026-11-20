@@ -1,11 +1,11 @@
 ---
 name: record-narration
-description: Record your own narration from a script using a local browser teleprompter, or resume a recording session through audio normalization and script-assisted subtitle correction.
+description: Record your own narration from a script using a local browser teleprompter, or resume a recording session through retake editing, audio normalization and script-assisted subtitle correction.
 ---
 
 # Record Narration
 
-Produce human-recorded narration and reviewed, timed subtitles from an existing UTF-8 script. Resolve bundled paths relative to this skill's directory; run the commands below there with absolute project paths. Preserve whole takes, speaking speed and content. Automatic cuts, denoising and TTS are outside this workflow.
+Produce human-recorded narration and reviewed, timed subtitles from an existing UTF-8 script. Resolve bundled paths relative to this skill's directory; run the commands below there with absolute project paths. Preserve original takes, intended speech and speaking speed. Remove abandoned retries when a complete replacement is identifiable. Denoising, general pause compression and TTS are outside this workflow.
 
 ## 1. Establish the session
 
@@ -44,7 +44,13 @@ This normalizes loudness and transcribes the resulting `narration.wav`. Use `scr
 
 **Ready for correction:** the WAV is decodable and has positive duration; `transcript.raw.json` contains nonempty timed cues, and `subtitles.raw.srt` exists. Retain raw outputs. A failed transcription is unfinished work, even if audio normalization succeeded.
 
-## 4. Correct recognition against the script
+## 4. Resolve retakes before correcting subtitles
+
+Read the complete transcript alongside the script. Look for abandoned phrases, repeated sentence openings and restarts; match them to the same passage before treating them as retries. Intentional repetition remains part of the speech. When retries are present, read [retakes.md](references/retakes.md), build a source-time cut plan, and export a new audio version. Choose the complete, script-consistent attempt; a later attempt is not automatically better. Keep ambiguous alternatives and list the specific uncertainty for user review.
+
+**Editing complete:** all detected retries have a keep/remove decision and evidence. Applied cuts have an edit report; final audio has been normalized and freshly transcribed after editing. With no cuts, reuse step 3's audio and transcript. Correction below always uses the transcript of the final audio.
+
+## 5. Correct recognition against the script
 
 Read the complete script snapshot and transcript. Correct clear misrecognitions, terminology and punctuation; recorded speech determines the words. Preserve spoken paraphrases and omissions. Resolve uncertain names, numbers, negations or substantial differences through audio evidence or a targeted user question. Keep unresolved cues unchanged and list their IDs, times and questions in `REVIEW.md`.
 
@@ -65,10 +71,10 @@ python3 scripts/process_audio.py correct \
 
 **Correction complete:** every cue has been considered; reviewed cue IDs and times match the raw cues, all text changes have evidence, and unresolved differences are documented. The corrected JSON's `segments` contain reviewed text; its `words` retain raw recognition evidence. Downstream subtitles must use the reviewed segments or exported SRT.
 
-## 5. Verify and hand off
+## 6. Verify and hand off
 
-Read the exported subtitles and check increasing, nonoverlapping cue times within the final WAV's duration, allowing only millisecond rounding at the end. Record the changes, unresolved questions, and verification performed in `REVIEW.md`. Distinguish measured checks from listening; state whether human playback is still needed.
+Read the exported subtitles and check increasing, nonoverlapping cue times within the final WAV's duration, allowing only millisecond rounding at the end. If adjacent cues split a word, merge them in a separate delivery export using existing outer cue boundaries; retain source cue IDs and raw word times. Record the changes, unresolved questions, and verification performed in `REVIEW.md`. Distinguish measured checks from listening; state whether human playback is still needed.
 
-Deliver clickable absolute paths to the final WAV, `reviewed/subtitles.srt`, `reviewed/transcript.corrected.json`, script snapshot and review notes. Keep original takes and chunks available. Pass these artifacts to the next production step; replacing an existing project's audio requires the user's requested scope to cover that change.
+Deliver clickable absolute paths to the final WAV, `reviewed/subtitles.srt`, `reviewed/transcript.corrected.json`, script snapshot and review notes; include the edit report when cuts were made. Keep original takes and chunks available. Pass these artifacts to the next production step; replacing an existing project's audio requires the user's requested scope to cover that change.
 
 **Delivery complete:** audio and reviewed subtitles are usable together, with any remaining review needs stated explicitly.

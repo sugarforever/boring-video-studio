@@ -78,7 +78,8 @@ $to-storyboard Turn SCENES.md into a HyperFrames storyboard.
 
 `record-narration` provides a local browser teleprompter and microphone recorder,
 multiple takes, playback, interruption recovery, and selected-take handoff to the
-agent. The bundled processing CLI normalizes loudness with FFmpeg, generates
+agent. The agent identifies abandoned retries against the script and applies
+reviewed cuts while retaining originals and an edit map. The bundled processing CLI normalizes loudness with FFmpeg, generates
 local Whisper subtitles, and applies agent-reviewed recognition corrections
 without changing subtitle timing. Original recordings are retained.
 
@@ -102,8 +103,8 @@ Recording uses Python 3.10+ and Chrome or Safari. Processing additionally needs
 FFmpeg; local transcription uses a Python 3.11/3.12 environment with
 `pip install 'faster-whisper>=1.1,<2'`. Model weights download on first use;
 recorded audio stays local. After selecting a take and submitting it in the page,
-return to the chat and ask the agent to continue. V1 preserves speaking speed and
-content; automatic noise reduction and semantic cutting are deferred.
+return to the chat and ask the agent to continue. The workflow preserves speaking speed and intended content;
+automatic noise reduction and general pause compression are deferred.
 
 See [the skill](skills/boring-video/record-narration/SKILL.md) for processing and
 subtitle correction commands.
