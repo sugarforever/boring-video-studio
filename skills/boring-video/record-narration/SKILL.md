@@ -42,13 +42,13 @@ Tell the user that first use may download model weights; audio processing and tr
 
 This normalizes loudness and transcribes the resulting `narration.wav`. Use `scripts/process_audio.py --help` and its subcommand help for alternate inputs or model settings.
 
-**Ready for correction:** the WAV is decodable and has positive duration; `transcript.raw.json` contains nonempty timed cues, and `subtitles.raw.srt` exists. Retain raw outputs. A failed transcription is unfinished work, even if audio normalization succeeded.
+**Ready for editing:** the WAV is decodable and has positive duration; `transcript.raw.json` contains nonempty timed cues, and `subtitles.raw.srt` exists. Retain raw outputs. A failed transcription is unfinished work, even if audio normalization succeeded.
 
 ## 4. Resolve retakes before correcting subtitles
 
-Read the complete transcript alongside the script. Look for abandoned phrases, repeated sentence openings and restarts; match them to the same passage before treating them as retries. Intentional repetition remains part of the speech. When retries are present, read [retakes.md](references/retakes.md), build a source-time cut plan, and export a new audio version. Choose the complete, script-consistent attempt; a later attempt is not automatically better. Keep ambiguous alternatives and list the specific uncertainty for user review.
+For every continuous narration take, read [retakes.md](references/retakes.md) and perform its review before correcting recognition text, including when the transcript appears fluent. This reference defines evidence, review coverage and handling of unavailable audio understanding. Preserve the uncorrected transcript as evidence throughout editing.
 
-**Editing complete:** all detected retries have a keep/remove decision and evidence. Applied cuts have an edit report; final audio has been normalized and freshly transcribed after editing. With no cuts, reuse step 3's audio and transcript. Correction below always uses the transcript of the final audio.
+**Editing stage complete:** `REVIEW.md` accounts for review coverage, candidate decisions and every user-reported interval under the reference's criteria. Applied cuts have an edit report and the resulting audio has a fresh transcript. Unresolved alternatives remain in the audio and are identified for review. With no cuts, reuse step 3's audio and transcript. Correction below always uses the transcript of the final audio.
 
 ## 5. Correct recognition against the script
 
@@ -73,8 +73,8 @@ python3 scripts/process_audio.py correct \
 
 ## 6. Verify and hand off
 
-Read the exported subtitles and check increasing, nonoverlapping cue times within the final WAV's duration, allowing only millisecond rounding at the end. If adjacent cues split a word, merge them in a separate delivery export using existing outer cue boundaries; retain source cue IDs and raw word times. Record the changes, unresolved questions, and verification performed in `REVIEW.md`. Distinguish measured checks from listening; state whether human playback is still needed.
+Read the exported subtitles and check increasing, nonoverlapping cue times within the final WAV's duration, allowing only millisecond rounding at the end. If adjacent cues split a word, merge them in a separate delivery export using existing outer cue boundaries; retain source cue IDs and raw word times. Record subtitle checks in `REVIEW.md` alongside the audio review defined in the retake reference.
 
 Deliver clickable absolute paths to the final WAV, `reviewed/subtitles.srt`, `reviewed/transcript.corrected.json`, script snapshot and review notes; include the edit report when cuts were made. Keep original takes and chunks available. Pass these artifacts to the next production step; replacing an existing project's audio requires the user's requested scope to cover that change.
 
-**Delivery complete:** audio and reviewed subtitles are usable together, with any remaining review needs stated explicitly.
+**Delivery complete:** audio and subtitles are usable together, and the delivery carries the audio-review status defined in the retake reference. Pending audio review is stated in the final response as well as the review notes.

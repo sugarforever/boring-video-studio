@@ -1,14 +1,26 @@
 # Retake editing
 
-Use after the first transcription when the speaker restarts or repeats a passage. The agent identifies retries from the complete script and transcript; the helper executes reviewed cut times, not semantic detection.
+Review every continuous narration take after the first transcription. The agent makes editing decisions; the helper only executes cut times.
+
+## Evidence and coverage
+
+Establish whether the current environment can actually analyze spoken audio, such as through an audio-capable model or human listening. Playback, waveform inspection and another speech-to-text pass are different capabilities; report which was used.
+
+The original transcript locates candidates, the script supplies intended meaning, and acoustic measurements help place boundaries. Speech recognition can omit or merge repeated syllables and partial-word restarts. Treat fluent transcription as a candidate-generation result, not evidence that its corresponding audio is free of retries. Preserve raw recognition until editing decisions are recorded.
+
+In `REVIEW.md`, record the source audio path and duration, inspected time ranges, method and evidence for each range, and the remaining coverage gaps. Check whole-sentence restarts, short repeated words or syllables, abandoned word openings, immediate self-corrections, and restarts after a pause. Preserve deliberate emphasis and legitimate repetition.
+
+Inspect every user-reported interval with its surrounding speech, even when recognition shows no repeat. Record the reported issue, local evidence and disposition. If a report identifies final-output time, use the edit map to locate the source interval. A report is resolved only by a supported keep/remove decision or an explicit pending question, not by a clean transcript.
+
+When spoken-audio analysis is unavailable, continue safe, supported edits and export timestamped local previews for uncertain passages. Retain ambiguous audio; report uninspected ranges without inventing listening results. Repeated transcription may add evidence but does not close an audio-review coverage gap.
 
 ## Decide what survives
 
-Map each attempt to a script passage. Record its source start/end, recognized words, completeness and keep/remove decision. A partial sentence followed by another attempt that restates it and continues is strong retry evidence. Repeated terminology across different passages, deliberate emphasis and legitimate recaps are not retries.
+Map each candidate to a script passage. Record source start/end, recognized words, completeness, available audio evidence and a keep/remove/pending decision. A partial sentence followed by a replacement that repeats its beginning and continues is strong retry evidence. Check short retries locally even when both attempts were collapsed into one recognized word.
 
-Prefer an attempt that contains the intended meaning without a false start. Preserve recorded paraphrases. The final attempt is a useful candidate, not a rule: numbers, negations and names can change between attempts. When transcript and script cannot distinguish a correction from a meaning change, retain alternatives and ask a targeted question rather than silently discarding one. Choose naturalness only from audio evidence; transcript alone establishes completeness, not vocal quality.
+Prefer a complete attempt consistent with the intended meaning; preserve recorded paraphrases. The latest attempt is a candidate, not a rule: numbers, negations and names can change between attempts. When the evidence cannot distinguish a correction from a meaning change, retain alternatives and identify a targeted question. Vocal naturalness requires audio evidence.
 
-**Decisions complete:** every suspected retry has an explicit outcome and a reason; unique intended content remains in its original order.
+**Decisions recorded:** each candidate and user report has a disposition, evidence and source interval; unique intended content stays in order, and inspected versus uninspected coverage is explicit. This permits a draft export, not a claim that all retries are removed.
 
 ## Place and execute cuts
 
@@ -33,16 +45,22 @@ The source must be the mono 48 kHz PCM16 WAV used for the transcript. The helper
 
 ## Rebuild final timing
 
-Normalize and transcribe the edited audio in a new directory:
+Transcribe the edited audio in a new directory. The analyzed source was already loudness-normalized; preserve its level instead of automatically normalizing it a second time:
 
 ```bash
-/path/to/venv/bin/python scripts/process_audio.py prepare \
+/path/to/venv/bin/python scripts/process_audio.py transcribe \
   --audio /absolute/path/edited-v2/narration.edited.wav \
-  --output /absolute/path/edited-v2/final --transcribe --language zh
+  --output /absolute/path/edited-v2/final --language zh
 ```
 
 Continue recognition correction against this new transcript. Source subtitle times become stale after a cut; replacing text in the old SRT does not retime it. Use the edit map when referring back to original attempts in the review notes.
 
-Inspect the new transcript for the discarded restart and for missing retained content. Export a short join preview if playback review is needed. Report durations before/after, what was removed and why, and which joins require human listening. Preserve raw recognition, source audio and edit report so a disputed choice can be revised.
+Compare the new transcript with retained content and check subtitle timing against the edited audio. Preserve raw recognition, source audio and the edit report so a disputed choice can be revised.
 
-**Ready for subtitle review:** the final audio is decodable, its transcript follows the retained script progression, and uncertainty about words or join quality is stated explicitly.
+## Audio acceptance
+
+Review each join with enough surrounding speech to assess missing attacks/tails, clicks and unnatural pauses. Inspect the complete final audio for missed retries, including intervals previously transcribed fluently. Add these results to the existing coverage record, distinguishing audio understanding from signal measurements.
+
+**Reviewed delivery:** the final audio has complete spoken-audio review coverage, every join has been checked, and reported issues are resolved. State the reviewing method rather than claiming perfect detection.
+
+**Draft pending audio review:** spoken-audio coverage is incomplete, a join remains unchecked, or an issue is unresolved. Deliver the supported edits with local previews and exact pending ranges; label the result “待听审的剪辑草稿” in the user-facing response. Subtitle correctness and successful technical checks alone do not upgrade that status.
