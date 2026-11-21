@@ -1,5 +1,11 @@
 'use strict';
 const $ = id => document.getElementById(id);
+$('menu').addEventListener('click', () => {
+  $('settings').showModal();
+  $('menu').setAttribute('aria-expanded', 'true');
+});
+$('closeMenu').addEventListener('click', () => $('settings').close());
+$('settings').addEventListener('close', () => $('menu').setAttribute('aria-expanded', 'false'));
 const key = `recorder-token:${location.host}`;
 const token = location.hash.slice(1) || sessionStorage.getItem(key) || '';
 sessionStorage.setItem(key, token);
@@ -9,9 +15,9 @@ let busy = false, selected = null, started = 0, elapsed = 0, scrollOn = false, l
 let playerURL, backupURL, activeRegion;
 const regions = WaveSurfer.Regions.create();
 const waveform = WaveSurfer.create({container: '#waveform', media: $('player'),
-  height: 90, waveColor: '#8b9e83', progressColor: '#c6e7a5', cursorColor: '#edf2ec',
+  height: 90, waveColor: '#a1b0a0', progressColor: '#3e6154', cursorColor: '#30332f',
   plugins: [regions]});
-regions.enableDragSelection({color: 'rgba(198,231,165,.22)'});
+regions.enableDragSelection({color: 'rgba(62,97,84,.18)'});
 function selection(region) {
   activeRegion = region;
   regions.getRegions().filter(item => item !== region).forEach(item => item.remove());
@@ -201,7 +207,7 @@ async function saveRecording() {
 }
 $('finish').addEventListener('click', async () => {
   busy = true; controls();
-  try { await api('/api/ready', {take: selected}); message('已交接。在 Codex 聊天中说“录好了，继续处理”。'); }
+  try { await api('/api/ready', {take: selected}); $('settings').close(); message('已交接。在 Codex 聊天中说“录好了，继续处理”。'); }
   catch (error) { message(error.message); }
   finally { busy = false; controls(); }
 });
