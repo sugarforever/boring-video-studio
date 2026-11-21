@@ -53,30 +53,144 @@ def correct(data, changes):
     return result
 
 
-def word_cues(words, max_chars=24):
-    cues, group = [], []
-    def flush():
-        if group:
-            cues.append({'id': len(cues) + 1, 'start': group[0]['start'],
-                         'end': group[-1]['end'], 'text': ''.join(w['word'] for w in group).strip()})
-            group.clear()
-    previous_end = 0
-    for word in words:
-        word = dict(word)
-        word['start'] = max(previous_end, float(word['start']))
-        word['end'] = float(word['end'])
-        if not word['word'].strip() or word['end'] <= word['start']:
+def word_cues(words, max_chars=20, max_duration=5.0, pause_gap=.45):
+    """Regroup at lexical/ASR boundaries, prioritizing punctuation and pauses."""
+    if (not isinstance(max_chars, int) or max_chars < 1 or
+            not math.isfinite(max_duration) or max_duration <= 0 or
+            not math.isfinite(pause_gap) or pause_gap <= 0):
+        raise ValueError('Subtitle limits must be positive')
+    cleaned, previous_end = [], 0.0
+    for index, original in enumerate(words):
+        word = dict(original)
+        start, end = float(word['start']), float(word['end'])
+        if not math.isfinite(start) or not math.isfinite(end) or start < 0:
+            raise ValueError('Invalid word timestamp')
+        word['start'], word['end'] = max(previous_end, start), end
+        if not word['word'].strip():
             continue
-        if group and (len(''.join(w['word'] for w in group)) + len(word['word']) > max_chars
-                      or word['end'] - group[0]['start'] > 5
-                      or word['start'] - group[-1]['end'] > .8):
-            flush()
+        if end <= word['start']:
+            raise ValueError('识别词缺少有效时长；需要重新对齐，避免字幕漏字')
+        word['source_word_indices'] = word.get('source_word_indices', [index])
+        cleaned.append(word)
+        previous_end = end
+    if not cleaned:
+        return []
+    text = ''.join(w['word'] for w in cleaned)
+    try:
+        import jieba
+    except ImportError as error:
+        raise RuntimeError('字幕分词需要 jieba：安装此 Skill 的 requirements.txt') from error
+    jieba.setLogLevel(30)
+    lexical_ends = {end for _, _, end in jieba.tokenize(text, HMM=False)}
+    # ASR "words" can be single Chinese characters or partial English words.
+    # Only boundaries shared by lexical tokens and timed units can be used.
+    atoms, group, offset = [], [], 0
+    for i, word in enumerate(cleaned):
         group.append(word)
-        previous_end = word['end']
-        if word['word'].rstrip().endswith(('。', '！', '？', '.', '!', '?')):
-            flush()
-    flush()
+        offset += len(word['word'])
+        following = text[offset:].lstrip()
+        safe = offset in lexical_ends and not (following and following[0] in '，。！？；：、,.!?;:）】》”’')
+        if safe or i == len(cleaned) - 1:
+            atoms.append({'word': ''.join(w['word'] for w in group), 'start': group[0]['start'],
+                          'end': group[-1]['end'], 'source_word_indices': sorted({j for w in group for j in w['source_word_indices']})})
+            group = []
+    n = len(atoms)
+    costs, choices = [float('inf')] * (n + 1), [None] * n
+    costs[n] = 0
+    target = max_chars * .75
+    for i in range(n - 1, -1, -1):
+        combined = ''
+        for j in range(i, n):
+            if j > i:
+                prev = atoms[j - 1]['word'].rstrip()
+                gap = atoms[j]['start'] - atoms[j - 1]['end']
+                if gap >= pause_gap or prev.endswith(('。', '！', '？', '!', '?', '；', ';')):
+                    break
+            combined += atoms[j]['word']
+            length = len(combined.strip())
+            duration = atoms[j]['end'] - atoms[i]['start']
+            if length > max_chars or duration > max_duration:
+                break
+            ending = combined.rstrip()
+            gap = atoms[j + 1]['start'] - atoms[j]['end'] if j + 1 < n else 0
+            natural = (j == n - 1 or gap >= pause_gap or ending.endswith(('。', '！', '？', '!', '?', '；', ';')))
+            penalty = 0 if natural else 1 if ending.endswith(('，', ',', '：', ':', '、')) else 4
+            # Balance clauses so a hard limit does not strand a tiny final cue.
+            cost = 2 + ((length - target) / max(1, target)) ** 2 + penalty
+            if length < min(4, max_chars) and not natural:
+                cost += 3
+            if cost + costs[j + 1] < costs[i]:
+                costs[i], choices[i] = cost + costs[j + 1], j + 1
+    if choices[0] is None:
+        raise ValueError('无法在完整词和已有时间边界内满足字幕长度/时长限制；需要更细的词时间或人工对齐')
+    cues, i = [], 0
+    while i < n:
+        end = choices[i]
+        group = atoms[i:end]
+        cues.append({'id': len(cues) + 1, 'start': group[0]['start'], 'end': group[-1]['end'],
+                     'text': ''.join(w['word'] for w in group).strip(),
+                     'source_word_indices': sorted({j for w in group for j in w['source_word_indices']})})
+        i = end
     return cues
+
+
+def delivery(data, max_chars=20, max_duration=5.0, pause_gap=.45):
+    """Project reviewed text onto raw timing without inventing intra-word times."""
+    from difflib import SequenceMatcher
+    import re
+    words = data.get('words', [])
+    if not words:
+        raise ValueError('重新分段需要原始 words 时间；请保留原始转写或重新对齐')
+    raw = ''.join(w['word'] for w in words)
+    owners = [i for i, word in enumerate(words) for _ in word['word']]
+    reviewed = ''
+    for cue in data['segments']:
+        text = cue['text'].strip()
+        if reviewed and text and re.match(r'[A-Za-z0-9]', text) and re.search(r'[A-Za-z0-9]$', reviewed):
+            reviewed += ' '
+        reviewed += text
+    projected = []
+    for op, a, b, c, d in SequenceMatcher(None, raw, reviewed, autojunk=False).get_opcodes():
+        if op == 'delete':
+            continue
+        if op == 'equal':
+            projected.extend((char, [owners[a + k]]) for k, char in enumerate(reviewed[c:d]))
+        else:
+            # Replacements/insertions share the complete neighboring timed span;
+            # treating that span atomically avoids fabricated character timing.
+            if op == 'insert' and not any(char.isalnum() for char in reviewed[c:d]):
+                # Added punctuation belongs to the preceding spoken word, so
+                # its clause boundary remains available without new timing.
+                ids = owners[max(0, a - 1):max(1, a)]
+            else:
+                ids = sorted(set(owners[a:b] or owners[max(0, a - 1):min(len(owners), a + 1)]))
+            if not ids:
+                raise ValueError('校对文字无法映射回原始词时间')
+            projected.extend((char, ids) for char in reviewed[c:d])
+    aligned, group_text, group_ids = [], '', set()
+    for char, ids in projected:
+        if group_ids and min(ids) > max(group_ids):
+            aligned.append({'word': group_text, 'start': words[min(group_ids)]['start'],
+                            'end': words[max(group_ids)]['end'], 'source_word_indices': sorted(group_ids)})
+            group_text, group_ids = '', set()
+        group_text += char
+        group_ids.update(ids)
+    if group_text:
+        aligned.append({'word': group_text, 'start': words[min(group_ids)]['start'],
+                        'end': words[max(group_ids)]['end'], 'source_word_indices': sorted(group_ids)})
+    result = copy.deepcopy(data)
+    result['source_segments'] = copy.deepcopy(data['segments'])
+    result['segments'] = word_cues(aligned, max_chars, max_duration, pause_gap)
+    if not result['segments']:
+        raise ValueError('没有可导出的字幕')
+    if re.sub(r'\s+', '', ''.join(cue['text'] for cue in result['segments'])) != re.sub(r'\s+', '', reviewed):
+        raise ValueError('重新分段改变了校对正文，停止交付')
+    for cue in result['segments']:
+        cue['source_cue_ids'] = [s['id'] for s in data['segments'] if s['start'] < cue['end'] and s['end'] > cue['start']]
+    result['subtitle_layout'] = {'max_chars': max_chars, 'max_duration': max_duration,
+                                 'pause_gap': pause_gap, 'tokenizer': 'jieba', 'timing': 'raw-word-spans'}
+    srt(result)
+    return result
 
 
 def prepare(source, output):
@@ -178,6 +292,12 @@ def main():
     correction.add_argument('--transcript', type=Path, required=True)
     correction.add_argument('--corrections', type=Path, required=True)
     correction.add_argument('--output', type=Path, required=True)
+    layout = commands.add_parser('delivery', help='Regroup reviewed text at pauses and lexical boundaries', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    layout.add_argument('--transcript', type=Path, required=True)
+    layout.add_argument('--output', type=Path, required=True)
+    layout.add_argument('--max-chars', type=int, default=20, help='Maximum characters per cue, including punctuation')
+    layout.add_argument('--max-duration', type=float, default=5.0, help='Maximum cue duration in seconds')
+    layout.add_argument('--pause-gap', type=float, default=.45, help='Split at word gaps at least this many seconds')
     args = parser.parse_args()
     try:
         if args.command == 'prepare':
@@ -195,6 +315,15 @@ def main():
                 transcribe(target, args.output, args.model, args.language)
         elif args.command == 'transcribe':
             transcribe(args.audio, args.output, args.model, args.language)
+        elif args.command == 'delivery':
+            data = json.loads(args.transcript.read_text(encoding='utf-8'))
+            result = delivery(data, args.max_chars, args.max_duration, args.pause_gap)
+            args.output.mkdir(parents=True, exist_ok=True)
+            if any((args.output / name).exists() for name in ('transcript.delivery.json', 'subtitles.srt')):
+                raise FileExistsError('交付字幕已存在，请使用新输出目录')
+            write_json(args.output / 'transcript.delivery.json', result)
+            (args.output / 'subtitles.srt').write_text(srt(result), encoding='utf-8')
+            print(f'Delivery subtitles: {args.output / "subtitles.srt"}')
         else:
             data = json.loads(args.transcript.read_text(encoding='utf-8'))
             changes = json.loads(args.corrections.read_text(encoding='utf-8'))

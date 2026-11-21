@@ -28,12 +28,60 @@ class ProcessingTests(unittest.TestCase):
         with self.assertRaises(ValueError): p.correct(data, [{'id': 1, 'text': 'a'}, {'id': 1, 'text': 'b'}])
     def test_invalid_subtitle_timing(self):
         with self.assertRaises(ValueError): p.srt({'segments': [{'id': 1, 'start': 2, 'end': 1, 'text': '错'}]})
-    def test_word_cues_follow_actual_timestamps(self):
-        words = [{'start': i, 'end': i + .5, 'word': '测试'} for i in range(10)]
-        cues = p.word_cues(words, max_chars=6)
-        self.assertEqual(len(cues), 4)
-        self.assertEqual(cues[1]['start'], 3)
-        self.assertEqual(cues[-1]['end'], 9.5)
+    def words(self, text, pause_after=None):
+        result, clock = [], 0
+        for i, char in enumerate(text):
+            result.append({'start': clock, 'end': clock + .16, 'word': char})
+            clock += .18 + (.6 if i == pause_after else 0)
+        return result
+    def test_subtitles_keep_chinese_words_and_short_lines(self):
+        text = '现在把它们放进同一个流程，然后生成字幕，再参照原稿检查识别错误。'
+        cues = p.word_cues(self.words(text), max_chars=12)
+        self.assertEqual(''.join(c['text'] for c in cues), text)
+        self.assertTrue(all(len(c['text']) <= 12 for c in cues))
+        self.assertFalse(any(c['text'].endswith('流') or c['text'].startswith('程') for c in cues))
+        self.assertTrue(all(c['end'] - c['start'] <= 5 for c in cues))
+    def test_subtitles_use_pause_and_punctuation(self):
+        text = '准备好了就开始录音完成以后生成字幕。'
+        words = self.words(text, pause_after=8)
+        cues = p.word_cues(words)
+        self.assertEqual(cues[0]['text'], text[:9])
+        self.assertEqual(cues[1]['start'], words[9]['start'])
+        text = '打开页面，就能看到口播稿。准备好了，点击开始录音。'
+        cues = p.word_cues(self.words(text))
+        self.assertTrue(any(c['text'].endswith('。') for c in cues[:-1]))
+        self.assertEqual(''.join(c['text'] for c in cues), text)
+    def test_subtitles_keep_english_words(self):
+        words = [{'word': 'Hello', 'start': 0, 'end': .3},
+                 {'word': ' trans', 'start': .3, 'end': .6},
+                 {'word': 'cription', 'start': .6, 'end': 1.0},
+                 {'word': ' works.', 'start': 1, 'end': 1.5}]
+        cues = p.word_cues(words, max_chars=14)
+        self.assertEqual([c['text'] for c in cues], ['Hello', 'transcription', 'works.'])
+    def test_delivery_resegments_corrected_text_and_preserves_evidence(self):
+        raw = self.words('整理音量，声称字幕，再称照原稿检查识别错误。')
+        data = {'words': raw, 'segments': [{'id': 1, 'start': 0, 'end': raw[-1]['end'],
+                'text': '整理音量，生成字幕，再参照原稿检查识别错误。'}]}
+        result = p.delivery(data, max_chars=12)
+        self.assertEqual(''.join(c['text'] for c in result['segments']), data['segments'][0]['text'])
+        self.assertEqual(result['words'], raw)
+        self.assertTrue(all(len(c['text']) <= 12 for c in result['segments']))
+        self.assertEqual(result['source_segments'], data['segments'])
+        p.srt(result)
+    def test_added_punctuation_keeps_sentence_boundary_available(self):
+        words = self.words('打开页面就能看到口播稿准备好了点击开始录音')
+        data = {'words': words, 'segments': [{'id': 1, 'start': 0, 'end': words[-1]['end'],
+                'text': '打开页面，就能看到口播稿。准备好了，点击开始录音。'}]}
+        result = p.delivery(data)
+        self.assertEqual([c['text'] for c in result['segments']],
+                         ['打开页面，就能看到口播稿。', '准备好了，点击开始录音。'])
+        self.assertEqual(result['segments'][1]['start'], words[11]['start'])
+    def test_subtitle_limits_require_real_timing(self):
+        with self.assertRaises(ValueError):
+            p.word_cues([{'word': '这是一段没有内部时间的超长识别结果', 'start': 0, 'end': 8}], max_chars=10)
+        with self.assertRaises(ValueError): p.word_cues(self.words('测试'), max_chars=0)
+        with self.assertRaises(ValueError): p.word_cues([{'word': '字', 'start': 0, 'end': 0}])
+        with self.assertRaises(ValueError): p.delivery({'words': [], 'segments': [{'text': '测试'}]})
     @unittest.skipUnless(shutil.which('ffmpeg') and shutil.which('ffprobe'), 'FFmpeg required')
     def test_real_normalization_and_no_overwrite(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -23,3 +23,9 @@ ffmpeg-normalize **1.45.2** is installed by `requirements.txt`, not copied into
 this repository. Its MIT-style license is published at
 https://github.com/slhck/ffmpeg-normalize/blob/master/LICENSE.md.
 Its transitive dependencies retain their own distributions and licenses.
+
+## Subtitle tokenization dependency
+
+Jieba **0.42.1** is installed by `requirements.txt`, not bundled. It supplies
+Chinese lexical boundaries and token offsets under the [MIT license](https://github.com/fxsjy/jieba/blob/master/LICENSE).
+Project: https://github.com/fxsjy/jieba.

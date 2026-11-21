@@ -1,3 +1,4 @@
 # Processing dependencies. The Python standard library alone can run the recorder.
 ffmpeg-normalize==1.45.2
 faster-whisper>=1.1,<2
+jieba==0.42.1
