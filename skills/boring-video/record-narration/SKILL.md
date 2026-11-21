@@ -9,7 +9,7 @@ Produce human-recorded narration and reviewed, timed subtitles from an existing 
 
 ## 1. Establish the session
 
-Resolve the script and project directory from the request. For a new recording, choose `<project>/narration/recording-YYYYMMDD-HHMMSS`. For a continuation, locate the previously supplied session path before creating anything new. Its `script.txt` snapshot is the recording's reference even if the original draft has changed.
+Resolve the script and project directory from the request. For a new recording, choose `<project>/narration/recording-YYYYMMDD-HHMMSS`. For a continuation, including draft revisions and repeated recording, reuse the previously supplied session path. The session's `script.txt` is the current draft; each take retains its own script snapshot. Set the recording’s reference script once: for a submitted session take, use its script path in `handoff.json`; for directly imported audio, use the supplied matching script, or the backup take’s snapshot as defined in [recovery.md](references/recovery.md). Use that reference for retake review, correction and delivery.
 
 **Ready to proceed:** the script and session path are known, and a continuation uses the existing session rather than a replacement.
 
@@ -19,8 +19,12 @@ Start a long-running process and retain its process handle:
 
 ```bash
 python3 scripts/recorder.py --script /absolute/path/NARRATION.md \
-  --session /absolute/path/project/narration/recording-YYYYMMDD-HHMMSS --port 0
+  --session /absolute/path/project/narration/recording-YYYYMMDD-HHMMSS
 ```
+
+Rerunning this command for the same session reuses its running service and URL without opening another tab. When the user revises the draft, run the same command with `--update-script`; the existing page picks up the new text while idle. Finish or recover incomplete takes before updating; for unrecoverable takes, follow [recovery.md](references/recovery.md). Keep the session directory and `recorder-server.json` private; the latter contains the local access token. If the service has stopped, restart it on the same port. An occupied port is an error to resolve, rather than a reason to silently select a new port.
+
+**Recorder ready:** the service is reachable for the intended session. After a draft update, verify that the existing page displays the requested text and previous takes retain their script snapshots. If the page cannot be inspected, report the display check as pending rather than claiming the new draft is visible.
 
 Give the user the printed browser URL, including its token fragment, and the session path. Ask them to choose a microphone, start recording, stop and listen, then select a take and click “使用选中版本，交给 Codex”. They can pause/resume or record another whole take. After saving, they can drag across the waveform and play that selection to inspect short retries. Microphone permission and recording controls belong to the user.
 
@@ -52,7 +56,7 @@ For every continuous narration take, read [retakes.md](references/retakes.md) an
 
 ## 5. Correct recognition against the script
 
-Read the complete script snapshot and final transcript. Correct recognition errors and punctuation using audio evidence and context; preserve intelligible spoken wording, including off-script additions, omissions and changed examples. A difference from the script alone is not a recognition error. Apply the author-intent and capability rules in the retake reference to unresolved passages, and record their IDs, times and disposition in `REVIEW.md`.
+Read the reference script established in step 1 and the complete final transcript. Correct recognition errors and punctuation using audio evidence and context; preserve intelligible spoken wording, including off-script additions, omissions and changed examples. A difference from the script alone is not a recognition error. Apply the author-intent and capability rules in the retake reference to unresolved passages, and record their IDs, times and disposition in `REVIEW.md`.
 
 Write `corrections.json` as an array of changed cue IDs and replacement text; use `[]` if no changes are needed. For example, when cue 3 clearly misrecognized the spoken product name:
 

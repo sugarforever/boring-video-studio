@@ -4,15 +4,15 @@ Use the matching branch below; continue the main workflow once its completion co
 
 ## Recorder cannot open or access the microphone
 
-Open the exact printed URL in Chrome or Safari on the user's Mac. An embedded HTML preview may block microphone access. Let the user grant permission. If the original process ended, restart `scripts/recorder.py` with the existing session's `script.txt` as `--script` and the same `--session`; use the newly printed URL because restarting changes the access token.
+Open the exact printed URL in Chrome or Safari on the user's Mac. An embedded HTML preview may block microphone access. Let the user grant permission. If the original process ended, restart `scripts/recorder.py` with the existing session's `script.txt` as `--script` and the same `--session`; reuse the saved URL: restarting retains the port and access token in `recorder-server.json`. If that file is missing, use the newly printed URL.
 
 **Recovered:** the page displays the session's script and the user can start recording.
 
 ## Browser interrupted or saving failed
 
-While the page is still open, use its original-audio download link if automatic saving fails. After an interruption, reopen the same session and use the incomplete take's recovery button. Recovery joins only successfully saved chunks and may omit the tail. Have the user listen before selecting and submitting the recovered take. Preserve the original takes and chunks.
+While the page is still open, use its original-audio download link if automatic saving fails. After an interruption, reopen the same session and use the incomplete take's recovery button. Recovery joins only successfully saved chunks and may omit the tail. Have the user listen before selecting and submitting the recovered take. If a take has no saved chunks or recovery fails, use “放弃此版本” while recording is stopped. It marks that take abandoned and retains its files, allowing draft updates and new recordings. Preserve the original takes and chunks.
 
-For a downloaded backup, run `prepare --audio /absolute/path/backup.webm` instead of `--session`; retain the session's script snapshot for correction. Confirm the user chose this backup before processing it.
+For a downloaded backup, run `prepare --audio /absolute/path/backup.webm` instead of `--session`; retain the backup take’s `takes/<id>/script.txt` for correction, or the script path in its existing handoff. For an older session without per-take snapshots, retain the session’s `script.txt` before any draft update. Confirm the user chose this backup before processing it.
 
 **Recovered:** the user has selected a playable saved take or backup. For an ordinary session, submission must still satisfy the main workflow's handoff checks.
 

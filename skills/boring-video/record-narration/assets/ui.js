@@ -127,7 +127,7 @@
 
   // takes: [{id, n, complete, duration, chunks, at, recovered}]
   // handlers: {onPick(take), onRecover(take)}；返回 Map(id -> element)
-  function renderTakes(takes, {selected, handed, locked, onPick, onRecover}) {
+  function renderTakes(takes, {selected, handed, locked, onPick, onRecover, onAbandon}) {
     const box = $('takes'), map = new Map();
     $('takeCount').textContent = takes.length ? `${takes.length} 个` : '';
     if (!takes.length) {
@@ -135,7 +135,7 @@
     } else {
       box.replaceChildren(...takes.map(take => {
         const tpl = $(take.complete ? 'takeTpl' : 'partialTpl').content.firstElementChild.cloneNode(true);
-        tpl.querySelector('.take-t').textContent = `版本 ${take.n}${take.complete ? '' : ' · 未完成'}`;
+        tpl.querySelector('.take-t').textContent = `版本 ${take.n}${take.complete ? '' : take.abandoned ? ' · 已放弃' : ' · 未完成'}`;
         tpl.querySelector('.take-m').textContent = take.complete
           ? `${Number.isFinite(take.duration) ? fmt(take.duration) : '时长待读取'}${take.at ? ' · ' + take.at : ''}`
           : `已保存 ${take.chunks} 块 ≈ ${fmt(take.chunks * 2000)}`;
@@ -152,8 +152,13 @@
           tpl.addEventListener('click', () => onPick(take));
         } else {
           const b = tpl.querySelector('button');
-          b.disabled = locked;
+          b.dataset.unavailable = String(!!take.abandoned || !take.chunks);
+          b.disabled = locked || b.dataset.unavailable === 'true';
           b.addEventListener('click', () => { b.textContent = '正在恢复…'; onRecover(take); });
+          const abandon = tpl.querySelector('.abandon');
+          abandon.dataset.unavailable = String(!!take.abandoned);
+          abandon.disabled = locked || take.abandoned;
+          abandon.addEventListener('click', () => onAbandon(take));
         }
         map.set(take.id, tpl);
         return tpl;

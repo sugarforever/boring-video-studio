@@ -11,6 +11,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 import uuid
 import webbrowser
+import urllib.request
+import urllib.error
 
 ASSETS = Path(__file__).resolve().parents[1] / 'assets'
 MIMES = {'audio/webm': '.webm', 'audio/mp4': '.m4a', 'audio/ogg': '.ogg'}
@@ -42,12 +44,34 @@ class Store:
         else:
             self.data = json.loads(self.manifest.read_text(encoding='utf-8'))
 
+    def update_script(self, text):
+        if not isinstance(text, str) or not text.strip():
+            raise ValueError('口播稿为空')
+        with self.lock:
+            old = (self.root / 'script.txt').read_text(encoding='utf-8')
+            if text == old:
+                return {'changed': False}
+            if any(not take['complete'] and not take.get('abandoned') for take in self.data['takes']):
+                raise ValueError('请先完成或恢复未完成的录音，再更新口播稿')
+            # Backfill snapshots for recordings made before per-take scripts.
+            for take in self.data['takes']:
+                target = self.root / 'takes' / take['id'] / 'script.txt'
+                if not target.exists():
+                    atomic(target, old.encode('utf-8'))
+            atomic(self.root / 'script.txt', text.encode('utf-8'))
+            self.data.update(status='idle', selected=None)
+            self.data.pop('audio', None)
+            (self.root / 'handoff.json').unlink(missing_ok=True)
+            self.save()
+            return {'changed': True}
+
     def save(self):
         atomic(self.manifest, json.dumps(self.data, ensure_ascii=False, indent=2).encode())
 
     def state(self):
         with self.lock:
             result = json.loads(json.dumps(self.data))
+            result['session'] = str(self.root)
             result['script'] = (self.root / 'script.txt').read_text(encoding='utf-8')
             for take in result['takes']:
                 take['chunks'] = len(list((self.root / 'takes' / take['id']).glob('*.chunk')))
@@ -56,17 +80,22 @@ class Store:
     def take(self, take_id):
         return next(t for t in self.data['takes'] if t['id'] == take_id)
 
-    def create(self, mime, capture=None):
+    def create(self, mime, capture=None, expected_script=None):
         if capture is not None and not isinstance(capture, dict):
             raise ValueError('无效的录音设备设置')
         base = mime.split(';')[0]
         if base not in MIMES:
             raise ValueError('不支持的录音格式')
         with self.lock:
+            current_script = (self.root / 'script.txt').read_text(encoding='utf-8')
+            if expected_script != current_script:
+                raise FileExistsError('口播稿已更新，请确认新稿后重新开始录音')
             take = {'id': uuid.uuid4().hex, 'mime': mime, 'complete': False,
                     'capture': {key: value for key, value in (capture or {}).items()
                                 if key in ('sampleRate', 'channelCount', 'echoCancellation', 'noiseSuppression', 'autoGainControl')}}
             (self.root / 'takes' / take['id']).mkdir(parents=True)
+            atomic(self.root / 'takes' / take['id'] / 'script.txt',
+                   current_script.encode('utf-8'))
             self.data['takes'].append(take)
             self.data['status'] = 'recording'
             self.data.pop('audio', None)
@@ -74,10 +103,22 @@ class Store:
             self.save()
             return take
 
+    def abandon(self, take_id):
+        with self.lock:
+            take = self.take(take_id)
+            if take['complete']:
+                raise ValueError('完整录音无需放弃，请保留并选择需要的版本')
+            take['abandoned'] = True
+            if self.data['status'] == 'recording' and not any(
+                    not t['complete'] and not t.get('abandoned') for t in self.data['takes']):
+                self.data['status'] = 'idle'
+            self.save()
+            return {'status': 'abandoned'}
+
     def chunk(self, take_id, index, data):
         with self.lock:
             take = self.take(take_id)
-            if take['complete'] or not 0 <= index < 100000 or not data:
+            if take['complete'] or take.get('abandoned') or not 0 <= index < 100000 or not data:
                 raise ValueError('无效的音频块')
             path = self.root / 'takes' / take_id / f'{index:06d}.chunk'
             if path.exists():
@@ -90,6 +131,8 @@ class Store:
     def finalize(self, take_id, count):
         with self.lock:
             take = self.take(take_id)
+            if take.get('abandoned'):
+                raise ValueError('该版本已放弃，保存的文件仍保留')
             if take['complete']:
                 return take
             directory = self.root / 'takes' / take_id
@@ -120,7 +163,9 @@ class Store:
             self.data.update(status='ready', selected=take_id, audio=take['audio'])
             self.save()
             atomic(self.root / 'handoff.json', json.dumps({
-                'script': str(self.root / 'script.txt'),
+                'script': str(self.root / 'takes' / take_id / 'script.txt'
+                              if (self.root / 'takes' / take_id / 'script.txt').exists()
+                              else self.root / 'script.txt'),
                 'audio': str(self.root / take['audio']), 'take': take_id,
             }, ensure_ascii=False, indent=2).encode())
             return {'status': 'ready'}
@@ -188,10 +233,15 @@ def make_server(store, port=8765):
                 if match:
                     return self.respond(store.chunk(match[1], int(match[2]), raw))
                 body = json.loads(raw)
+                if path == '/api/script':
+                    return self.respond(store.update_script(body['text']))
                 if path == '/api/takes':
-                    return self.respond(store.create(body['mime'], body.get('capture')))
+                    return self.respond(store.create(body['mime'], body.get('capture'), body.get('script')))
                 if path == '/api/ready':
                     return self.respond(store.ready(body['take']))
+                match = re.fullmatch(r'/api/takes/([a-f0-9]{32})/abandon', path)
+                if match:
+                    return self.respond(store.abandon(match[1]))
                 match = re.fullmatch(r'/api/takes/([a-f0-9]{32})/finalize', path)
                 if match:
                     return self.respond(store.finalize(match[1], int(body['chunks'])))
@@ -209,16 +259,66 @@ def make_server(store, port=8765):
     return server
 
 
+def reuse_server(session, script=None):
+    """Validate the saved endpoint before reusing it; never replace a live service."""
+    endpoint = Path(session) / 'recorder-server.json'
+    if not endpoint.exists():
+        return None
+    saved = json.loads(endpoint.read_text(encoding='utf-8'))
+    port = int(saved['port'])
+    if not 1 <= port <= 65535:
+        raise ValueError('Invalid saved recorder port')
+    base = f'http://127.0.0.1:{port}'
+    headers = {'X-Recorder-Token': saved['token']}
+    try:
+        with urllib.request.urlopen(urllib.request.Request(base + '/api/state', headers=headers), timeout=2) as response:
+            state = json.load(response)
+    except urllib.error.HTTPError as error:
+        raise RuntimeError('保存的端口由其他服务占用，请检查后再启动') from error
+    except urllib.error.URLError:
+        return None
+    if state.get('session') != str(Path(session).resolve()):
+        raise ValueError('录音服务与会话目录不匹配')
+    if script is not None:
+        request = urllib.request.Request(base + '/api/script',
+            data=json.dumps({'text': Path(script).read_text(encoding='utf-8-sig')}).encode(),
+            headers={**headers, 'Content-Type': 'application/json'})
+        try:
+            with urllib.request.urlopen(request, timeout=2) as response:
+                json.load(response)
+        except urllib.error.HTTPError as error:
+            detail = json.loads(error.read()).get('error', str(error))
+            raise ValueError(detail) from error
+    return base + '/#' + saved['token']
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--script', type=Path, required=True)
     parser.add_argument('--session', type=Path, required=True)
-    parser.add_argument('--port', type=int, default=8765, help='0 chooses an available port')
+    parser.add_argument('--port', type=int, default=None, help='Reuse saved port, otherwise 8765; 0 chooses an available port')
     parser.add_argument('--no-open', action='store_true')
+    parser.add_argument('--update-script', action='store_true', help='Update the current draft while preserving each take’s script snapshot')
     args = parser.parse_args()
+    url = reuse_server(args.session, args.script if args.update_script else None)
+    if url:
+        print(f'Recorder (reused): {url}\nSession: {args.session.resolve()}', flush=True)
+        return
     store = Store(args.session, args.script)
-    server = make_server(store, args.port)
+    if args.update_script:
+        store.update_script(args.script.read_text(encoding='utf-8-sig'))
+    port = args.port
+    if port is None:
+        endpoint = store.root / 'recorder-server.json'
+        port = int(json.loads(endpoint.read_text())['port']) if endpoint.exists() else 8765
+    server = make_server(store, port)
     url = f'http://127.0.0.1:{server.server_port}/#{server.token}'
+    endpoint = store.root / 'recorder-server.json'
+    if endpoint.exists():
+        server.token = json.loads(endpoint.read_text())['token']
+        url = f'http://127.0.0.1:{server.server_port}/#{server.token}'
+    atomic(endpoint, json.dumps({'port': server.server_port, 'token': server.token}).encode())
+    endpoint.chmod(0o600)
     print(f'Recorder: {url}\nSession: {store.root}', flush=True)
     if not args.no_open:
         webbrowser.open(url)

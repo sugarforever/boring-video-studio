@@ -1,5 +1,6 @@
 // Optional integration test: npm install playwright outside the repository, then
 // PLAYWRIGHT_MODULE=/absolute/path/node_modules/playwright node tests/browser.cjs
+// RECORDER_ONLY=1 skips audio normalization for constant-level fake microphone input.
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const { spawn, execFileSync } = require('node:child_process');
 const { mkdtempSync, writeFileSync, readFileSync, rmSync } = require('node:fs');
@@ -92,9 +93,11 @@ const assert = require('node:assert/strict');
     const audio = path.join(root, 'session', state.audio);
     // Streaming WebM often has no duration header. Decode before measuring.
     execFileSync('ffprobe', ['-v', 'error', audio]);
+    if (!process.env.RECORDER_ONLY) {
     execFileSync(python, [path.join(skill, 'scripts/process_audio.py'), 'prepare', '--session', path.join(root, 'session'), '--output', path.join(root, 'processed')]);
     const duration = Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1', path.join(root, 'processed/narration.wav')]).toString());
     assert.ok(duration > 2 && duration < 5, `pause removed from audio duration: ${duration}`);
+    }
     // A failed upload must block later chunks so interrupted recovery has a valid prefix.
     await page.route('**/api/takes/*/chunks/1', route => route.fulfill({status: 503, contentType: 'application/json', body: JSON.stringify({error: 'simulated upload failure'})}));
     await page.locator('#record').click();
@@ -104,7 +107,7 @@ const assert = require('node:assert/strict');
     const { readdirSync } = require('node:fs');
     assert.deepEqual(readdirSync(path.join(root, 'session/takes', interrupted.id)).filter(name => name.endsWith('.chunk')), ['000000.chunk']);
     await page.reload();
-    await page.waitForFunction(() => document.querySelectorAll('#takes button').length === 2);
+    await page.waitForFunction(() => document.querySelectorAll('#takes .take').length === 2);
     await page.locator('#menu').click();
     const recovery = page.locator('#takes button').filter({hasText: '恢复'});
     await recovery.click();
@@ -116,6 +119,41 @@ const assert = require('node:assert/strict');
     assert.equal(state.takes.length, 2);
     assert.equal(state.takes.every(take => take.complete), true);
     execFileSync('ffprobe', ['-v', 'error', path.join(root, 'session', state.audio)]);
+    // A zero-chunk emptyTake take must not trap draft revisions.
+    const auth = new URL(url).hash.slice(1);
+    const emptyTake = await page.evaluate(async token => {
+      const response = await fetch('/api/takes', {method: 'POST',
+        headers: {'X-Recorder-Token': token, 'Content-Type': 'application/json'},
+        body: JSON.stringify({mime: 'audio/webm', script: document.querySelector('#scriptInner').dataset.source})});
+      return response.json();
+    }, auth);
+    await page.reload();
+    await page.waitForFunction(() => !document.querySelector('#record').disabled);
+    await page.locator('#menu').click();
+    assert.equal(await page.getByRole('button', {name: '恢复已保存部分'}).isDisabled(), true);
+    await page.getByRole('button', {name: '放弃此版本'}).click();
+    await page.waitForFunction(() => document.querySelector('#takes').textContent.includes('已放弃'));
+    const oldSnapshot = readFileSync(path.join(root, 'session/takes', emptyTake.id, 'script.txt'), 'utf8');
+    const revised = '修改后的稿件，在原页面继续录制。';
+    writeFileSync(script, revised);
+    const reused = execFileSync(python, [path.join(skill, 'scripts/recorder.py'),
+      '--script', script, '--session', path.join(root, 'session'), '--update-script', '--no-open'], {encoding: 'utf8'});
+    assert.ok(reused.includes(url));
+    await page.waitForFunction(text => document.querySelector('#scriptInner').dataset.source === text, revised);
+    assert.equal(readFileSync(path.join(root, 'session/takes', emptyTake.id, 'script.txt'), 'utf8'), oldSnapshot);
+    await page.locator('#closeMenu').click();
+    // Force a draft update between the displayed text and take creation.
+    const latest = '刚更新的新稿，确认后才能重新开始。';
+    await page.route('**/api/takes', async route => {
+      await page.request.post(new URL('/api/script', url).href, {
+        headers: {'X-Recorder-Token': auth}, data: {text: latest}});
+      await route.continue();
+    }, {times: 1});
+    await page.locator('#record').click();
+    await page.waitForFunction(() => document.querySelector('#notice').textContent.includes('请确认新稿'));
+    assert.equal(await page.locator('#scriptInner').getAttribute('data-source'), latest);
+    assert.equal(JSON.parse(readFileSync(path.join(root, 'session/session.json'))).takes.length, 3);
+    assert.equal(await page.locator('#record').isEnabled(), true);
     assert.deepEqual(errors, []);
     if (process.env.SCREENSHOT) await page.screenshot({path: process.env.SCREENSHOT + '.desktop.png', fullPage: true});
     await page.setViewportSize({width: 390, height: 844});
@@ -125,7 +163,7 @@ const assert = require('node:assert/strict');
     assert.equal(await page.locator('#mic').isVisible(), true);
     await page.locator('#closeMenu').click();
     if (process.env.SCREENSHOT) await page.screenshot({path: process.env.SCREENSHOT, fullPage: true});
-    console.log('PASS: recording, pause/resume, playback, normalization, handoff, reload recovery, script escaping');
+    console.log('PASS: recording, pause/resume, playback, handoff, reload recovery, script escaping, abandoned take, live draft update' + (process.env.RECORDER_ONLY ? ' (normalization excluded)' : ', normalization'));
   } catch (error) {
     console.error('Session at failure:', readFileSync(path.join(root, 'session/session.json'), 'utf8'));
     for (const context of browser?.contexts() || []) for (const page of context.pages()) console.error('UI at failure:', await page.locator('#message').textContent(), await page.locator('#timer').textContent());

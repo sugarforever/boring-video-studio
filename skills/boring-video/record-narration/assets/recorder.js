@@ -38,7 +38,9 @@ async function api(path, body) {
   const response = await fetch(path, {method: body === undefined ? 'GET' : 'POST', headers, body});
   if (!response.ok) {
     const data = await response.json();
-    throw new Error(data.error || `请求失败 (${response.status})`);
+    const error = new Error(data.error || `请求失败 (${response.status})`);
+    error.status = response.status;
+    throw error;
   }
   return response.json();
 }
@@ -54,7 +56,7 @@ function controls() {
   waveform.setOptions({interact: !busy && !active});
   $('playSelection').disabled = busy || active || !activeRegion;
   $('finish').disabled = busy || active || !selected;
-  document.querySelectorAll('#takes button').forEach(button => { button.disabled = busy || active; });
+  document.querySelectorAll('#takes button').forEach(button => { button.disabled = busy || active || button.dataset.unavailable === 'true'; });
 }
 async function preview(take) {
   const response = await fetch(`/api/takes/${take.id}/audio`, {headers: {'X-Recorder-Token': token}});
@@ -104,7 +106,15 @@ async function refresh() {
     finally { busy = false; controls(); }
   };
   UI.renderTakes(sessionTakes, {selected, handed, locked: busy || !!(recorder && recorder.state !== 'inactive'),
-    onPick: handle(false), onRecover: handle(true)});
+    onPick: handle(false), onRecover: handle(true), onAbandon: async take => {
+      busy = true; controls();
+      try {
+        await api(`/api/takes/${take.id}/abandon`, {});
+        await refresh(); savedPhase();
+        message('已放弃此版本，已保存的文件仍保留。可以改稿或重新录制。');
+      } catch (error) { message(error.message); }
+      finally { busy = false; controls(); }
+    }});
   const current = sessionTakes.find(take => take.id === selected && take.complete);
   if (current) await preview(current);
   controls();
@@ -165,7 +175,7 @@ $('record').addEventListener('click', async () => {
     levelData = new Uint8Array(analyser.fftSize);
     const settings = stream.getAudioTracks()[0].getSettings();
     const capture = Object.fromEntries(['sampleRate', 'channelCount', 'echoCancellation', 'noiseSuppression', 'autoGainControl'].filter(key => key in settings).map(key => [key, settings[key]]));
-    const take = await api('/api/takes', {mime, capture}); takeId = take.id;
+    const take = await api('/api/takes', {mime, capture, script: $('scriptInner').dataset.source}); takeId = take.id;
     chunks = []; nextUpload = 0; elapsed = 0; started = performance.now(); uploadQueue = Promise.resolve();
     recorder.addEventListener('dataavailable', event => {
       if (!event.data.size) return;
@@ -184,7 +194,13 @@ $('record').addEventListener('click', async () => {
     $('fallback').hidden = true;
     phase('recording'); UI.clearNotice();
     await refresh();
-  } catch (error) { release(); phase('error', {error: 'perm'}); UI.showNotice({kind: 'error', title: '无法开始录音', detail: error.message}); }
+  } catch (error) {
+    release();
+    if (error.status === 409) {
+      await refresh(); savedPhase();
+      UI.showNotice({kind: 'warn', title: '口播稿已更新', detail: '请确认新稿，再点击开始录音。'});
+    } else { phase('error', {error: 'perm'}); UI.showNotice({kind: 'error', title: '无法开始录音', detail: error.message}); }
+  }
   finally { busy = false; controls(); }
 });
 $('pause').addEventListener('click', () => {
@@ -255,7 +271,23 @@ window.addEventListener('beforeunload', event => {
     if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) throw new Error('当前页面无法访问麦克风，请用 Chrome 或 Safari 打开本地链接。');
     await microphones();
     savedPhase();
-    if (state.takes.some(take => !take.complete)) UI.showNotice({kind: 'warn', title: '发现未完成的录音', detail: '可在菜单恢复已保存部分，恢复后请试听确认。', recover: true});
+    if (state.takes.some(take => !take.complete && !take.abandoned)) UI.showNotice({kind: 'warn', title: '发现未完成的录音', detail: '可在菜单恢复已保存部分，恢复后请试听确认。', recover: true});
     controls(); requestAnimationFrame(frame);
   } catch (error) { $('record').disabled = true; UI.showNotice({kind: 'error', title: '无法准备录音', detail: error.message}); }
 })();
+
+// Follow draft changes in the existing tab, leaving active capture untouched.
+let checkingDraft = false;
+setInterval(async () => {
+  if (checkingDraft || busy || (recorder && recorder.state !== 'inactive')) return;
+  checkingDraft = true;
+  try {
+    const state = await api('/api/state');
+    if (!busy && (!recorder || recorder.state === 'inactive') && $('scriptInner').dataset.source !== state.script) {
+      await refresh();
+      $('script').scrollTop = 0;
+      savedPhase(); controls();
+    }
+  } catch (_) { /* Keep the current draft visible during a service restart. */ }
+  finally { checkingDraft = false; }
+}, 2000);
