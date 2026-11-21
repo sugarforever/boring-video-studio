@@ -1,25 +1,121 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>口播录音室</title>
-<style>
-:root{color-scheme:light;font-family:system-ui,-apple-system,sans-serif;background:#f3f0e9;color:#30332f;--line:#d7d8ce;--accent:#3e6154}*{box-sizing:border-box}body{margin:0}button,select{font:inherit;color:inherit;background:transparent;border:1px solid var(--line);border-radius:10px;padding:11px 16px}button{cursor:pointer}button:hover{background:#e7e7dd}button:disabled{opacity:.4;cursor:default}button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:4px}.primary{background:var(--accent);color:#fff;border-color:var(--accent)}.primary:hover{background:#304c42}.danger{color:#954439}.muted{color:#686d63}.menu-button{position:fixed;top:20px;right:24px;width:46px;height:46px;font-size:23px;background:#f3f0e9;z-index:1}main{height:100dvh;display:flex;flex-direction:column;max-width:980px;margin:auto;padding:64px 40px 16px}#script{flex:1;min-height:0;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:32px;line-height:1.85;letter-spacing:.025em;padding:24px 24px 32vh;scrollbar-width:thin;scrollbar-color:#b8bdb1 transparent}#script:focus-visible{outline:2px solid #9cae9e;outline-offset:3px}.recording-bar{padding:18px 0 0;border-top:1px solid var(--line)}.controls{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}.clock{font-size:18px;font-variant-numeric:tabular-nums;min-width:56px}meter{width:70px;height:14px}#message{text-align:center;font-size:13px;line-height:1.6;min-height:21px;margin:12px 0 0;overflow-wrap:anywhere}#fallback{display:none;text-align:center;color:var(--accent);margin:8px}dialog{position:fixed;inset:0 0 0 auto;margin:0;width:400px;max-width:100%;height:100dvh;max-height:100dvh;border:0;border-left:1px solid var(--line);background:#faf8f2;color:inherit;padding:26px;overflow-y:auto}dialog::backdrop{background:#30332f30}dialog header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px}h1,h2{font-size:16px;font-weight:600;margin:0}h2{margin:28px 0 16px}label{display:grid;gap:12px;margin:22px 0;font-size:14px}input[type=range]{accent-color:var(--accent);width:100%}select{width:100%}.tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.take{padding:10px 0}.take button{width:100%;text-align:left}audio{width:100%;margin:16px 0}#waveform{height:90px;margin:12px 0}#selection{font-size:12px}#finish{width:100%;margin:20px 0}footer{border-top:1px solid var(--line);padding-top:20px;font-size:12px;line-height:1.8;color:#686d63}@media(max-width:600px){main{padding:66px 16px 12px}#script{padding:12px 8px 32vh}.menu-button{top:12px;right:16px}.controls{gap:8px}button{padding:10px 12px}.controls meter{width:48px}}
-</style></head>
-<body>
-<button id="menu" class="menu-button" aria-label="打开设置与录音版本" aria-haspopup="dialog" aria-controls="settings" aria-expanded="false">☰</button>
-<main>
-<div id="script" tabindex="0" aria-label="口播稿"></div>
-<section class="recording-bar" aria-label="录制控制">
-<div class="controls"><span id="timer" class="clock" aria-label="录音时长">00:00</span><meter id="level" aria-label="输入音量" min="0" max="1" low="0.03" high="0.85" optimum="0.3" value="0"></meter><button id="record" class="primary" disabled>开始录音</button><button id="pause" disabled>暂停</button><button id="stop" class="danger" disabled>停止并保存</button><button id="scroll">开始滚动</button></div>
-<div id="message" role="status" aria-live="polite">正在读取口播稿…</div><a id="fallback" download>下载本次原始录音备份</a>
-</section>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>口播录音</title>
+<link rel="stylesheet" href="/ui.css">
+</head>
+<body data-state="idle">
+
+<button id="menu" class="icon-btn menu-btn" type="button" aria-label="打开设置与录音版本" aria-haspopup="dialog" aria-controls="settings" aria-expanded="false">
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14"/></svg>
+  <span id="menuBadge" class="badge" aria-hidden="true" hidden></span>
+</button>
+
+<main class="app">
+  <div id="script" class="script" tabindex="0" aria-label="口播稿">
+    <div id="scriptInner" class="script-inner"><p class="para">正在读取口播稿…</p></div>
+  </div>
+
+  <div class="notice-wrap">
+    <div id="notice" class="notice" role="status" hidden>
+      <span class="notice-ico" aria-hidden="true">
+        <svg class="ico-alert" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="7.2"/><path d="M9 5.2v4.6M9 12.6v.1"/></svg>
+        <svg class="ico-ok" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5l3.5 3.5 7.5-8"/></svg>
+      </span>
+      <div class="notice-text"><div id="noticeTitle" class="notice-title"></div><div id="noticeDetail" class="notice-detail"></div></div>
+      <div class="notice-actions">
+        <a id="fallback" class="btn btn-primary btn-sm" download hidden>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.5v8M4.5 7.5L8 11l3.5-3.5M3 13.5h10"/></svg>下载原始录音备份</a>
+        <button id="openRecover" class="btn btn-sm" type="button" hidden>打开菜单恢复</button>
+        <button id="copyPhrase" class="btn btn-sm" type="button" hidden>复制这句话</button>
+        <button id="dismissNotice" class="btn btn-sm btn-quiet" type="button" hidden>关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <section id="bar" class="bar" aria-label="录制控制">
+    <div id="progress" class="progress" aria-hidden="true" hidden></div>
+    <div class="bar-inner">
+      <div class="status">
+        <span id="dot" class="dot" aria-hidden="true"></span>
+        <span id="timer" class="timer is-dim" aria-label="录音时长">00:00</span>
+        <div id="level" class="level" role="img" aria-label="输入电平：未在录音">
+          <span class="lv"></span><span class="lv"></span><span class="lv"></span><span class="lv"></span><span class="lv"></span><span class="lv"></span>
+          <span class="lv"></span><span class="lv"></span><span class="lv"></span><span class="lv"></span><span class="lv hot"></span><span class="lv hot"></span>
+        </div>
+        <div class="status-text"><span id="statusLabel" class="status-label">未录制</span><span id="statusMeta" class="status-meta">系统默认麦克风</span></div>
+      </div>
+      <div class="actions">
+        <button id="review" class="btn" type="button" hidden>试听与交接</button>
+        <button id="pause" class="btn" type="button" hidden></button>
+        <button id="retrySave" class="btn btn-primary" type="button" hidden>重试保存</button>
+        <button id="stop" class="btn" type="button" hidden></button>
+        <button id="record" class="btn btn-primary" type="button" disabled><span class="recdot" aria-hidden="true"></span><span class="lbl">开始录音</span></button>
+      </div>
+      <div class="aux">
+        <button id="scroll" class="btn btn-quiet scroll-btn" type="button" aria-pressed="false">
+          <svg class="ico-down" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.5v10M4 8.5l4 4 4-4"/></svg>
+          <svg class="ico-pause" width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true"><rect x="2.5" y="2" width="3" height="10" rx="1"/><rect x="8.5" y="2" width="3" height="10" rx="1"/></svg>
+          <span class="lbl-long">自动滚动</span><span class="lbl-short">滚动</span><span id="scrollMeta" class="speed-tag">24 px/秒</span>
+        </button>
+      </div>
+    </div>
+    <div id="message" class="sr" role="status" aria-live="polite"></div>
+  </section>
 </main>
-<dialog id="settings" aria-labelledby="settings-title">
-<header><h1 id="settings-title">设置与录音版本</h1><button id="closeMenu" aria-label="关闭菜单">✕</button></header>
-<label>字号<input id="font" type="range" min="20" max="60" value="32"></label>
-<label>滚动速度<input id="speed" type="range" min="5" max="80" value="24"></label>
-<button id="top">回到开头</button>
-<label>麦克风<select id="mic"><option value="">系统默认麦克风</option></select></label>
-<h2>录音版本</h2><div id="takes"></div><audio id="player" controls></audio><div id="waveform" aria-label="录音波形"></div><div class="tools"><button id="playSelection" disabled>试听选区</button><span id="selection" class="muted">拖动波形选择试听范围</span></div><button id="finish" class="primary" disabled>使用选中版本，交给 Codex</button>
-<footer>录音每隔约 2 秒保存。完成前请保持此页和本地服务开启。<br>交给 Codex 后，在聊天中说“录好了，继续处理”。</footer>
+
+<dialog id="settings" class="drawer" aria-labelledby="settings-title">
+  <div class="dh">
+    <h2 id="settings-title">设置与录音版本</h2>
+    <button id="closeMenu" class="icon-btn" type="button" aria-label="关闭菜单">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9"/></svg>
+    </button>
+  </div>
+  <div class="db">
+    <p id="lock" class="lock" hidden>录音进行中：阅读设置可随时调整；麦克风、试听和交接需要先停止并保存。</p>
+    <div class="sec">
+      <h3 class="sec-h">阅读</h3>
+      <label class="field"><span>字号</span><input id="font" class="range" type="range" min="20" max="60" step="1" value="34"><output id="fontOut" class="field-v" for="font">34 px</output></label>
+      <label class="field"><span>滚动速度</span><input id="speed" class="range" type="range" min="5" max="80" step="1" value="24"><output id="speedOut" class="field-v" for="speed">24 px/秒</output></label>
+      <div class="row-btns"><button id="top" class="btn btn-sm" type="button">回到开头</button></div>
+    </div>
+    <div class="sec">
+      <h3 class="sec-h"><label for="mic">麦克风</label></h3>
+      <select id="mic" class="select"><option value="">系统默认麦克风</option></select>
+      <p class="hint">录制时请求关闭回声消除、降噪和自动增益，实际设置由浏览器与麦克风决定。</p>
+    </div>
+    <div class="sec" id="takesSec">
+      <h3 class="sec-h">录音版本<small id="takeCount"></small></h3>
+      <div id="takes" class="takes"><div class="empty">还没有录音版本。关闭菜单，点击「开始录音」。</div></div>
+    </div>
+    <div class="sec" id="previewSec" hidden>
+      <h3 class="sec-h">试听<small id="previewTitle"></small></h3>
+      <audio id="player" class="audio" controls preload="metadata"></audio>
+      <div id="waveform" class="wave" aria-label="录音波形，拖动选择试听范围"></div>
+      <div class="sel-row">
+        <span id="selection" class="sel-txt">在波形上拖动，选择要试听的片段</span>
+        <span class="row-btns"><button id="playSelection" class="btn btn-sm" type="button" disabled>试听选区</button></span>
+      </div>
+    </div>
+  </div>
+  <div class="df">
+    <button id="finish" class="btn btn-primary btn-block" type="button" disabled>使用选中版本，交给 Codex</button>
+    <p id="finishNote" class="df-note">交接后，回到 Codex 聊天说「录好了，继续处理」。录音每约 2 秒保存到本地，完成前请保持此页和本地服务开启。</p>
+  </div>
 </dialog>
-<script src="/vendor/wavesurfer.min.js"></script><script src="/vendor/regions.min.js"></script><script src="/recorder.js"></script></body></html>
+
+<template id="takeTpl">
+  <button class="take" type="button" aria-pressed="false"><span class="radio" aria-hidden="true"></span><span><span class="take-t"></span><span class="take-m"></span></span><span class="tag"></span></button>
+</template>
+<template id="partialTpl">
+  <div class="take is-partial"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#7A500E" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 5v4.5M9 12.5v.1"/></svg><span><span class="take-t"></span><span class="take-m"></span></span><button class="btn btn-sm" type="button">恢复已保存部分</button></div>
+</template>
+
+<script src="/vendor/wavesurfer.min.js"></script>
+<script src="/vendor/regions.min.js"></script>
+<script src="/ui.js"></script>
+<script src="/recorder.js"></script>
+</body>
+</html>

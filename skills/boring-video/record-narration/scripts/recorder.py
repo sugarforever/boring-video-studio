@@ -152,6 +152,8 @@ def make_server(store, port=8765):
         def do_GET(self):
             path = urlparse(self.path).path
             static = {'/': ('index.html', 'text/html; charset=utf-8'), '/recorder.js': ('recorder.js', 'text/javascript'),
+                      '/ui.css': ('ui.css', 'text/css; charset=utf-8'),
+                      '/ui.js': ('ui.js', 'text/javascript'),
                       '/vendor/wavesurfer.min.js': ('vendor/wavesurfer.min.js', 'text/javascript'),
                       '/vendor/regions.min.js': ('vendor/regions.min.js', 'text/javascript')}
             if path in static:
