@@ -40,6 +40,12 @@ class RecorderTests(unittest.TestCase):
         except urllib.error.HTTPError as error:
             error.close()
             raise
+    def test_capture_settings_preserved(self):
+        settings = {'sampleRate': 48000, 'autoGainControl': False, 'deviceId': 'not needed'}
+        take = self.call('/api/takes', {'mime': 'audio/webm', 'capture': settings})
+        self.assertEqual(take['capture'], {'sampleRate': 48000, 'autoGainControl': False})
+        self.assertEqual(self.call('/api/state')['takes'][0]['capture'], take['capture'])
+
     def test_snapshot_and_resume(self):
         (self.root / 'draft.txt').write_text('changed')
         again = r.Store(self.root / 'session', self.root / 'draft.txt')

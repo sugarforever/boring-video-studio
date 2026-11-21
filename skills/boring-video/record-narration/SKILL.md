@@ -5,7 +5,7 @@ description: Record your own narration from a script using a local browser telep
 
 # Record Narration
 
-Produce human-recorded narration and reviewed, timed subtitles from an existing UTF-8 script. Resolve bundled paths relative to this skill's directory; run the commands below there with absolute project paths. Preserve original takes, intended speech and speaking speed. Remove abandoned retries when a complete replacement is identifiable. Denoising, general pause compression and TTS are outside this workflow.
+Produce human-recorded narration and reviewed, timed subtitles from an existing UTF-8 script. Resolve bundled paths relative to this skill's directory; run the commands below there with absolute project paths. Treat recorded speech as the content authority and the script as context for recognition and progression. Preserve original takes, coherent improvisation and speaking speed. Remove abandoned retries when a complete replacement is identifiable. Denoising, general pause compression and TTS are outside this workflow.
 
 ## 1. Establish the session
 
@@ -22,7 +22,7 @@ python3 scripts/recorder.py --script /absolute/path/NARRATION.md \
   --session /absolute/path/project/narration/recording-YYYYMMDD-HHMMSS --port 0
 ```
 
-Give the user the printed browser URL, including its token fragment, and the session path. Ask them to choose a microphone, start recording, stop and listen, then select a take and click “使用选中版本，交给 Codex”. They can pause/resume or record another whole take. Microphone permission and recording controls belong to the user.
+Give the user the printed browser URL, including its token fragment, and the session path. Ask them to choose a microphone, start recording, stop and listen, then select a take and click “使用选中版本，交给 Codex”. They can pause/resume or record another whole take. After saving, they can drag across the waveform and play that selection to inspect short retries. Microphone permission and recording controls belong to the user.
 
 Leave the service running and yield the chat while they record. Explain that they must return and say “录好了，继续处理”; the page saves a handoff file but does not send a chat message. If opening, saving or recording fails, read [recovery.md](references/recovery.md).
 
@@ -30,7 +30,7 @@ Leave the service running and yield the chat while they record. Explain that the
 
 ## 3. Prepare audio and transcribe
 
-Use an existing compatible environment when available. Recording needs Python 3.10+; processing needs `ffmpeg` and `ffprobe`; transcription uses `faster-whisper>=1.1,<2` in a Python 3.11/3.12 virtual environment outside the skill directory. If dependencies are missing, or only part of processing succeeded, read [recovery.md](references/recovery.md).
+Use an existing compatible environment when available. Recording needs Python 3.10+; processing needs `ffmpeg` and `ffprobe`, plus this skill’s `requirements.txt` installed in a Python 3.11/3.12 virtual environment outside the skill directory. If dependencies are missing, or only part of processing succeeded, read [recovery.md](references/recovery.md).
 
 Tell the user that first use may download model weights; audio processing and transcription run locally. Choose the spoken language (`zh` for Chinese, `auto` when uncertain) and a new output directory:
 
@@ -40,7 +40,7 @@ Tell the user that first use may download model weights; audio processing and tr
   --transcribe --language zh
 ```
 
-This normalizes loudness and transcribes the resulting `narration.wav`. Use `scripts/process_audio.py --help` and its subcommand help for alternate inputs or model settings.
+This uses ffmpeg-normalize to measure and apply a uniform gain, then transcribes `narration.wav`. Preserve the loudness report: peak headroom can require a quieter target. A dynamic fallback stops export rather than amplifying quiet passages separately. Normalization preserves relative levels; it does not remove noise. Use `scripts/process_audio.py --help` and its subcommand help for alternate inputs or model settings.
 
 **Ready for editing:** the WAV is decodable and has positive duration; `transcript.raw.json` contains nonempty timed cues, and `subtitles.raw.srt` exists. Retain raw outputs. A failed transcription is unfinished work, even if audio normalization succeeded.
 
@@ -52,7 +52,7 @@ For every continuous narration take, read [retakes.md](references/retakes.md) an
 
 ## 5. Correct recognition against the script
 
-Read the complete script snapshot and transcript. Correct clear misrecognitions, terminology and punctuation; recorded speech determines the words. Preserve spoken paraphrases and omissions. Resolve uncertain names, numbers, negations or substantial differences through audio evidence or a targeted user question. Keep unresolved cues unchanged and list their IDs, times and questions in `REVIEW.md`.
+Read the complete script snapshot and final transcript. Correct recognition errors and punctuation using audio evidence and context; preserve intelligible spoken wording, including off-script additions, omissions and changed examples. A difference from the script alone is not a recognition error. Apply the author-intent and capability rules in the retake reference to unresolved passages, and record their IDs, times and disposition in `REVIEW.md`.
 
 Write `corrections.json` as an array of changed cue IDs and replacement text; use `[]` if no changes are needed. For example, when cue 3 clearly misrecognized the spoken product name:
 
@@ -75,6 +75,6 @@ python3 scripts/process_audio.py correct \
 
 Read the exported subtitles and check increasing, nonoverlapping cue times within the final WAV's duration, allowing only millisecond rounding at the end. If adjacent cues split a word, merge them in a separate delivery export using existing outer cue boundaries; retain source cue IDs and raw word times. Record subtitle checks in `REVIEW.md` alongside the audio review defined in the retake reference.
 
-Deliver clickable absolute paths to the final WAV, `reviewed/subtitles.srt`, `reviewed/transcript.corrected.json`, script snapshot and review notes; include the edit report when cuts were made. Keep original takes and chunks available. Pass these artifacts to the next production step; replacing an existing project's audio requires the user's requested scope to cover that change.
+Deliver clickable absolute paths to the final WAV, final subtitle SRT and corresponding transcript JSON, script snapshot and review notes; include the edit report when cuts were made. If cues were merged, link the delivery exports and retain the reviewed originals as provenance. Keep original takes and chunks available. Pass these artifacts to the next production step; replacing an existing project's audio requires the user's requested scope to cover that change.
 
 **Delivery complete:** audio and subtitles are usable together, and the delivery carries the audio-review status defined in the retake reference. Pending audio review is stated in the final response as well as the review notes.

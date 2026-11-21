@@ -77,9 +77,9 @@ $to-storyboard Turn SCENES.md into a HyperFrames storyboard.
 ## Record your own narration
 
 `record-narration` provides a local browser teleprompter and microphone recorder,
-multiple takes, playback, interruption recovery, and selected-take handoff to the
+multiple takes, WaveSurfer waveform selection/playback, interruption recovery, and selected-take handoff to the
 agent. The agent identifies abandoned retries against the script and applies
-reviewed cuts while retaining originals and an edit map. The bundled processing CLI normalizes loudness with FFmpeg, generates
+reviewed cuts while retaining originals and an edit map. The bundled processing CLI normalizes loudness with ffmpeg-normalize in linear mode, generates
 local Whisper subtitles, and applies agent-reviewed recognition corrections
 without changing subtitle timing. Original recordings are retained.
 
@@ -101,7 +101,7 @@ python3 skills/boring-video/record-narration/scripts/recorder.py \
 
 Recording uses Python 3.10+ and Chrome or Safari. Processing additionally needs
 FFmpeg; local transcription uses a Python 3.11/3.12 environment with
-`pip install 'faster-whisper>=1.1,<2'`. Model weights download on first use;
+`pip install -r skills/boring-video/record-narration/requirements.txt`. Model weights download on first use;
 recorded audio stays local. After selecting a take and submitting it in the page,
 return to the chat and ask the agent to continue. The workflow preserves speaking speed and intended content;
 automatic noise reduction and general pause compression are deferred.
@@ -109,10 +109,10 @@ automatic noise reduction and general pause compression are deferred.
 See [the skill](skills/boring-video/record-narration/SKILL.md) for processing and
 subtitle correction commands.
 
-Development checks:
+Development checks (activate the processing virtual environment first):
 
 ```bash
-python3 -m unittest discover -s skills/boring-video/record-narration/tests -v
+python -m unittest discover -s skills/boring-video/record-narration/tests -v
 node --check skills/boring-video/record-narration/assets/recorder.js
 ```
 
@@ -122,5 +122,6 @@ Install Playwright in a temporary directory, then run:
 
 ```bash
 PLAYWRIGHT_MODULE=/absolute/path/node_modules/playwright \
+NARRATION_PYTHON=/absolute/path/venv/bin/python \
   node skills/boring-video/record-narration/tests/browser.cjs
 ```

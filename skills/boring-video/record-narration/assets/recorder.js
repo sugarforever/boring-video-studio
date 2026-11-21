@@ -1,13 +1,34 @@
 'use strict';
 const $ = id => document.getElementById(id);
+const UI = window.RecorderUI;
+let sessionTakes = [], handed = null;
 const key = `recorder-token:${location.host}`;
 const token = location.hash.slice(1) || sessionStorage.getItem(key) || '';
 sessionStorage.setItem(key, token);
 history.replaceState(null, '', location.pathname);
 let recorder, stream, context, analyser, levelData, takeId, chunks = [], nextUpload = 0, uploadQueue = Promise.resolve();
 let busy = false, selected = null, started = 0, elapsed = 0, scrollOn = false, lastFrame = 0, scrollCarry = 0;
-let playerURL, backupURL;
-const message = text => { $('message').textContent = text; };
+let playerURL, backupURL, activeRegion;
+const regions = WaveSurfer.Regions.create();
+const waveform = WaveSurfer.create({container: '#waveform', media: $('player'),
+  height: 76, waveColor: '#ABA496', progressColor: '#57534A', cursorColor: '#26251F',
+  plugins: [regions]});
+regions.enableDragSelection({color: 'rgba(47,94,140,.13)'});
+function selection(region) {
+  activeRegion = region;
+  regions.getRegions().filter(item => item !== region).forEach(item => item.remove());
+  $('selection').textContent = `${region.start.toFixed(2)} - ${region.end.toFixed(2)} 秒`;
+  $('playSelection').disabled = busy || recorder?.state === 'recording' || recorder?.state === 'paused';
+}
+regions.on('region-created', selection);
+regions.on('region-updated', selection);
+$('playSelection').addEventListener('click', () => activeRegion?.play(true));
+const message = text => { UI.say(text); UI.showNotice({kind: 'warn', title: text}); };
+function phase(next, info = {}) { UI.setPhase(next, {chunks: nextUpload, total: chunks.length, ...info}); }
+function savedPhase() {
+  const take = sessionTakes.find(take => take.id === selected);
+  phase(take ? 'saved' : 'idle', {take});
+}
 async function api(path, body) {
   const headers = {'X-Recorder-Token': token};
   if (body !== undefined && !(body instanceof Blob)) {
@@ -24,9 +45,14 @@ async function api(path, body) {
 function controls() {
   const active = recorder && recorder.state !== 'inactive';
   $('record').disabled = busy || active;
+  $('retrySave').disabled = busy || active;
+  $('review').disabled = busy || active;
+  $('lock').hidden = !busy && !active;
   $('pause').disabled = busy || !active;
   $('stop').disabled = busy || !active;
   $('mic').disabled = busy || active;
+  waveform.setOptions({interact: !busy && !active});
+  $('playSelection').disabled = busy || active || !activeRegion;
   $('finish').disabled = busy || active || !selected;
   document.querySelectorAll('#takes button').forEach(button => { button.disabled = busy || active; });
 }
@@ -36,40 +62,50 @@ async function preview(take) {
   const blob = await response.blob();
   if (playerURL) URL.revokeObjectURL(playerURL);
   playerURL = URL.createObjectURL(blob);
+  $('player').pause();
+  activeRegion = null; regions.clearRegions(); $('playSelection').disabled = true;
+  $('selection').textContent = '拖动波形选择试听范围';
+  $('waveform').dataset.ready = 'false';
+  UI.setPreview(take);
   $('player').src = playerURL;
+  try {
+    await waveform.loadBlob(blob);
+    $('waveform').dataset.ready = 'true';
+  } catch (error) { message(`波形加载失败，仍可用播放器试听：${error.message}`); }
   selected = take.id;
   document.querySelectorAll('[data-take]').forEach(button => {
     button.setAttribute('aria-pressed', String(button.dataset.take === selected));
-    button.classList.toggle('primary', button.dataset.take === selected);
+    button.classList.toggle('is-sel', button.dataset.take === selected);
+    button.querySelector('.radio')?.classList.toggle('is-on', button.dataset.take === selected);
+    const tag = button.querySelector('.tag');
+    if (tag) tag.textContent = button.dataset.take === handed ? '已交接' : button.dataset.take === selected ? '已选中' : '完整';
   });
   controls();
 }
 async function refresh() {
   const state = await api('/api/state');
-  $('script').textContent = state.script;
-  selected = state.selected;
-  $('takes').replaceChildren();
-  for (const [index, take] of state.takes.entries()) {
-    const row = document.createElement('div'); row.className = 'take';
-    const button = document.createElement('button');
-    button.textContent = take.complete ? `版本 ${index + 1} · 选择 / 试听` : `版本 ${index + 1} · 恢复 ${take.chunks} 个已保存块`;
-    button.dataset.take = take.id;
-    button.classList.toggle('primary', selected === take.id);
-    button.setAttribute('aria-pressed', String(selected === take.id));
-    button.addEventListener('click', async () => {
-      busy = true; controls();
-      try {
-        if (!take.complete) {
-          await api(`/api/takes/${take.id}/finalize`, {chunks: take.chunks});
-          await refresh();
-          message('已恢复保存部分。中断录音请试听确认，尾部可能缺失。');
-        } else { await preview(take); message(`已选择版本 ${index + 1}`); }
-      } catch (error) { message(error.message); }
-      finally { busy = false; controls(); }
-    });
-    row.append(button); $('takes').append(row);
+  if ($('scriptInner').dataset.source !== state.script) {
+    UI.renderScript(state.script);
+    $('scriptInner').dataset.source = state.script;
   }
-  const current = state.takes.find(take => take.id === selected && take.complete);
+  selected = state.selected;
+  handed = state.status === 'ready' ? selected : null;
+  sessionTakes = state.takes.map((take, index) => ({...take, n: index + 1,
+    duration: take.id === takeId ? elapsed : undefined}));
+  const handle = recover => async take => {
+    busy = true; controls();
+    try {
+      if (recover) {
+        await api(`/api/takes/${take.id}/finalize`, {chunks: take.chunks});
+        await refresh(); savedPhase();
+        message('已恢复保存部分。中断录音请试听确认，尾部可能缺失。');
+      } else { await preview(take); savedPhase(); UI.clearNotice(); }
+    } catch (error) { message(error.message); }
+    finally { busy = false; controls(); }
+  };
+  UI.renderTakes(sessionTakes, {selected, handed, locked: busy || !!(recorder && recorder.state !== 'inactive'),
+    onPick: handle(false), onRecover: handle(true)});
+  const current = sessionTakes.find(take => take.id === selected && take.complete);
   if (current) await preview(current);
   controls();
   return state;
@@ -101,18 +137,23 @@ async function flushChunks() {
   while (nextUpload < chunks.length) {
     await upload(nextUpload);
     nextUpload++;
+    if (UI.phase === 'saving') phase('saving');
+    else if (recorder?.state === 'recording' || recorder?.state === 'paused') {
+      phase(recorder.state === 'paused' ? 'paused' : 'recording');
+      if ($('notice').dataset.upload === 'pending') { UI.clearNotice(); delete $('notice').dataset.upload; }
+    }
   }
 }
 function release() {
   stream?.getTracks().forEach(track => track.stop());
   if (context) context.close().catch(() => {});
-  analyser = null; context = null; $('level').value = 0;
+  analyser = null; context = null; UI.setLevel(0);
 }
 $('record').addEventListener('click', async () => {
-  busy = true; controls();
+  busy = true; $('player').pause(); controls();
   try {
     const mic = $('mic').value;
-    stream = await navigator.mediaDevices.getUserMedia({audio: mic ? {deviceId: {exact: mic}} : true});
+    stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1, ...(mic ? {deviceId: {exact: mic}} : {})}});
     await microphones();
     const mime = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus'].find(type => MediaRecorder.isTypeSupported(type));
     if (!mime) throw new Error('此浏览器不支持可保存的录音格式，请使用 Chrome 或 Safari。');
@@ -122,39 +163,43 @@ $('record').addEventListener('click', async () => {
     analyser = context.createAnalyser(); analyser.fftSize = 256;
     context.createMediaStreamSource(stream).connect(analyser);
     levelData = new Uint8Array(analyser.fftSize);
-    const take = await api('/api/takes', {mime}); takeId = take.id;
+    const settings = stream.getAudioTracks()[0].getSettings();
+    const capture = Object.fromEntries(['sampleRate', 'channelCount', 'echoCancellation', 'noiseSuppression', 'autoGainControl'].filter(key => key in settings).map(key => [key, settings[key]]));
+    const take = await api('/api/takes', {mime, capture}); takeId = take.id;
     chunks = []; nextUpload = 0; elapsed = 0; started = performance.now(); uploadQueue = Promise.resolve();
     recorder.addEventListener('dataavailable', event => {
       if (!event.data.size) return;
       chunks.push({blob: event.data, saved: false});
       uploadQueue = uploadQueue.then(flushChunks).catch(error => {
+        $('notice').dataset.upload = 'pending';
         message(`暂未保存到本地服务：${error.message}。停止时将重试，请勿关闭页面。`);
       });
     });
     recorder.addEventListener('error', event => {
+      phase('error', {error: 'mic'});
       message(`录音发生错误：${event.error?.message || '设备不可用'}。请保存或恢复已有录音。`);
     });
     recorder.addEventListener('stop', saveRecording, {once: true});
     recorder.start(2000);
-    $('fallback').style.display = 'none';
-    $('pause').textContent = '暂停'; message('录音中 · 每隔约 2 秒保存');
+    $('fallback').hidden = true;
+    phase('recording'); UI.clearNotice();
     await refresh();
-  } catch (error) { release(); message(`无法开始录音：${error.message}`); }
+  } catch (error) { release(); phase('error', {error: 'perm'}); UI.showNotice({kind: 'error', title: '无法开始录音', detail: error.message}); }
   finally { busy = false; controls(); }
 });
 $('pause').addEventListener('click', () => {
   if (recorder.state === 'recording') {
     elapsed += performance.now() - started; recorder.pause();
-    $('pause').textContent = '继续'; message('已暂停');
+    phase('paused');
   } else {
     started = performance.now(); recorder.resume();
-    $('pause').textContent = '暂停'; message('录音中');
+    phase('recording');
   }
 });
 $('stop').addEventListener('click', () => {
   if (recorder.state === 'recording') elapsed += performance.now() - started;
   busy = true; recorder.stop(); controls(); scrollOn = false;
-  $('scroll').textContent = '开始滚动'; message('正在保存，请稍候…');
+  UI.setScrolling(false); phase('saving'); UI.clearNotice();
 });
 async function saveRecording() {
   release();
@@ -165,24 +210,24 @@ async function saveRecording() {
     backupURL = URL.createObjectURL(blob);
     $('fallback').href = backupURL;
     $('fallback').download = `narration-${takeId}.${recorder.mimeType.includes('mp4') ? 'm4a' : recorder.mimeType.includes('ogg') ? 'ogg' : 'webm'}`;
-    $('fallback').style.display = 'block';
+    $('fallback').hidden = true;
     await uploadQueue;
     await flushChunks();
     await api(`/api/takes/${takeId}/finalize`, {chunks: chunks.length});
-    await refresh(); message('录音已保存。试听后可以交给 Codex，或另录一版。');
-  } catch (error) { message(`自动保存失败：${error.message}。请立即下载原始录音备份，或保持页面并重启服务后恢复已保存块。`); }
+    await refresh(); savedPhase(); UI.clearNotice();
+  } catch (error) { phase('error', {error: 'save'}); UI.showNotice({kind: 'error', title: '自动保存失败', detail: `${error.message}。请先下载原始录音备份，保持页面开启后重试。`, fallback: true}); }
   finally { busy = false; controls(); }
 }
+$('retrySave').addEventListener('click', () => { phase('saving'); UI.clearNotice(); saveRecording(); });
 $('finish').addEventListener('click', async () => {
   busy = true; controls();
-  try { await api('/api/ready', {take: selected}); message('已交接。在 Codex 聊天中说“录好了，继续处理”。'); }
+  try { await api('/api/ready', {take: selected}); UI.closeMenu(); UI.showNotice({kind: 'ok', title: '已交接', detail: '回到 Codex 聊天，发送「录好了，继续处理」。', copy: true, dismissable: true}); }
   catch (error) { message(error.message); }
   finally { busy = false; controls(); }
 });
-$('font').addEventListener('input', () => { $('script').style.fontSize = `${$('font').value}px`; });
 $('top').addEventListener('click', () => { $('script').scrollTop = 0; });
 $('scroll').addEventListener('click', () => {
-  scrollOn = !scrollOn; $('scroll').textContent = scrollOn ? '暂停滚动' : '开始滚动';
+  scrollOn = !scrollOn; UI.setScrolling(scrollOn, Number($('speed').value));
 });
 function frame(now) {
   if (scrollOn && recorder?.state !== 'paused') {
@@ -190,11 +235,12 @@ function frame(now) {
     const pixels = Math.floor(movement);
     scrollCarry = movement - pixels;
     $('script').scrollTop += pixels;
+    if ($('script').scrollTop + $('script').clientHeight >= $('script').scrollHeight - 1) { scrollOn = false; UI.setScrolling(false); }
   }
   lastFrame = now;
   if (analyser) {
     analyser.getByteTimeDomainData(levelData);
-    $('level').value = Math.min(1, Math.sqrt(levelData.reduce((sum, value) => sum + ((value - 128) / 128) ** 2, 0) / levelData.length) * 3);
+    UI.setLevel(Math.min(1, Math.sqrt(levelData.reduce((sum, value) => sum + ((value - 128) / 128) ** 2, 0) / levelData.length) * 3));
   }
   const seconds = Math.floor((elapsed + (recorder?.state === 'recording' ? now - started : 0)) / 1000);
   $('timer').textContent = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
@@ -208,7 +254,8 @@ window.addEventListener('beforeunload', event => {
     const state = await refresh();
     if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) throw new Error('当前页面无法访问麦克风，请用 Chrome 或 Safari 打开本地链接。');
     await microphones();
-    message(state.status === 'ready' ? '当前版本已交给 Codex，也可以再录一版。' : '准备好了。点击开始录音。');
+    savedPhase();
+    if (state.takes.some(take => !take.complete)) UI.showNotice({kind: 'warn', title: '发现未完成的录音', detail: '可在菜单恢复已保存部分，恢复后请试听确认。', recover: true});
     controls(); requestAnimationFrame(frame);
-  } catch (error) { $('record').disabled = true; message(error.message); }
+  } catch (error) { $('record').disabled = true; UI.showNotice({kind: 'error', title: '无法准备录音', detail: error.message}); }
 })();
