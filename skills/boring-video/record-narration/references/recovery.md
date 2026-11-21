@@ -29,9 +29,15 @@ Python 3.12 is also suitable. If installation or model download fails, report th
 
 **Recovered:** the selected interpreter imports `faster_whisper`, `ffmpeg_normalize` and `jieba`, and `ffmpeg` and `ffprobe` are available to the processing command.
 
-## WAV exists but transcription failed
+## Recognition saved but subtitle export failed
 
-Resume from the final WAV rather than running normalization again:
+Inspect `transcript.raw.json` and the reported error first. This file is saved before SRT export, retaining original ASR segments and word timings. Keep it unchanged. For invalid cue times, create an aligned version using the final audio and record the changed intervals and evidence. Continue correction from that version once its cues are valid. A delivery-layout failure with usable raw cues belongs to [subtitles.md](subtitles.md), not a new recognition run.
+
+**Recovered:** raw evidence remains available, repaired cue times have supporting evidence, and a usable SRT corresponds to the transcript used for correction. With no available alignment capability, retain the evidence and report the specific pending intervals.
+
+## WAV exists but recognition did not finish
+
+When no saved transcript exists, resume from the final WAV rather than running normalization again:
 
 ```bash
 /path/to/venv/bin/python scripts/process_audio.py transcribe \
@@ -39,6 +45,6 @@ Resume from the final WAV rather than running normalization again:
   --output /absolute/path/processed-v1 --language zh
 ```
 
-The helpers protect existing outputs. For a fresh version, use a new output directory instead of deleting previous results. If raw JSON or SRT already exists from a partial write, preserve it and transcribe into a new directory.
+The helpers protect existing outputs. Preserve partial results and use a new output directory for another recognition attempt.
 
-**Recovered:** both nonempty raw transcript cues and the corresponding SRT exist for the final WAV.
+**Recovered:** a nonempty original ASR transcript and corresponding raw SRT exist for the final WAV. Final delivery segmentation remains a later step.

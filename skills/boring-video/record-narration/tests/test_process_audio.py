@@ -8,6 +8,8 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
+from types import SimpleNamespace
 
 SCRIPT = Path(__file__).resolve().parents[1] / 'scripts' / 'process_audio.py'
 spec = importlib.util.spec_from_file_location('process_audio', SCRIPT)
@@ -76,6 +78,40 @@ class ProcessingTests(unittest.TestCase):
         self.assertEqual([c['text'] for c in result['segments']],
                          ['打开页面，就能看到口播稿。', '准备好了，点击开始录音。'])
         self.assertEqual(result['segments'][1]['start'], words[11]['start'])
+    def test_delivery_restores_original_english_word_boundary(self):
+        for following, expected in [('cription', 'transcription'), (' cription', 'trans cription')]:
+            data = {'words': [{'word': 'trans', 'start': 0, 'end': .5},
+                              {'word': following, 'start': .5, 'end': 1}],
+                    'segments': [{'id': 1, 'start': 0, 'end': .5, 'text': 'trans'},
+                                 {'id': 2, 'start': .5, 'end': 1, 'text': 'cription'}]}
+            self.assertEqual(p.delivery(data)['segments'][0]['text'], expected)
+        ambiguous = {'words': [{'word': 'hello', 'start': 0, 'end': .4}],
+                     'segments': [{'id': 1, 'start': 0, 'end': .4, 'text': 'hello'},
+                                  {'id': 2, 'start': .6, 'end': 1, 'text': 'world'}]}
+        with self.assertRaisesRegex(ValueError, '词界'):
+            p.delivery(ambiguous)
+    def test_transcribe_saves_evidence_before_subtitle_layout(self):
+        word = SimpleNamespace(start=0, end=0, word='原始识别即使词时间异常也应完整保存', probability=.9)
+        segment = SimpleNamespace(start=0, end=8, text=word.word, words=[word])
+        engine = SimpleNamespace(transcribe=lambda *a, **kw: (iter([segment]), SimpleNamespace(language='zh')))
+        module = SimpleNamespace(WhisperModel=lambda *a, **kw: engine)
+        with tempfile.TemporaryDirectory() as tmp, patch.dict('sys.modules', {'faster_whisper': module}):
+            with patch.object(p, 'word_cues', side_effect=ValueError('layout failed')) as layout:
+                result = p.transcribe('fixture.wav', tmp)
+                layout.assert_not_called()
+            raw = Path(tmp)/'transcript.raw.json'
+            self.assertEqual(json.loads(raw.read_text())['words'][0]['word'], word.word)
+            self.assertEqual(result['segments'][0]['end'], 8)
+            self.assertTrue((Path(tmp)/'subtitles.raw.srt').is_file())
+            with self.assertRaises(ValueError): p.delivery(result)
+            self.assertEqual(json.loads(raw.read_text())['words'][0]['end'], 0)
+    def test_raw_json_survives_failed_srt_export(self):
+        word = SimpleNamespace(start=0, end=1, word='测试', probability=.9)
+        engine = SimpleNamespace(transcribe=lambda *a, **kw: (iter([SimpleNamespace(start=0, end=1, text='测试', words=[word])]), SimpleNamespace(language='zh')))
+        with tempfile.TemporaryDirectory() as tmp, patch.dict('sys.modules', {'faster_whisper': SimpleNamespace(WhisperModel=lambda *a, **kw: engine)}):
+            with patch.object(p, 'srt', side_effect=ValueError('bad cue')):
+                with self.assertRaises(ValueError): p.transcribe('fixture.wav', tmp)
+            self.assertTrue((Path(tmp)/'transcript.raw.json').is_file())
     def test_subtitle_limits_require_real_timing(self):
         with self.assertRaises(ValueError):
             p.word_cues([{'word': '这是一段没有内部时间的超长识别结果', 'start': 0, 'end': 8}], max_chars=10)

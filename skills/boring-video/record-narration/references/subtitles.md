@@ -1,6 +1,6 @@
 # Subtitle segmentation
 
-Run after recognition correction, using the final audio's transcript. ASR words can be single Chinese characters or partial English words; those boundaries alone are insufficient for subtitles.
+Run after recognition correction, using the final audio's transcript. Recognition preserves the ASR's original segments; this step alone imposes final delivery layout limits. ASR words can be single Chinese characters or partial English words; those boundaries alone are insufficient for subtitles.
 
 ## Export
 
@@ -12,7 +12,7 @@ Run after recognition correction, using the final audio's transcript. ASR words 
 
 The helper reuses Jieba lexical boundaries and the existing ASR word times. It prioritizes sentence punctuation, clause punctuation and word gaps. It balances short clauses within the character and duration limits shown by `delivery --help`. These defaults are a narration layout choice, not a universal subtitle standard; choose tighter limits for narrower video layouts.
 
-Reviewed text supplies punctuation and actual spoken wording. Original `words` supply timing; `source_segments`, source cue IDs and source word indices preserve provenance. Replacements share the corresponding original word span, while added punctuation stays with its preceding word. This is text-to-timing projection, not a new acoustic alignment: listen around wording corrections and large replacements to verify their timing.
+Reviewed text supplies punctuation and actual spoken wording. Original `words` supply timing; `source_segments`, source cue IDs and source word indices preserve provenance. Replacements share the corresponding original word span, while added punctuation stays with its preceding word. English cue joins recover spacing from the original timed word boundary, so a split word rejoins without an inserted space. An unmappable boundary stops export; resolve it from the audio or corrected alignment and record the decision. This is text-to-timing projection, not a new acoustic alignment: listen around wording corrections and large replacements to verify their timing.
 
 If a complete timed word cannot fit a limit, export stops with a diagnostic. Obtain finer audio alignment or make an evidenced boundary adjustment; preserve the entire word rather than inventing equally spaced character timestamps. Keep every previous export.
 
@@ -28,7 +28,7 @@ Read all delivery cues and their neighboring cues. Check that:
 
 If a dictionary splits a specialist expression, merge the affected cues only when the result still fits both limits; otherwise choose another phrase boundary using the retained word times. Save any manual adjustment as a new delivery version with its source mapping. Hand off `delivery/subtitles.srt` and `delivery/transcript.delivery.json` together.
 
-**Segmentation complete:** every cue passes the layout checks, uncertain timing/phrasing is listed in `REVIEW.md`, and delivery links point to the same export version. Technical layout success does not resolve pending audio review.
+**Layout verified:** every cue passes the text, character-count, duration and time-order checks, and delivery links point to the same export version. **Boundary review complete:** each phrase boundary and correction span has a supported decision; pending intervals and missing evidence remain explicitly listed in `REVIEW.md` and the user-facing delivery status. Technical layout success does not resolve pending audio review.
 
 ## Reused experience
 

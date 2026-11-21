@@ -42,7 +42,7 @@ Tell the user that first use may download model weights; audio processing and tr
 
 This uses ffmpeg-normalize to measure and apply a uniform gain, then transcribes `narration.wav`. Preserve the loudness report: peak headroom can require a quieter target. A dynamic fallback stops export rather than amplifying quiet passages separately. Normalization preserves relative levels; it does not remove noise. Use `scripts/process_audio.py --help` and its subcommand help for alternate inputs or model settings.
 
-**Ready for editing:** the WAV is decodable and has positive duration; `transcript.raw.json` contains nonempty timed cues, and `subtitles.raw.srt` exists. Retain raw outputs. A failed transcription is unfinished work, even if audio normalization succeeded.
+**Recognition saved:** `transcript.raw.json` preserves the ASR's original segments and word timings before SRT export. Raw cues may exceed delivery limits. **Ready for editing:** the WAV is decodable with positive duration, raw cues are nonempty and usable for locating speech, and `subtitles.raw.srt` exists. If export fails after recognition is saved, follow the saved-transcript branch in [recovery.md](references/recovery.md); retain the evidence and repair its timing rather than repeating successful recognition. Final subtitle layout is a separate gate in step 6.
 
 ## 4. Resolve retakes before correcting subtitles
 

@@ -143,12 +143,18 @@ def delivery(data, max_chars=20, max_duration=5.0, pause_gap=.45):
         raise ValueError('重新分段需要原始 words 时间；请保留原始转写或重新对齐')
     raw = ''.join(w['word'] for w in words)
     owners = [i for i, word in enumerate(words) for _ in word['word']]
-    reviewed = ''
+    reviewed, previous_cue = '', None
     for cue in data['segments']:
         text = cue['text'].strip()
         if reviewed and text and re.match(r'[A-Za-z0-9]', text) and re.search(r'[A-Za-z0-9]$', reviewed):
-            reviewed += ' '
+            left = [i for i, w in enumerate(words) if w['start'] < previous_cue['end'] and w['end'] > previous_cue['start']]
+            right = [i for i, w in enumerate(words) if w['start'] < cue['end'] and w['end'] > cue['start']]
+            if not left or not right or right[0] not in (left[-1], left[-1] + 1):
+                raise ValueError('英文跨条目词界无法确定；请依据原始词时间或音频确认后再导出')
+            if right[0] != left[-1] and (words[left[-1]]['word'][-1:].isspace() or words[right[0]]['word'][:1].isspace()):
+                reviewed += ' '
         reviewed += text
+        previous_cue = cue
     projected = []
     for op, a, b, c, d in SequenceMatcher(None, raw, reviewed, autojunk=False).get_opcodes():
         if op == 'delete':
@@ -179,6 +185,7 @@ def delivery(data, max_chars=20, max_duration=5.0, pause_gap=.45):
         aligned.append({'word': group_text, 'start': words[min(group_ids)]['start'],
                         'end': words[max(group_ids)]['end'], 'source_word_indices': sorted(group_ids)})
     result = copy.deepcopy(data)
+    result['segmentation'] = 'delivery-layout'
     result['source_segments'] = copy.deepcopy(data['segments'])
     result['segments'] = word_cues(aligned, max_chars, max_duration, pause_gap)
     if not result['segments']:
@@ -258,17 +265,19 @@ def transcribe(audio, output, model='small', language='zh'):
     engine = WhisperModel(model, device='cpu', compute_type='int8')
     segments, info = engine.transcribe(str(audio), language=None if language == 'auto' else language,
                                        word_timestamps=True, vad_filter=True)
-    words = []
+    words, raw_segments = [], []
     for segment in segments:
         for word in segment.words or []:
             words.append({'start': word.start, 'end': word.end, 'word': word.word, 'probability': word.probability})
+        raw_segments.append({'id': len(raw_segments) + 1, 'start': segment.start,
+                             'end': segment.end, 'text': segment.text.strip()})
         print(f'Transcribed through {segment.end:.1f}s', flush=True)
     data = {'audio': str(Path(audio).resolve()), 'language': info.language, 'model': model,
-            'words': words, 'segments': word_cues(words)}
+            'words': words, 'segments': raw_segments, 'segmentation': 'asr-original'}
+    write_json(output / 'transcript.raw.json', data)
     if not data['segments']:
         raise ValueError('未识别出语音；请试听录音并检查麦克风或语言设置')
     subtitle = srt(data)
-    write_json(output / 'transcript.raw.json', data)
     (output / 'subtitles.raw.srt').write_text(subtitle, encoding='utf-8')
     return data
 
