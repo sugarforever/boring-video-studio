@@ -1,6 +1,6 @@
 # Subtitle segmentation
 
-Run after recognition correction, using the final audio's transcript. Recognition preserves the ASR's original segments; this step alone imposes final delivery layout limits. ASR words can be single Chinese characters or partial English words; those boundaries alone are insufficient for subtitles.
+Run after recognition correction, using the final audio's transcript. Recognition saves the ASR's original segments and also exports length-limited `transcript.initial.json` / `subtitles.initial.srt`. Correct the raw transcript for stable cue IDs, then regenerate the delivery layout from the reviewed text. ASR words can be single Chinese characters or partial English words; those boundaries alone are insufficient for subtitles.
 
 ## Export
 
@@ -10,7 +10,7 @@ Run after recognition correction, using the final audio's transcript. Recognitio
   --output /absolute/path/final/delivery
 ```
 
-The helper reuses Jieba lexical boundaries and the existing ASR word times. It prioritizes sentence punctuation, clause punctuation and word gaps. It balances short clauses within the character and duration limits shown by `delivery --help`. These defaults are a narration layout choice, not a universal subtitle standard; choose tighter limits for narrower video layouts.
+The helper reuses Jieba lexical boundaries and the existing ASR word times. It prioritizes sentence punctuation, clause punctuation and word gaps. It preserves source segment boundaries that coincide with complete lexical units, splitting overlong clauses within the character and duration limits shown by `delivery --help`. This prevents global regrouping from merging neighboring short clauses and then cutting them in less natural places. Source boundaries inside a complete word yield to word integrity. The same limits are available on `transcribe` and `prepare --transcribe`; they constrain subtitle export after decoding, not the recognizer’s linguistic sentence length. These defaults are a narration layout choice, not a universal subtitle standard; choose tighter limits for narrower video layouts.
 
 Reviewed text supplies punctuation and actual spoken wording. Original `words` supply timing; `source_segments`, source cue IDs and source word indices preserve provenance. Replacements share the corresponding original word span, while added punctuation stays with its preceding word. English cue joins recover spacing from the original timed word boundary, so a split word rejoins without an inserted space. An unmappable boundary stops export; resolve it from the audio or corrected alignment and record the decision. This is text-to-timing projection, not a new acoustic alignment: listen around wording corrections and large replacements to verify their timing.
 

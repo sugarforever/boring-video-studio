@@ -53,7 +53,7 @@ def correct(data, changes):
     return result
 
 
-def word_cues(words, max_chars=20, max_duration=5.0, pause_gap=.45):
+def word_cues(words, max_chars=20, max_duration=5.0, pause_gap=.45, segment_ends=()):
     """Regroup at lexical/ASR boundaries, prioritizing punctuation and pauses."""
     if (not isinstance(max_chars, int) or max_chars < 1 or
             not math.isfinite(max_duration) or max_duration <= 0 or
@@ -94,6 +94,9 @@ def word_cues(words, max_chars=20, max_duration=5.0, pause_gap=.45):
             atoms.append({'word': ''.join(w['word'] for w in group), 'start': group[0]['start'],
                           'end': group[-1]['end'], 'source_word_indices': sorted({j for w in group for j in w['source_word_indices']})})
             group = []
+    # Preserve source clauses where their boundary is also a complete lexical unit.
+    from bisect import bisect_right
+    buckets = [bisect_right(segment_ends, (a["start"] + a["end"]) / 2) for a in atoms]
     n = len(atoms)
     costs, choices = [float('inf')] * (n + 1), [None] * n
     costs[n] = 0
@@ -104,7 +107,7 @@ def word_cues(words, max_chars=20, max_duration=5.0, pause_gap=.45):
             if j > i:
                 prev = atoms[j - 1]['word'].rstrip()
                 gap = atoms[j]['start'] - atoms[j - 1]['end']
-                if gap >= pause_gap or prev.endswith(('。', '！', '？', '!', '?', '；', ';')):
+                if buckets[j] != buckets[j - 1] or gap >= pause_gap or prev.endswith(('。', '！', '？', '!', '?', '；', ';')):
                     break
             combined += atoms[j]['word']
             length = len(combined.strip())
@@ -113,7 +116,7 @@ def word_cues(words, max_chars=20, max_duration=5.0, pause_gap=.45):
                 break
             ending = combined.rstrip()
             gap = atoms[j + 1]['start'] - atoms[j]['end'] if j + 1 < n else 0
-            natural = (j == n - 1 or gap >= pause_gap or ending.endswith(('。', '！', '？', '!', '?', '；', ';')))
+            natural = (j == n - 1 or buckets[j + 1] != buckets[j] or gap >= pause_gap or ending.endswith(('。', '！', '？', '!', '?', '；', ';')))
             penalty = 0 if natural else 1 if ending.endswith(('，', ',', '：', ':', '、')) else 4
             # Balance clauses so a hard limit does not strand a tiny final cue.
             cost = 2 + ((length - target) / max(1, target)) ** 2 + penalty
@@ -187,7 +190,8 @@ def delivery(data, max_chars=20, max_duration=5.0, pause_gap=.45):
     result = copy.deepcopy(data)
     result['segmentation'] = 'delivery-layout'
     result['source_segments'] = copy.deepcopy(data['segments'])
-    result['segments'] = word_cues(aligned, max_chars, max_duration, pause_gap)
+    boundaries = sorted({s['end'] for s in data['segments'][:-1]})
+    result['segments'] = word_cues(aligned, max_chars, max_duration, pause_gap, boundaries)
     if not result['segments']:
         raise ValueError('没有可导出的字幕')
     if re.sub(r'\s+', '', ''.join(cue['text'] for cue in result['segments'])) != re.sub(r'\s+', '', reviewed):
@@ -195,7 +199,7 @@ def delivery(data, max_chars=20, max_duration=5.0, pause_gap=.45):
     for cue in result['segments']:
         cue['source_cue_ids'] = [s['id'] for s in data['segments'] if s['start'] < cue['end'] and s['end'] > cue['start']]
     result['subtitle_layout'] = {'max_chars': max_chars, 'max_duration': max_duration,
-                                 'pause_gap': pause_gap, 'tokenizer': 'jieba', 'timing': 'raw-word-spans'}
+                                 'pause_gap': pause_gap, 'tokenizer': 'jieba', 'timing': 'raw-word-spans', 'preserve_source_boundaries': True}
     srt(result)
     return result
 
@@ -251,14 +255,14 @@ def prepare(source, output):
     return target
 
 
-def transcribe(audio, output, model='small', language='zh'):
+def transcribe(audio, output, model='small', language='zh', max_chars=20, max_duration=5.0, pause_gap=.45):
     try:
         from faster_whisper import WhisperModel
     except ImportError as error:
         raise RuntimeError('缺少本地转写依赖。使用 Python 3.11/3.12 虚拟环境安装：pip install "faster-whisper>=1.1,<2"') from error
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
-    for name in ('transcript.raw.json', 'subtitles.raw.srt'):
+    for name in ('transcript.raw.json', 'subtitles.raw.srt', 'transcript.initial.json', 'subtitles.initial.srt'):
         if (output / name).exists():
             raise FileExistsError(f'{name} 已存在，请使用新目录保留旧转写')
     print(f'Loading local Whisper model: {model} (first use may download model weights)', flush=True)
@@ -279,6 +283,10 @@ def transcribe(audio, output, model='small', language='zh'):
         raise ValueError('未识别出语音；请试听录音并检查麦克风或语言设置')
     subtitle = srt(data)
     (output / 'subtitles.raw.srt').write_text(subtitle, encoding='utf-8')
+    initial = delivery(data, max_chars, max_duration, pause_gap)
+    initial['segmentation'] = 'initial-layout'
+    write_json(output / 'transcript.initial.json', initial)
+    (output / 'subtitles.initial.srt').write_text(srt(initial), encoding='utf-8')
     return data
 
 
@@ -304,9 +312,10 @@ def main():
     layout = commands.add_parser('delivery', help='Regroup reviewed text at pauses and lexical boundaries', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     layout.add_argument('--transcript', type=Path, required=True)
     layout.add_argument('--output', type=Path, required=True)
-    layout.add_argument('--max-chars', type=int, default=20, help='Maximum characters per cue, including punctuation')
-    layout.add_argument('--max-duration', type=float, default=5.0, help='Maximum cue duration in seconds')
-    layout.add_argument('--pause-gap', type=float, default=.45, help='Split at word gaps at least this many seconds')
+    for command in (prep, tx, layout):
+        command.add_argument('--max-chars', type=int, default=20, help='Maximum characters per cue, including punctuation')
+        command.add_argument('--max-duration', type=float, default=5.0, help='Maximum cue duration in seconds')
+        command.add_argument('--pause-gap', type=float, default=.45, help='Split at word gaps at least this many seconds')
     args = parser.parse_args()
     try:
         if args.command == 'prepare':
@@ -321,9 +330,9 @@ def main():
             target = prepare(audio, args.output)
             print(f'Normalized audio: {target}', flush=True)
             if args.transcribe:
-                transcribe(target, args.output, args.model, args.language)
+                transcribe(target, args.output, args.model, args.language, args.max_chars, args.max_duration, args.pause_gap)
         elif args.command == 'transcribe':
-            transcribe(args.audio, args.output, args.model, args.language)
+            transcribe(args.audio, args.output, args.model, args.language, args.max_chars, args.max_duration, args.pause_gap)
         elif args.command == 'delivery':
             data = json.loads(args.transcript.read_text(encoding='utf-8'))
             result = delivery(data, args.max_chars, args.max_duration, args.pause_gap)

@@ -31,7 +31,7 @@ Python 3.12 is also suitable. If installation or model download fails, report th
 
 ## Recognition saved but subtitle export failed
 
-Inspect `transcript.raw.json` and the reported error first. This file is saved before SRT export, retaining original ASR segments and word timings. Keep it unchanged. For invalid cue times, create an aligned version using the final audio and record the changed intervals and evidence. Continue correction from that version once its cues are valid. A delivery-layout failure with usable raw cues belongs to [subtitles.md](subtitles.md), not a new recognition run.
+Inspect `transcript.raw.json` and the reported error first. This file is saved before SRT export, retaining original ASR segments and word timings. Keep it unchanged. For invalid cue times, create an aligned version using the final audio and record the changed intervals and evidence. Continue correction from that version once its cues are valid. If raw cues are usable but the initial limited export failed, use `delivery` on the saved raw or aligned JSON to recover a limited subtitle draft in a new directory; record that output as the initial draft. Follow [subtitles.md](subtitles.md) for layout failures rather than starting a new recognition run.
 
 **Recovered:** raw evidence remains available, repaired cue times have supporting evidence, and a usable SRT corresponds to the transcript used for correction. With no available alignment capability, retain the evidence and report the specific pending intervals.
 

@@ -84,7 +84,8 @@ class ProcessingTests(unittest.TestCase):
                               {'word': following, 'start': .5, 'end': 1}],
                     'segments': [{'id': 1, 'start': 0, 'end': .5, 'text': 'trans'},
                                  {'id': 2, 'start': .5, 'end': 1, 'text': 'cription'}]}
-            self.assertEqual(p.delivery(data)['segments'][0]['text'], expected)
+            self.assertEqual([c['text'] for c in p.delivery(data)['segments']],
+                             [expected] if following == 'cription' else ['trans', 'cription'])
         ambiguous = {'words': [{'word': 'hello', 'start': 0, 'end': .4}],
                      'segments': [{'id': 1, 'start': 0, 'end': .4, 'text': 'hello'},
                                   {'id': 2, 'start': .6, 'end': 1, 'text': 'world'}]}
@@ -97,14 +98,37 @@ class ProcessingTests(unittest.TestCase):
         module = SimpleNamespace(WhisperModel=lambda *a, **kw: engine)
         with tempfile.TemporaryDirectory() as tmp, patch.dict('sys.modules', {'faster_whisper': module}):
             with patch.object(p, 'word_cues', side_effect=ValueError('layout failed')) as layout:
-                result = p.transcribe('fixture.wav', tmp)
-                layout.assert_not_called()
+                with self.assertRaises(ValueError):
+                    p.transcribe('fixture.wav', tmp)
+                layout.assert_called_once()
+                result = json.loads((Path(tmp)/'transcript.raw.json').read_text())
             raw = Path(tmp)/'transcript.raw.json'
             self.assertEqual(json.loads(raw.read_text())['words'][0]['word'], word.word)
             self.assertEqual(result['segments'][0]['end'], 8)
             self.assertTrue((Path(tmp)/'subtitles.raw.srt').is_file())
             with self.assertRaises(ValueError): p.delivery(result)
             self.assertEqual(json.loads(raw.read_text())['words'][0]['end'], 0)
+    def test_source_clauses_survive_without_measured_word_gap(self):
+        clauses = ['处理页面请求的代码', '通过集中的入口获取来源说明']
+        words = self.words(''.join(clauses))
+        split = len(clauses[0])
+        data = {'words': words, 'segments': [
+            {'id': 1, 'start': 0, 'end': words[split-1]['end'], 'text': clauses[0]},
+            {'id': 2, 'start': words[split]['start'], 'end': words[-1]['end'], 'text': clauses[1]}]}
+        self.assertEqual([c['text'] for c in p.delivery(data)['segments']], clauses)
+    def test_transcribe_exports_limited_initial_subtitles(self):
+        text = '现在打开页面准备录音然后生成字幕再检查完整的字幕内容'
+        words = self.words(text)
+        segment = SimpleNamespace(start=0, end=words[-1]['end'], text=text,
+            words=[SimpleNamespace(**w, probability=.9) for w in words])
+        engine = SimpleNamespace(transcribe=lambda *a, **kw: (iter([segment]), SimpleNamespace(language='zh')))
+        with tempfile.TemporaryDirectory() as tmp, patch.dict('sys.modules', {'faster_whisper': SimpleNamespace(WhisperModel=lambda *a, **kw: engine)}):
+            raw = p.transcribe('fixture.wav', tmp, max_chars=12)
+            initial = json.loads((Path(tmp)/'transcript.initial.json').read_text())
+            self.assertEqual(len(raw['segments']), 1)
+            self.assertEqual(''.join(c['text'] for c in initial['segments']), text)
+            self.assertTrue(all(len(c['text']) <= 12 for c in initial['segments']))
+            self.assertTrue((Path(tmp)/'subtitles.initial.srt').is_file())
     def test_raw_json_survives_failed_srt_export(self):
         word = SimpleNamespace(start=0, end=1, word='测试', probability=.9)
         engine = SimpleNamespace(transcribe=lambda *a, **kw: (iter([SimpleNamespace(start=0, end=1, text='测试', words=[word])]), SimpleNamespace(language='zh')))
