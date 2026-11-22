@@ -77,7 +77,7 @@ python3 scripts/process_audio.py correct \
 
 ## 6. Verify and hand off
 
-Read [subtitles.md](references/subtitles.md) and generate delivery subtitles from the corrected transcript. This required pass uses pauses, punctuation and lexical boundaries to keep cues complete and short; it also defines limits, timing provenance and checks. Record its results in `REVIEW.md` alongside the audio review defined in the retake reference.
+Read [subtitles.md](references/subtitles.md) and generate delivery subtitles from the corrected transcript. This required pass defines the single-line policy, natural boundary review, reading-speed checks and timing provenance. Follow its acceptance criteria before claiming subtitle delivery is complete. Record its results in `REVIEW.md` alongside the audio review defined in the retake reference.
 
 Deliver clickable absolute paths to the final WAV, final subtitle SRT and corresponding transcript JSON, script snapshot and review notes; include the edit report when cuts were made. If cues were merged, link the delivery exports and retain the reviewed originals as provenance. Keep original takes and chunks available. Pass these artifacts to the next production step; replacing an existing project's audio requires the user's requested scope to cover that change.
 
