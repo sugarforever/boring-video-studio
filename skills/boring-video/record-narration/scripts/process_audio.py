@@ -11,6 +11,9 @@ import sys
 import tempfile
 from importlib.metadata import version
 
+DEFAULT_MAX_CHARS = 16
+MAX_READING_CPS = 9
+
 
 def write_json(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
@@ -53,7 +56,7 @@ def correct(data, changes):
     return result
 
 
-def word_cues(words, max_chars=20, max_duration=5.0, pause_gap=.45, segment_ends=()):
+def word_cues(words, max_chars=DEFAULT_MAX_CHARS, max_duration=5.0, pause_gap=.45, segment_ends=()):
     """Regroup at lexical/ASR boundaries, prioritizing punctuation and pauses."""
     if (not isinstance(max_chars, int) or max_chars < 1 or
             not math.isfinite(max_duration) or max_duration <= 0 or
@@ -62,6 +65,7 @@ def word_cues(words, max_chars=20, max_duration=5.0, pause_gap=.45, segment_ends
     cleaned, previous_end = [], 0.0
     for index, original in enumerate(words):
         word = dict(original)
+        word['word'] = ' '.join(word['word'].splitlines())
         start, end = float(word['start']), float(word['end'])
         if not math.isfinite(start) or not math.isfinite(end) or start < 0:
             raise ValueError('Invalid word timestamp')
@@ -137,7 +141,7 @@ def word_cues(words, max_chars=20, max_duration=5.0, pause_gap=.45, segment_ends
     return cues
 
 
-def delivery(data, max_chars=20, max_duration=5.0, pause_gap=.45):
+def delivery(data, max_chars=DEFAULT_MAX_CHARS, max_duration=5.0, pause_gap=.45):
     """Project reviewed text onto raw timing without inventing intra-word times."""
     from difflib import SequenceMatcher
     import re
@@ -148,7 +152,7 @@ def delivery(data, max_chars=20, max_duration=5.0, pause_gap=.45):
     owners = [i for i, word in enumerate(words) for _ in word['word']]
     reviewed, previous_cue = '', None
     for cue in data['segments']:
-        text = cue['text'].strip()
+        text = ' '.join(cue['text'].splitlines()).strip()
         if reviewed and text and re.match(r'[A-Za-z0-9]', text) and re.search(r'[A-Za-z0-9]$', reviewed):
             left = [i for i, w in enumerate(words) if w['start'] < previous_cue['end'] and w['end'] > previous_cue['start']]
             right = [i for i, w in enumerate(words) if w['start'] < cue['end'] and w['end'] > cue['start']]
@@ -198,10 +202,25 @@ def delivery(data, max_chars=20, max_duration=5.0, pause_gap=.45):
         raise ValueError('重新分段改变了校对正文，停止交付')
     for cue in result['segments']:
         cue['source_cue_ids'] = [s['id'] for s in data['segments'] if s['start'] < cue['end'] and s['end'] > cue['start']]
-    result['subtitle_layout'] = {'max_chars': max_chars, 'max_duration': max_duration,
+    result['subtitle_layout'] = {'max_lines': 1, 'max_chars': max_chars, 'max_duration': max_duration,
                                  'pause_gap': pause_gap, 'tokenizer': 'jieba', 'timing': 'raw-word-spans', 'preserve_source_boundaries': True}
     srt(result)
+    issues = []
+    for cue in result['segments']:
+        cps = len(cue['text']) / (cue['end'] - cue['start'])
+        if cps > MAX_READING_CPS:
+            issues.append({'kind': 'reading-speed', 'cue_id': cue['id'],
+                           'start': cue['start'], 'end': cue['end'], 'cps': round(cps, 3)})
+    result['subtitle_review'] = {'max_cps': MAX_READING_CPS,
+        'counting': 'unicode-codepoints-including-spaces-and-punctuation',
+        'status': 'needs-review' if issues else 'checks-passed', 'issues': issues}
     return result
+
+
+def print_subtitle_review(data):
+    review = data['subtitle_review']
+    print(f"Reading-speed check: {len(review['issues'])} cue(s) above {review['max_cps']} chars/s; "
+          f"{review['status']} (see subtitle_review in transcript JSON)", flush=True)
 
 
 def prepare(source, output):
@@ -255,7 +274,7 @@ def prepare(source, output):
     return target
 
 
-def transcribe(audio, output, model='small', language='zh', max_chars=20, max_duration=5.0, pause_gap=.45):
+def transcribe(audio, output, model='small', language='zh', max_chars=DEFAULT_MAX_CHARS, max_duration=5.0, pause_gap=.45):
     try:
         from faster_whisper import WhisperModel
     except ImportError as error:
@@ -287,6 +306,7 @@ def transcribe(audio, output, model='small', language='zh', max_chars=20, max_du
     initial['segmentation'] = 'initial-layout'
     write_json(output / 'transcript.initial.json', initial)
     (output / 'subtitles.initial.srt').write_text(srt(initial), encoding='utf-8')
+    print_subtitle_review(initial)
     return data
 
 
@@ -313,7 +333,7 @@ def main():
     layout.add_argument('--transcript', type=Path, required=True)
     layout.add_argument('--output', type=Path, required=True)
     for command in (prep, tx, layout):
-        command.add_argument('--max-chars', type=int, default=20, help='Maximum characters per cue, including punctuation')
+        command.add_argument('--max-chars', type=int, default=DEFAULT_MAX_CHARS, help='Maximum characters per cue, including punctuation')
         command.add_argument('--max-duration', type=float, default=5.0, help='Maximum cue duration in seconds')
         command.add_argument('--pause-gap', type=float, default=.45, help='Split at word gaps at least this many seconds')
     args = parser.parse_args()
@@ -342,6 +362,7 @@ def main():
             write_json(args.output / 'transcript.delivery.json', result)
             (args.output / 'subtitles.srt').write_text(srt(result), encoding='utf-8')
             print(f'Delivery subtitles: {args.output / "subtitles.srt"}')
+            print_subtitle_review(result)
         else:
             data = json.loads(args.transcript.read_text(encoding='utf-8'))
             changes = json.loads(args.corrections.read_text(encoding='utf-8'))

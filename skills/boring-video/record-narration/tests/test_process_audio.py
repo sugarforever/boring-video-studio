@@ -36,6 +36,41 @@ class ProcessingTests(unittest.TestCase):
             result.append({'start': clock, 'end': clock + .16, 'word': char})
             clock += .18 + (.6 if i == pause_after else 0)
         return result
+    def test_default_single_line_limit_and_no_added_or_lost_text(self):
+        text = '现在把音频交给程序处理然后生成完整字幕最后逐条检查字幕内容'
+        words = self.words(text)
+        data = {'words': words, 'segments': [{'id': 1, 'start': 0, 'end': words[-1]['end'], 'text': text}]}
+        result = p.delivery(data)
+        self.assertEqual(''.join(c['text'] for c in result['segments']), text)
+        self.assertTrue(all(len(c['text']) <= 16 for c in result['segments']))
+        self.assertEqual(result['subtitle_layout']['max_lines'], 1)
+        self.assertEqual(result['subtitle_layout']['max_chars'], 16)
+        self.assertEqual(result['words'], words)
+
+    def test_delivery_flattens_embedded_line_breaks(self):
+        text = '检查字幕内容'
+        words = self.words(text)
+        data = {'words': words, 'segments': [{'id': 1, 'start': 0, 'end': words[-1]['end'], 'text': '检查字幕\n内容'}]}
+        result = p.delivery(data)
+        self.assertTrue(all(len(c['text'].splitlines()) == 1 for c in result['segments']))
+        self.assertEqual(''.join(c['text'] for c in result['segments']).replace(' ', ''), text)
+        self.assertEqual(data['segments'][0]['text'], '检查字幕\n内容')
+
+    def test_reading_speed_issues_keep_text_and_timing(self):
+        for end, expected in [(1.0, 'checks-passed'), (.4, 'needs-review')]:
+            words = [{'word': '检查字幕', 'start': 0, 'end': end}]
+            data = {'words': words, 'segments': [{'id': 1, 'start': 0, 'end': end, 'text': '检查字幕'}]}
+            result = p.delivery(data)
+            review = result['subtitle_review']
+            self.assertEqual(review['status'], expected)
+            self.assertEqual(review['max_cps'], 9)
+            self.assertEqual(result['segments'][0]['end'], end)
+            self.assertEqual(result['segments'][0]['text'], '检查字幕')
+            if expected == 'needs-review':
+                self.assertEqual(review['issues'][0]['cue_id'], 1)
+                self.assertEqual(review['issues'][0]['kind'], 'reading-speed')
+                self.assertEqual(review['issues'][0]['cps'], 10)
+
     def test_subtitles_keep_chinese_words_and_short_lines(self):
         text = '现在把它们放进同一个流程，然后生成字幕，再参照原稿检查识别错误。'
         cues = p.word_cues(self.words(text), max_chars=12)
@@ -129,6 +164,8 @@ class ProcessingTests(unittest.TestCase):
             self.assertEqual(''.join(c['text'] for c in initial['segments']), text)
             self.assertTrue(all(len(c['text']) <= 12 for c in initial['segments']))
             self.assertTrue((Path(tmp)/'subtitles.initial.srt').is_file())
+            self.assertEqual(initial['subtitle_layout']['max_lines'], 1)
+            self.assertEqual(initial['subtitle_review']['max_cps'], 9)
     def test_raw_json_survives_failed_srt_export(self):
         word = SimpleNamespace(start=0, end=1, word='测试', probability=.9)
         engine = SimpleNamespace(transcribe=lambda *a, **kw: (iter([SimpleNamespace(start=0, end=1, text='测试', words=[word])]), SimpleNamespace(language='zh')))
