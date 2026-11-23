@@ -5,7 +5,7 @@ description: Record your own narration from a script using a local browser telep
 
 # Record Narration
 
-Produce human-recorded narration and reviewed, timed subtitles from an existing UTF-8 script. Resolve bundled paths relative to this skill's directory; run the commands below there with absolute project paths. Treat recorded speech as the content authority and the script as context for recognition and progression. Preserve original takes, coherent improvisation and speaking speed. Remove abandoned retries when a complete replacement is identifiable. Denoising, general pause compression and TTS are outside this workflow.
+Produce human-recorded narration and reviewed, timed subtitles from an existing UTF-8 script. Resolve bundled paths relative to this skill's directory; run the commands below there with absolute project paths. Treat recorded speech as the content authority and the script as context for recognition and progression. Preserve original takes, coherent improvisation and speaking speed. Remove abandoned retries when a complete replacement is identifiable. General pause compression and TTS are outside this workflow; optional low-level background suppression is defined in step 3.
 
 ## 1. Establish the session
 
@@ -36,6 +36,8 @@ Leave the service running and yield the chat while they record. Explain that the
 
 Use an existing compatible environment when available. Recording needs Python 3.10+; processing needs `ffmpeg` and `ffprobe`, plus this skill’s `requirements.txt` installed in a Python 3.11/3.12 virtual environment outside the skill directory. If dependencies are missing, or only part of processing succeeded, read [recovery.md](references/recovery.md).
 
+When the user requests noise reduction or reports background voices, read [background.md](references/background.md) before preparation. It defines optional low-level suppression, reference exports and a listening gate; it does not promise separation of overlapping speakers.
+
 Tell the user that first use may download model weights; audio processing and transcription run locally. Choose the spoken language (`zh` for Chinese, `auto` when uncertain) and a new output directory:
 
 ```bash
@@ -44,7 +46,7 @@ Tell the user that first use may download model weights; audio processing and tr
   --transcribe --language zh
 ```
 
-This uses ffmpeg-normalize to measure and apply a uniform gain, then transcribes `narration.wav`. Preserve the loudness report: peak headroom can require a quieter target. A dynamic fallback stops export rather than amplifying quiet passages separately. Normalization preserves relative levels; it does not remove noise. Use `scripts/process_audio.py --help` and its subcommand help for alternate inputs or model settings.
+This uses ffmpeg-normalize to measure and apply a uniform gain, then transcribes `narration.wav`. Preserve the loudness report: peak headroom can require a quieter target. A dynamic fallback stops export rather than amplifying quiet passages separately. Normalization preserves relative levels; it does not remove noise. Optional background suppression is a separate preceding stage with its own review gate. Use `scripts/process_audio.py --help` and its subcommand help for alternate inputs or model settings.
 
 **Recognition saved:** `transcript.raw.json` preserves the ASR's original segments and word timings before SRT export. Raw cues may exceed delivery limits; `transcript.initial.json` and `subtitles.initial.srt` apply the selected limits immediately after recognition. **Ready for editing:** the WAV is decodable with positive duration, raw cues are nonempty and usable for locating speech, and both raw and initial SRT exports exist. If export fails after recognition is saved, follow the saved-transcript branch in [recovery.md](references/recovery.md); retain the evidence and repair its timing rather than repeating successful recognition. Final subtitle layout is a separate gate in step 6.
 
