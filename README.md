@@ -10,7 +10,7 @@ content/TOPIC.md → content/ARTICLE.md → BEATS.md → NARRATION.md → SCENES
 
 Research notes and experiment reports live beside the content contracts under `content/`. Product promos, UI demonstrations, music-led pieces, locked scripts, and other direct-production inputs can bypass the article chain and enter HyperFrames through its own intake.
 
-It then hands the approved plan to [HyperFrames](https://www.hyperframes.dev), which owns video production, review, timing, animation, verification, and rendering. Optional [ListenHub](https://listenhub.ai) TTS support can provide narration audio and subtitles through the `listenhub-tts` skill.
+It then hands the approved plan to [HyperFrames](https://www.hyperframes.dev), which owns video production, review, timing, animation, verification, and rendering. Optional [ListenHub](https://listenhub.ai) and [MiniMax](https://platform.minimax.io) TTS support can provide narration audio and subtitles through the `listenhub-tts` and `minimax-tts` skills, respectively.
 
 The existing `verysmallwoods-video` skill remains available as the complete VerySmallWoods publishing workflow for videos, covers, platform copy, blog posts, and social posts.
 
@@ -56,7 +56,7 @@ For a content-driven video, the skill asks for any missing production choices an
 4. `to-narration` writes the spoken draft without adding new content.
 5. `to-scenes` designs visual events, worlds, action, and continuity.
 6. `to-storyboard` translates the scenes into buildable shots.
-7. `to-video` hands the complete plan and optional ListenHub narration to the appropriate HyperFrames workflow.
+7. `to-video` hands the complete plan and optional ListenHub or MiniMax narration to the appropriate HyperFrames workflow.
 
 Every planning stage maintains one authoritative Markdown artifact at a stable path. Codex opens that file directly for reading and uses the source or diff review surface for line comments; Git holds its history. Rendered images and media remain evidence referenced from Markdown, while HyperFrames Studio owns playable timeline and motion review.
 
@@ -72,6 +72,29 @@ npx skills add sugarforever/boring-video-studio --skill record-terminal to-story
 
 ```text
 $to-storyboard Turn SCENES.md into a HyperFrames storyboard.
+```
+
+## MiniMax narration
+
+Install the optional provider skill:
+
+```bash
+npx skills add sugarforever/boring-video-studio --skill minimax-tts
+```
+
+Choose MiniMax at the voice gate in `boring-video` or `verysmallwoods-video`,
+or invoke `$minimax-tts` directly. Set `MINIMAX_API_KEY` in the environment;
+`MINIMAX_API_BASE` selects the international (default), domestic, or US West endpoint.
+The bundled Python 3.10+ CLI lists account voices and generates MP3 + sentence-level SRT,
+with no extra Python dependencies. It uses native subtitle timestamps and preserves
+audio if subtitle retrieval fails. Each synthesis accepts 1–9999 characters;
+longer narration requires separate parts and timeline assembly.
+
+See [MiniMax setup, commands and recovery](skills/boring-video/minimax-tts/SKILL.md).
+Local tests use a substitute HTTP server and do not call the paid API:
+
+```bash
+python3 -m unittest discover -s skills/boring-video/minimax-tts/tests -v
 ```
 
 ## Record your own narration
