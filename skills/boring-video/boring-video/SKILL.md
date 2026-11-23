@@ -43,7 +43,7 @@ For content-driven work, ask one compact question for any missing production cho
 
 1. **Presentation:** faceless, footage, screen capture, talking head, or mixed media?
 2. **Collaboration:** storyboard reviews or agent-executed production with final preview?
-3. **Voice:** HyperFrames voice, ListenHub TTS, user recording, or no narration?
+3. **Voice:** HyperFrames voice, ListenHub TTS, MiniMax TTS (`minimax-tts`), user recording, or no narration?
 4. **Design:** existing design truth, named direction, or agent-proposed direction?
 5. **Publishing:** which covers, platform adaptations, blog/article variants, subtitles, or social copy are requested, if any?
 

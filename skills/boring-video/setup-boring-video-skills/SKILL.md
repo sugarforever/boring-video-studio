@@ -36,6 +36,6 @@ setup-boring-video-skills
    ```
 
 4. Confirm that the `hyperframes` skill is available, then run `npx hyperframes doctor`. HyperFrames owns production and is a hard dependency for the later stages.
-5. Report optional voice support separately. ListenHub is needed only when the user chooses that voice branch.
+5. Report optional voice support separately. The `listenhub-tts` or `minimax-tts` skill and its API credentials are needed only when the user chooses that provider. Install MiniMax separately with `npx skills add sugarforever/boring-video-studio --skill minimax-tts`; its CLI requires Python 3.10+ and no additional Python packages.
 
 Setup is complete only when all required suite names are discoverable, HyperFrames is discoverable, and `npx hyperframes doctor` passes. Preserve the diagnostic output when a check fails and give the smallest corrective action; do not claim readiness from file presence alone.
