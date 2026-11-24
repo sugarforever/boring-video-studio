@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Preset Sample 02 — Matched Comparison</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --panel-a: #ffffff;
+      --panel-b: #f0fdf4;
+      --ink: #111827;
+      --muted: #4b5563;
+      --border: #1f2937;
+      --before-accent: #b91c1c;
+      --before-soft: #fee2e2;
+      --after-accent: #15803d;
+      --after-soft: #dcfce7;
+      --delta-accent: #1d4ed8;
+      --font-display: "Inter", sans-serif;
+      --font-mono: "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--font-display); }
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .page {
+      width: 100%;
+      height: 100%;
+      padding: 72px 88px 132px;
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      animation: fadeUp 0.4s ease-out 0s both;
+    }
+    .badges { display: flex; gap: 14px; }
+    .badge {
+      padding: 8px 18px;
+      border: 2px solid var(--border);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 20px;
+    }
+    .badge-mode { background: #dbeafe; border-color: var(--delta-accent); color: var(--delta-accent); }
+    h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      color: var(--ink);
+      font-size: 56px;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      animation: fadeUp 0.45s ease-out 0.1s both;
+    }
+    .grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: stretch;
+    }
+    .panel {
+      display: flex;
+      flex-direction: column;
+      border: 3px solid var(--border);
+      border-radius: 22px;
+      padding: 32px 36px;
+      gap: 20px;
+      box-shadow: 0 12px 30px rgba(17, 24, 39, 0.07);
+    }
+    .panel-before {
+      background: var(--panel-a);
+      animation: panelIn 0.5s ease-out 0.5s both;
+    }
+    .panel-after {
+      background: var(--panel-b);
+      border-color: var(--after-accent);
+      animation: panelIn 0.5s ease-out 2.2s both;
+    }
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 18px;
+    }
+    .panel-title { font-size: 36px; font-weight: 800; margin: 0; }
+    .pill {
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .pill-before { background: var(--before-soft); color: var(--before-accent); }
+    .pill-after { background: var(--after-soft); color: var(--after-accent); }
+    .rows {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      flex: 1;
+    }
+    .row {
+      height: 126px;
+      padding: 20px 24px;
+      border-radius: 16px;
+      border: 2px solid #e5e7eb;
+      background: rgba(255, 255, 255, 0.85);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
+    }
+    .row-label {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .row-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .row-delta-before {
+      animation: emphasizeBefore 0.4s ease-out 3.2s forwards;
+    }
+    .row-delta-after {
+      animation: emphasizeAfter 0.4s ease-out 3.2s forwards;
+    }
+    .summary-bar {
+      padding: 20px 28px;
+      border-radius: 16px;
+      background: #111827;
+      color: #ffffff;
+      font-size: 28px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeUp 0.5s ease-out 3.8s both;
+    }
+    .summary-tag {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      background: #1d4ed8;
+      color: #fff;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes emphasizeBefore {
+      to { border-color: #b91c1c; background: #fef2f2; }
+    }
+    @keyframes emphasizeAfter {
+      to { border-color: #15803d; background: #dcfce7; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root" data-composition-id="matched-comparison-sample" data-no-timeline data-start="0" data-width="1920" data-height="1080" data-duration="8">
+    <section class="page" data-start="0" data-duration="8">
+      <div class="topbar">
+        <h1>Query Execution: Table Scan vs B-Tree Index</h1>
+        <div class="badges">
+          <span class="badge">Illustrative</span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel panel-before">
+          <div class="panel-head">
+            <h2 class="panel-title">Full Table Scan</h2>
+            <span class="pill pill-before">BEFORE</span>
+          </div>
+          <div class="rows">
+            <div class="row">
+              <div class="row-label">Access Path</div>
+              <div class="row-value">Sequential scan of every page</div>
+            </div>
+            <div class="row row-delta-before">
+              <div class="row-label">Rows Examined</div>
+              <div class="row-value">1,000,000 rows</div>
+            </div>
+            <div class="row row-delta-before">
+              <div class="row-label">Illustrative Latency</div>
+              <div class="row-value">420 ms</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-after">
+          <div class="panel-head">
+            <h2 class="panel-title">B-Tree Index Lookup</h2>
+            <span class="pill pill-after">AFTER</span>
+          </div>
+          <div class="rows">
+            <div class="row">
+              <div class="row-label">Access Path</div>
+              <div class="row-value">3-level balanced tree traversal</div>
+            </div>
+            <div class="row row-delta-after">
+              <div class="row-label">Rows Examined</div>
+              <div class="row-value">12 index entries</div>
+            </div>
+            <div class="row row-delta-after">
+              <div class="row-label">Illustrative Latency</div>
+              <div class="row-value">2.4 ms</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-bar">
+        <span>Same SQL predicate — 99.9% fewer rows scanned with a balanced index.</span>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

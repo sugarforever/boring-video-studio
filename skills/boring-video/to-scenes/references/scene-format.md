@@ -26,6 +26,7 @@ hyperframes_revision: Revision containing the current rendered proofs
 - rhythm: Quick hit, development, hold, or release
 - audio_intent: Narration emphasis and meaningful sound opportunity
 - feasibility: Envelope class, named dependency, and fallback when required
+- preset: Optional v1 preset family and mode from `scene-presets.md` (`relationship-causal-diagram` [`topology` | `causal`], `matched-comparison` [`before-after` | `parallel`], `structured-list-cards` [`ordered` | `grouped`]), or omit for custom scenes
 - proof: Markdown image references or media links for the Hero or Start/Hero/End render IDs, selected by what must be judged
 - visual_risks: Typography, density, evidence surface, motion, continuity, or other risks the proof resolves
 
@@ -61,5 +62,6 @@ Compute `artifact_digest` as SHA-256 of the complete scenes file after removing 
 - Each proof set is the smallest set that exposes its scene's declared risks; scenes are not mechanically assigned three frames.
 - Typography, code, terminal, and component risks use real or near-final material rather than generic placeholders.
 - Screen scenes satisfy the viewing contract in `screen-evidence.md`; their proof set exposes the stated framing, evidence, and reveal risks.
+- Any scene declaring a `preset` from `scene-presets.md` satisfies that preset's selection condition, declared mode, input bounds, readable-hold timing, and fallback rules without weakening `screen-evidence.md` or `demo_contract` truthfulness.
 - Every demonstration specifies its complete visible content, truth mode, and code-surface labels; its presentation does not imply stronger evidence than the declared mode.
 - Every beat ID appears in at least one scene and every narration anchor remains owned by its beat.
