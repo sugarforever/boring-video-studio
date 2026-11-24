@@ -2,6 +2,7 @@
 """Normalize recorded narration, transcribe locally, and apply agent-reviewed corrections."""
 import argparse
 import copy
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -9,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import wave
 from importlib.metadata import version
 
 DEFAULT_MAX_CHARS = 16
@@ -223,20 +225,24 @@ def print_subtitle_review(data):
           f"{review['status']} (see subtitle_review in transcript JSON)", flush=True)
 
 
-def prepare(source, output):
+def prepare(source, output, suppress_background=False, background_threshold_db=-35.0):
     source, output = Path(source).resolve(), Path(output).resolve()
+    if suppress_background and (not math.isfinite(background_threshold_db) or not -80 <= background_threshold_db <= -15):
+        raise ValueError('Background threshold must be finite and between -80 and -15 dBFS')
     if not source.is_file():
         raise ValueError(f'Audio not found: {source}')
     if not shutil.which('ffmpeg') or not shutil.which('ffprobe'):
         raise RuntimeError('需要 FFmpeg：在 macOS 使用 brew install ffmpeg')
     output.mkdir(parents=True, exist_ok=True)
     target = output / 'narration.wav'
-    if target.exists():
+    if any((output / name).exists() for name in ('narration.wav', 'processing.json',
+            'narration.before-suppression.wav', 'narration.suppressed.wav')):
         raise FileExistsError(f'已有处理后的音频，使用新输出目录或继续 transcribe：{target}')
     try:
         from ffmpeg_normalize import FFmpegNormalize, FFmpegNormalizeError
     except ImportError as error:
         raise RuntimeError('需要 ffmpeg-normalize：在处理用的虚拟环境执行 pip install -r <skill-dir>/requirements.txt') from error
+    suppression = {'enabled': False}
     with tempfile.TemporaryDirectory(prefix='.prepare-', dir=output) as tmp:
         decoded = Path(tmp)/'decoded.wav'
         temp = Path(tmp)/'normalized.wav'
@@ -245,11 +251,35 @@ def prepare(source, output):
         subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-n', '-i', str(source),
                         '-map', '0:a:0', '-ar', '48000', '-ac', '1', '-c:a', 'pcm_s16le', str(decoded)],
                        check=True, capture_output=True)
+        normalization_input = decoded
+        if suppress_background:
+            filtered = Path(tmp)/'suppressed.wav'
+            # Soft downward expansion with a finite floor; no time removal or makeup gain.
+            filter_args = (f'agate=threshold={10 ** (background_threshold_db / 20):.12g}'
+                f':range={10 ** (-15 / 20):.12g}:ratio=3:knee=2.828427124746'
+                ':attack=5:release=200:detection=rms:mode=downward:makeup=1')
+            subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-n', '-i', str(decoded),
+                '-af', filter_args, '-c:a', 'pcm_s16le', str(filtered)], check=True, capture_output=True)
+            with wave.open(str(decoded)) as before, wave.open(str(filtered)) as after:
+                if before.getparams()[:4] != after.getparams()[:4]:
+                    raise ValueError('背景抑制改变了采样格式或时长，停止导出')
+            digest = hashlib.sha256()
+            with source.open('rb') as original:
+                for block in iter(lambda: original.read(1024*1024), b''):
+                    digest.update(block)
+            suppression = {'enabled': True, 'engine': 'ffmpeg-agate',
+                'threshold_dbfs': background_threshold_db, 'max_reduction_db': 15,
+                'ratio': 3, 'attack_ms': 5, 'release_ms': 200, 'filter': filter_args,
+                'source_sha256': digest.hexdigest(), 'review_status': 'pending',
+                'reference_audio': str(output/'narration.before-suppression.wav'),
+                'suppressed_audio': str(output/'narration.suppressed.wav'),
+                'scope': 'low-level attenuation; not speaker separation'}
+            normalization_input = filtered
         normalizer = FFmpegNormalize(target_level=-16, true_peak=-1.5,
             keep_loudness_range_target=True, auto_lower_loudness_target=True,
             audio_codec='pcm_s16le', sample_rate=48000, audio_channels=1,
             video_disable=True, subtitle_disable=True, metadata_disable=True, progress=False)
-        normalizer.add_media_file(str(decoded), str(temp))
+        normalizer.add_media_file(str(normalization_input), str(temp))
         try:
             normalizer.run_normalization()
         except FFmpegNormalizeError as error:
@@ -265,12 +295,15 @@ def prepare(source, output):
         for item in stats:
             item['input_file'] = str(source)
             item['output_file'] = str(target)
+        if suppress_background:
+            decoded.replace(output/'narration.before-suppression.wav')
+            filtered.replace(output/'narration.suppressed.wav')
         temp.replace(target)
     write_json(output / 'processing.json', {'source': str(source), 'audio': str(target), 'duration': duration,
                'status': 'normalized', 'normalization': {'engine': 'ffmpeg-normalize',
                'version': version('ffmpeg-normalize'), 'mode': 'linear', 'target_lufs': -16,
                'true_peak_db': -1.5, 'auto_lower_target': True, 'stats': stats},
-               'cuts': [], 'speed': 1.0, 'denoise': False})
+               'cuts': [], 'speed': 1.0, 'denoise': False, 'background_suppression': suppression})
     return target
 
 
@@ -319,6 +352,8 @@ def main():
     source.add_argument('--audio', type=Path)
     prep.add_argument('--output', type=Path, required=True)
     prep.add_argument('--transcribe', action='store_true')
+    prep.add_argument('--suppress-background', action='store_true', help='Opt-in soft attenuation of low-level background; requires listening review')
+    prep.add_argument('--background-threshold-db', type=float, default=-35, help='Input RMS threshold in dBFS (-80 to -15); only with --suppress-background')
     tx = commands.add_parser('transcribe', help='Transcribe final audio, including after a failed model download')
     tx.add_argument('--audio', type=Path, required=True)
     tx.add_argument('--output', type=Path, required=True)
@@ -347,8 +382,10 @@ def main():
                     raise ValueError('请先在录音页面选定版本并点击交给 Codex')
             else:
                 audio = args.audio
-            target = prepare(audio, args.output)
+            target = prepare(audio, args.output, args.suppress_background, args.background_threshold_db)
             print(f'Normalized audio: {target}', flush=True)
+            if args.suppress_background:
+                print('Background suppression: listening review pending; compare saved before/suppressed WAVs.', flush=True)
             if args.transcribe:
                 transcribe(target, args.output, args.model, args.language, args.max_chars, args.max_duration, args.pause_gap)
         elif args.command == 'transcribe':

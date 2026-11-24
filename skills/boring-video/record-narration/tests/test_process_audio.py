@@ -212,6 +212,50 @@ class ProcessingTests(unittest.TestCase):
             self.assertEqual(report['normalization']['engine'], 'ffmpeg-normalize')
             self.assertEqual(report['normalization']['mode'], 'linear')
 
+    @unittest.skipUnless(shutil.which('ffmpeg') and shutil.which('ffprobe'), 'FFmpeg required')
+    def test_optional_background_suppression_preserves_timing_and_reference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); source = root/'source.wav'
+            rate = 48000
+            # Quiet background -> foreground -> quiet background, including a release transition.
+            samples = array.array('h', (round((.008 if i < 2*rate or i >= 5*rate else .2) * 32767 * math.sin(2*math.pi*440*i/rate)) for i in range(8*rate)))
+            with wave.open(str(source), 'wb') as audio:
+                audio.setparams((1,2,rate,len(samples),'NONE','not compressed')); audio.writeframes(samples.tobytes())
+            before = source.read_bytes()
+            output = p.prepare(source, root/'processed', suppress_background=True)
+            def read(path):
+                with wave.open(str(path)) as audio:
+                    values = array.array('h'); values.frombytes(audio.readframes(audio.getnframes()))
+                    self.assertEqual(audio.getframerate(), rate)
+                    return values
+            ref = read(root/'processed/narration.before-suppression.wav')
+            filtered = read(root/'processed/narration.suppressed.wav')
+            final = read(output)
+            self.assertEqual(source.read_bytes(), before)
+            self.assertEqual(ref, samples)
+            self.assertEqual(len(filtered), len(samples)); self.assertEqual(len(final), len(samples))
+            def gain(a,b):
+                return 10*math.log10(sum(v*v for v in b)/sum(v*v for v in a))
+            quiet = gain(ref[rate//2:rate], filtered[rate//2:rate])
+            loud = gain(ref[3*rate:4*rate], filtered[3*rate:4*rate])
+            self.assertLess(quiet, -5); self.assertGreater(quiet, -16)
+            self.assertLess(abs(loud), .2)
+            self.assertLess(gain(ref[7*rate:8*rate],filtered[7*rate:8*rate]), -5)
+            report = json.loads((root/'processed/processing.json').read_text())
+            self.assertTrue(report['background_suppression']['enabled'])
+            self.assertEqual(report['background_suppression']['review_status'], 'pending')
+            self.assertEqual(report['normalization']['mode'], 'linear')
+            with self.assertRaises(FileExistsError):
+                p.prepare(source, root/'processed', suppress_background=True)
+
+    def test_background_threshold_validation_precedes_output(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); source = root/'source.wav';source.write_bytes(b'not decoded')
+            for value in (float('nan'), float('inf'), -90, 0):
+                with self.assertRaises(ValueError):
+                    p.prepare(source, root/'processed', suppress_background=True, background_threshold_db=value)
+            self.assertFalse((root/'processed').exists())
+
     def test_srt_content(self):
         self.assertEqual(p.srt({'segments': [{'id': 1, 'start': 0, 'end': 1, 'text': '你好'}]}), '1\n00:00:00,000 --> 00:00:01,000\n你好\n')
 
