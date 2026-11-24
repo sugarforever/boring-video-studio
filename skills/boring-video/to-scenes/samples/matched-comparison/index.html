@@ -182,7 +182,7 @@
 </head>
 <body>
   <div id="root" data-composition-id="matched-comparison-sample" data-no-timeline data-start="0" data-width="1920" data-height="1080" data-duration="8">
-    <section class="page" data-start="0" data-duration="8">
+    <section id="sample-scene" class="page" data-track-index="0" data-start="0" data-duration="8">
       <div class="topbar">
         <h1>Query Execution: Table Scan vs B-Tree Index</h1>
         <div class="badges">
@@ -235,7 +235,7 @@
       </div>
 
       <div class="summary-bar">
-        <span>Same SQL predicate — 99.9% fewer rows scanned with a balanced index.</span>
+        <span>Same query; illustrative latency: 420 → 2.4 ms.</span>
       </div>
     </section>
   </div>

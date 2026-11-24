@@ -26,7 +26,7 @@ hyperframes_revision: Revision containing the current rendered proofs
 - rhythm: Quick hit, development, hold, or release
 - audio_intent: Narration emphasis and meaningful sound opportunity
 - feasibility: Envelope class, named dependency, and fallback when required
-- preset: Optional v1 preset family and mode from `scene-presets.md` (`relationship-causal-diagram` [`topology` | `causal`], `matched-comparison` [`before-after` | `parallel`], `structured-list-cards` [`ordered` | `grouped`]), or omit for custom scenes
+- preset: Optional mapping with `family` and `mode` from [`scene-presets.md`](scene-presets.md), for example `{family: matched-comparison, mode: before-after}`; omit for custom scenes. Include the selected family’s required evidence labels and theme tokens in this mapping.
 - proof: Markdown image references or media links for the Hero or Start/Hero/End render IDs, selected by what must be judged
 - visual_risks: Typography, density, evidence surface, motion, continuity, or other risks the proof resolves
 

@@ -173,7 +173,7 @@
 </head>
 <body>
   <div id="root" data-composition-id="structured-list-cards-sample" data-no-timeline data-start="0" data-width="1920" data-height="1080" data-duration="8">
-    <section class="page" data-start="0" data-duration="8">
+    <section id="sample-scene" class="page" data-track-index="0" data-start="0" data-duration="8">
       <div class="topbar">
         <h1>Three-Stage Release Verification</h1>
         <div class="badges">
@@ -186,8 +186,8 @@
           <div>
             <div class="ordinal c1">01</div>
             <h2>Lint &amp; Schema</h2>
-            <p>Validate markup, token contrast, and required metadata before running execution checks.</p>
-            <p>Fastest feedback loop on syntax and bounds.</p>
+            <p>Check markup and metadata.</p>
+            <p>Validate contrast and input bounds.</p>
           </div>
           <div class="card-foot">GATE 1 · STATIC CHECK</div>
         </article>
@@ -196,8 +196,8 @@
           <div>
             <div class="ordinal c2">02</div>
             <h2>Isolated Tests</h2>
-            <p>Run candidate rules in a clean consumer fixture without touching installed copies.</p>
-            <p>Confirm expected order and reject premature states.</p>
+            <p>Run a clean consumer fixture.</p>
+            <p>Verify reveal order and timing.</p>
           </div>
           <div class="card-foot">GATE 2 · FIXTURE RUN</div>
         </article>
@@ -206,8 +206,8 @@
           <div>
             <div class="ordinal c3">03</div>
             <h2>Artifact Verify</h2>
-            <p>Inspect rendered frames and playback duration at delivery resolution before release.</p>
-            <p>Record paths, hashes, and open limitations.</p>
+            <p>Inspect delivery-size frames.</p>
+            <p>Record hashes and limitations.</p>
           </div>
           <div class="card-foot">GATE 3 · DELIVERY PROOF</div>
         </article>
