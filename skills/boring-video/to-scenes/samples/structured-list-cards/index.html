@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Preset Sample 03 — Structured List / Cards</title>
+  <style>
+    :root {
+      --bg: #faf8f5;
+      --card-bg: #ffffff;
+      --ink: #18181b;
+      --muted: #52525b;
+      --border: #27272a;
+      --accent-1: #0f766e;
+      --accent-2: #1d4ed8;
+      --accent-3: #7c3aed;
+      --font-display: "Inter", sans-serif;
+      --font-mono: "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--font-display); }
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .page {
+      width: 100%;
+      height: 100%;
+      padding: 72px 88px 136px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      animation: fadeUp 0.4s ease-out 0s both;
+    }
+    .badges { display: flex; gap: 14px; }
+    .badge {
+      padding: 8px 18px;
+      border: 2px solid var(--border);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 20px;
+    }
+    .badge-mode { background: #ccfbf1; border-color: var(--accent-1); color: var(--accent-1); }
+    h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      color: var(--ink);
+      font-size: 62px;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      animation: fadeUp 0.4s ease-out 0.1s both;
+    }
+    .subtitle {
+      margin: -14px 0 0;
+      font-size: 28px;
+      color: var(--muted);
+      animation: fadeUp 0.4s ease-out 0.18s both;
+    }
+    .cards {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 36px;
+      align-items: stretch;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 3px solid var(--border);
+      border-radius: 22px;
+      padding: 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 12px 28px rgba(24, 24, 27, 0.06);
+      opacity: 0;
+    }
+    .card-1 {
+      border-top: 12px solid var(--accent-1);
+      animation: cardEnter 0.4s ease-out 0.5s forwards, focusGlow1 1.1s ease-in-out 0.9s forwards;
+    }
+    .card-2 {
+      border-top: 12px solid var(--accent-2);
+      animation: cardEnter 0.4s ease-out 2.0s forwards, focusGlow2 1.1s ease-in-out 2.4s forwards;
+    }
+    .card-3 {
+      border-top: 12px solid var(--accent-3);
+      animation: cardEnter 0.4s ease-out 3.5s forwards, focusGlow3 1.1s ease-in-out 3.9s forwards;
+    }
+    .ordinal {
+      font-family: var(--font-mono);
+      font-size: 56px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .c1 { color: var(--accent-1); }
+    .c2 { color: var(--accent-2); }
+    .c3 { color: var(--accent-3); }
+    .card h2 {
+      margin: 22px 0 16px;
+      font-size: 40px;
+      line-height: 1.2;
+    }
+    .card p {
+      margin: 0 0 14px;
+      font-size: 28px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+    .card-foot {
+      padding-top: 18px;
+      border-top: 2px solid #e4e4e7;
+      font-family: var(--font-mono);
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .progress-track {
+      height: 10px;
+      border-radius: 999px;
+      background: #e4e4e7;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-1), var(--accent-2), var(--accent-3));
+      animation: progressGrow 4.0s ease-out 0.5s forwards;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes cardEnter {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes focusGlow1 {
+      0% { box-shadow: 0 12px 28px rgba(24, 24, 27, 0.06); }
+      30% { box-shadow: 0 0 0 6px rgba(15, 118, 110, 0.25), 0 16px 36px rgba(15, 118, 110, 0.16); }
+      100% { box-shadow: 0 12px 28px rgba(24, 24, 27, 0.06); }
+    }
+    @keyframes focusGlow2 {
+      0% { box-shadow: 0 12px 28px rgba(24, 24, 27, 0.06); }
+      30% { box-shadow: 0 0 0 6px rgba(29, 78, 216, 0.25), 0 16px 36px rgba(29, 78, 216, 0.16); }
+      100% { box-shadow: 0 12px 28px rgba(24, 24, 27, 0.06); }
+    }
+    @keyframes focusGlow3 {
+      0% { box-shadow: 0 12px 28px rgba(24, 24, 27, 0.06); }
+      30% { box-shadow: 0 0 0 6px rgba(124, 58, 237, 0.25), 0 16px 36px rgba(124, 58, 237, 0.16); }
+      100% { box-shadow: 0 12px 28px rgba(24, 24, 27, 0.06); }
+    }
+    @keyframes progressGrow {
+      0% { width: 0%; }
+      30% { width: 33%; }
+      65% { width: 66%; }
+      100% { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root" data-composition-id="structured-list-cards-sample" data-no-timeline data-start="0" data-width="1920" data-height="1080" data-duration="8">
+    <section id="sample-scene" class="page" data-track-index="0" data-start="0" data-duration="8">
+      <div class="topbar">
+        <h1>Three-Stage Release Verification</h1>
+        <div class="badges">
+          <span class="badge">Illustrative</span>
+        </div>
+      </div>
+
+      <div class="cards">
+        <article class="card card-1">
+          <div>
+            <div class="ordinal c1">01</div>
+            <h2>Lint &amp; Schema</h2>
+            <p>Check markup and metadata.</p>
+            <p>Validate contrast and input bounds.</p>
+          </div>
+          <div class="card-foot">GATE 1 · STATIC CHECK</div>
+        </article>
+
+        <article class="card card-2">
+          <div>
+            <div class="ordinal c2">02</div>
+            <h2>Isolated Tests</h2>
+            <p>Run a clean consumer fixture.</p>
+            <p>Verify reveal order and timing.</p>
+          </div>
+          <div class="card-foot">GATE 2 · FIXTURE RUN</div>
+        </article>
+
+        <article class="card card-3">
+          <div>
+            <div class="ordinal c3">03</div>
+            <h2>Artifact Verify</h2>
+            <p>Inspect delivery-size frames.</p>
+            <p>Record hashes and limitations.</p>
+          </div>
+          <div class="card-foot">GATE 3 · DELIVERY PROOF</div>
+        </article>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress-fill"></div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

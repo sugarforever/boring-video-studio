@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Preset Sample 01 — Relationship / Causal Diagram</title>
+  <style>
+    :root {
+      --bg: #f6f4ee;
+      --surface: #ffffff;
+      --ink: #16181d;
+      --muted: #576071;
+      --accent: #1d5fd1;
+      --accent-soft: #e6effd;
+      --warn: #b45309;
+      --warn-soft: #fef3c7;
+      --ok: #15803d;
+      --ok-soft: #dcfce7;
+      --edge: #94a3b8;
+      --edge-active: #1d5fd1;
+      --border: #1e293b;
+      --font-display: "Inter", sans-serif;
+      --font-mono: "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--font-display); }
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .page {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 72px 88px 136px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      animation: fadeUp 0.4s ease-out 0s both;
+    }
+    .badges { display: flex; gap: 14px; align-items: center; }
+    .badge {
+      padding: 8px 18px;
+      border: 2px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--ink);
+      font-size: 20px;
+    }
+    .badge-mode { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+    h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      color: var(--ink);
+      font-size: 62px;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      animation: fadeUp 0.45s ease-out 0.1s both;
+    }
+    .subtitle {
+      margin: -14px 0 0;
+      font-size: 28px;
+      color: var(--muted);
+      animation: fadeUp 0.45s ease-out 0.2s both;
+    }
+    .stage {
+      position: relative;
+      flex: 1;
+      background: var(--surface);
+      border: 3px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 14px 36px rgba(22, 24, 29, 0.08);
+      overflow: hidden;
+    }
+    svg.diagram {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .node { opacity: 0; }
+    .node-1 { animation: nodeReveal 0.4s ease-out 0.4s both; }
+    .node-2 { animation: nodeReveal 0.4s ease-out 1.6s both; }
+    .node-3 { animation: nodeReveal 0.4s ease-out 2.9s both; }
+
+    .edge-path {
+      fill: none;
+      stroke-width: 6;
+      stroke-linecap: round;
+      opacity: 0;
+    }
+    .edge-1 {
+      stroke: var(--edge-active);
+      stroke-dasharray: 240;
+      stroke-dashoffset: 240;
+      animation: showNow 0.01s linear 0.9s forwards, drawEdge 0.6s ease-in-out 0.9s forwards;
+    }
+    .edge-2 {
+      stroke: var(--warn);
+      stroke-dasharray: 240;
+      stroke-dashoffset: 240;
+      animation: showNow 0.01s linear 2.2s forwards, drawEdge 0.6s ease-in-out 2.2s forwards;
+    }
+    .edge-3 {
+      stroke: var(--ok);
+      stroke-dasharray: 640;
+      stroke-dashoffset: 640;
+      animation: showNow 0.01s linear 3.6s forwards, drawEdge 0.7s ease-in-out 3.6s forwards;
+    }
+    .arrow-head { opacity: 0; }
+    .arrow-1 { fill: var(--edge-active); animation: fadeIn 0.12s ease-out 1.42s both; }
+    .arrow-2 { fill: var(--warn); animation: fadeIn 0.12s ease-out 2.72s both; }
+    .arrow-3 { fill: var(--ok); animation: fadeIn 0.12s ease-out 4.22s both; }
+    .edge-label {
+      font-family: var(--font-mono);
+      font-size: 21px;
+      font-weight: 700;
+      opacity: 0;
+    }
+    .label-1 { fill: var(--accent); animation: fadeIn 0.25s ease-out 1.05s both; }
+    .label-2 { fill: var(--warn); animation: fadeIn 0.25s ease-out 2.35s both; }
+    .label-3 { fill: var(--ok); animation: fadeIn 0.25s ease-out 3.85s both; }
+
+    .arrival-ring {
+      fill: none;
+      stroke: var(--ok);
+      stroke-width: 6;
+      opacity: 0;
+      animation: arrivalPulse 0.6s ease-out 4.4s both;
+    }
+    .cache-updated {
+      opacity: 0;
+      animation: fadeIn 0.35s ease-out 4.45s both;
+    }
+    .footer-note {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 22px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+
+    @keyframes showNow {
+      to { opacity: 1; }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes nodeReveal {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes drawEdge {
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes arrivalPulse {
+      0% { opacity: 0; stroke-width: 2; }
+      45% { opacity: 1; stroke-width: 8; }
+      100% { opacity: 0.85; stroke-width: 5; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root" data-composition-id="relationship-causal-sample" data-no-timeline data-start="0" data-width="1920" data-height="1080" data-duration="8">
+    <section id="sample-scene" class="page" data-track-index="0" data-start="0" data-duration="8">
+      <div class="topbar">
+        <h1>Cache Miss Execution Path</h1>
+        <div class="badges">
+          <span class="badge">Illustrative</span>
+        </div>
+      </div>
+
+      <div class="stage">
+        <svg class="diagram" viewBox="0 0 1744 640" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrow-blue" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto">
+              <path d="M 0 1 L 11 6 L 0 11 z" fill="#1d5fd1" />
+            </marker>
+            <marker id="arrow-amber" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto">
+              <path d="M 0 1 L 11 6 L 0 11 z" fill="#b45309" />
+            </marker>
+            <marker id="arrow-green" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto">
+              <path d="M 0 1 L 11 6 L 0 11 z" fill="#15803d" />
+            </marker>
+          </defs>
+
+          <!-- Node 1: Client App (0.4s - 0.8s) -->
+          <g class="node node-1" id="node-client">
+            <rect x="84" y="180" width="360" height="200" rx="20" fill="#e6effd" stroke="#1d5fd1" stroke-width="4" />
+            <text x="116" y="232" font-family="ui-monospace, monospace" font-size="20" font-weight="700" fill="#1d5fd1">01 · SOURCE</text>
+            <text x="116" y="286" font-size="38" font-weight="800" fill="#16181d">Client App</text>
+            <text x="116" y="334" font-size="24" fill="#334155">GET /api/profile</text>
+          </g>
+
+          <!-- Edge 1: Client -> Edge Cache (0.9s - 1.5s) -->
+          <path class="edge-path edge-1" d="M 448 280 L 664 280" />
+          <polygon class="arrow-head arrow-1" points="658,266 686,280 658,294" />
+          <text class="edge-label label-1" x="488" y="254">1. Cache Lookup</text>
+
+          <!-- Node 2: Edge Cache (1.6s - 2.0s; established before return arrival at 4.4s) -->
+          <g class="node node-2" id="node-cache">
+            <rect x="692" y="180" width="360" height="200" rx="20" fill="#fef3c7" stroke="#b45309" stroke-width="4" />
+            <rect class="arrival-ring" x="684" y="172" width="376" height="216" rx="24" />
+            <text x="724" y="232" font-family="ui-monospace, monospace" font-size="20" font-weight="700" fill="#b45309">02 · EDGE LAYER</text>
+            <text x="724" y="286" font-size="38" font-weight="800" fill="#16181d">Edge Cache</text>
+            <text x="724" y="334" font-size="24" fill="#334155">MISS · Key expired</text>
+            <g class="cache-updated">
+              <rect x="720" y="398" width="304" height="44" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="2" />
+              <text x="740" y="427" font-family="ui-monospace, monospace" font-size="20" font-weight="700" fill="#15803d">UPDATED · TTL 300s</text>
+            </g>
+          </g>
+
+          <!-- Edge 2: Edge Cache -> Origin DB (2.2s - 2.8s) -->
+          <path class="edge-path edge-2" d="M 1056 280 L 1272 280" />
+          <polygon class="arrow-head arrow-2" points="1266,266 1294,280 1266,294" />
+          <text class="edge-label label-2" x="1094" y="254">2. Origin Query</text>
+
+          <!-- Node 3: Origin DB (2.9s - 3.3s) -->
+          <g class="node node-3" id="node-origin">
+            <rect x="1300" y="180" width="360" height="200" rx="20" fill="#f1f5f9" stroke="#1e293b" stroke-width="4" />
+            <text x="1332" y="232" font-family="ui-monospace, monospace" font-size="20" font-weight="700" fill="#475569">03 · DESTINATION</text>
+            <text x="1332" y="286" font-size="38" font-weight="800" fill="#16181d">Origin DB</text>
+            <text x="1332" y="334" font-size="24" fill="#334155">Row fetched · 18 ms</text>
+          </g>
+
+          <!-- Edge 3: Origin DB -> established Edge Cache (3.6s - 4.3s) -->
+          <path class="edge-path edge-3" d="M 1480 384 L 1480 510 L 872 510 L 872 462" />
+          <polygon class="arrow-head arrow-3" points="858,468 872,442 886,468" />
+          <text class="edge-label label-3" x="1050" y="548">3. Fill cache</text>
+        </svg>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
