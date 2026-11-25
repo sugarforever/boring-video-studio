@@ -1,0 +1,60 @@
+{
+  "tool": "HyperFrames",
+  "version": "0.9.92",
+  "ok": true,
+  "audio_status": "deferred_by_user",
+  "sections": {
+    "lint": {
+      "ok": true,
+      "errorCount": 0,
+      "warningCount": 0,
+      "findings": []
+    },
+    "runtime": {
+      "ok": true,
+      "errorCount": 0,
+      "warningCount": 0,
+      "findings": []
+    },
+    "layout": {
+      "ok": true,
+      "errorCount": 0,
+      "warningCount": 0,
+      "findings": []
+    },
+    "contrast": {
+      "ok": true,
+      "errorCount": 0,
+      "warningCount": 0,
+      "findings": []
+    },
+    "craft": {
+      "ok": true,
+      "errorCount": 0,
+      "warningCount": 2,
+      "findings": [
+        {
+          "code": "film_silent",
+          "severity": "warning",
+          "message": "This 28 s film has no sound source (no <audio>, no <video> with sound): add a music bed and sounds on the visible actions unless the person asked for silence; see references/sound.md.",
+          "selector": "[data-composition-id]",
+          "time": 0
+        },
+        {
+          "code": "dead_stretch",
+          "severity": "warning",
+          "message": "Nothing on screen changes for 3.25 s (9.38–12.63 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+          "selector": "[data-composition-id]",
+          "time": 9.375
+        }
+      ]
+    }
+  },
+  "source_digests": {
+    "compositions/s01.html": "sha256:d07cf49ba24f2fb7f7b709437fdede64fde3f9490f2f593b771f6297697f0c48",
+    "compositions/s02.html": "sha256:d14a9ac412f086ed83effa126c04a4e9c5a736a555d8245e074ed1005eeb57e5",
+    "compositions/s03.html": "sha256:3c7d2af08996711b996e7d1c9347264a78ddf009e6906100c22309253196550b"
+  },
+  "audio_review": "pending",
+  "design_acceptance": "pending user review"
+}

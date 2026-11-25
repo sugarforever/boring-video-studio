@@ -1,0 +1,542 @@
+<template
+  ><style>
+    @font-face {
+      font-family: "Noto Sans SC";
+      src: url("assets/fonts/noto-400.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Noto Sans SC";
+      src: url("assets/fonts/noto-600.ttf") format("truetype");
+      font-weight: 600;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Noto Sans SC";
+      src: url("assets/fonts/noto-700.ttf") format("truetype");
+      font-weight: 700;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Noto Sans SC";
+      src: url("assets/fonts/noto-800.ttf") format("truetype");
+      font-weight: 800;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Noto Sans SC";
+      src: url("assets/fonts/noto-900.ttf") format("truetype");
+      font-weight: 900;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Inter";
+      src: url("assets/fonts/inter-400.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Inter";
+      src: url("assets/fonts/inter-600.ttf") format("truetype");
+      font-weight: 600;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Inter";
+      src: url("assets/fonts/inter-700.ttf") format("truetype");
+      font-weight: 700;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Inter";
+      src: url("assets/fonts/inter-800.ttf") format("truetype");
+      font-weight: 800;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Inter";
+      src: url("assets/fonts/inter-900.ttf") format("truetype");
+      font-weight: 900;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Space Grotesk";
+      src: url("assets/fonts/space-600.ttf") format("truetype");
+      font-weight: 600;
+      font-style: normal;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      container-type: size;
+      overflow: hidden;
+      color: #000;
+      font-family: Inter, "Noto Sans SC", sans-serif;
+      font-synthesis: none;
+    }
+    #root {
+      --pink: #fe90e8;
+      --blue: #c0f7fe;
+      --green: #99e885;
+      --yellow: #f7cb46;
+      --cream: #ffdc8b;
+      --white: #ffffff;
+      --offwhite: #fffdf5;
+      --black: #000000;
+    }
+    .scene {
+      position: absolute;
+      inset: 0;
+    }
+    .eyebrow {
+      position: absolute;
+      left: 7.8125cqw;
+      top: 5.625cqw;
+      font:
+        600 1.51041667cqw "Space Grotesk",
+        "Noto Sans SC",
+        sans-serif;
+      letter-spacing: 0.10416667cqw;
+      text-transform: uppercase;
+      background: #fff;
+      border: 0.15625cqw solid #000;
+      box-shadow: 0.20833333cqw 0.20833333cqw #000;
+      border-radius: 5.15625cqw;
+      padding: 0.625cqw 1.35416667cqw;
+    }
+    .headline {
+      position: absolute;
+      left: 7.8125cqw;
+      top: 10.83333333cqw;
+      margin: 0;
+      font-size: 5.20833333cqw;
+      font-weight: 900;
+      letter-spacing: -0.20833333cqw;
+      line-height: 1.1;
+    }
+    .caption {
+      font-size: 1.97916667cqw;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+    .note {
+      font-size: 1.45833333cqw;
+      line-height: 1.5;
+    }
+    .box {
+      position: absolute;
+      border: 0.20833333cqw solid #000;
+      box-shadow: 0.41666667cqw 0.41666667cqw #000;
+      background: #fff;
+    }
+    .line {
+      height: 0.20833333cqw;
+      background: #000;
+    }
+    .star {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      clip-path: polygon(
+        50% 0%,
+        61% 20%,
+        79% 10%,
+        79% 32%,
+        100% 35%,
+        86% 52%,
+        100% 72%,
+        77% 75%,
+        79% 100%,
+        58% 88%,
+        44% 100%,
+        36% 79%,
+        10% 90%,
+        16% 66%,
+        0% 55%,
+        20% 42%,
+        6% 21%,
+        31% 23%,
+        36% 2%
+      );
+    }
+    .stripe {
+      position: absolute;
+      border: 0.20833333cqw solid #000;
+      background: repeating-linear-gradient(
+        45deg,
+        #000 0 0.625cqw,
+        var(--yellow) 0.625cqw 1.5625cqw
+      );
+    }
+    .film {
+      position: absolute;
+      border: 0.20833333cqw solid #000;
+      box-shadow: 0.41666667cqw 0.41666667cqw #000;
+      background: #fffdf5;
+      overflow: hidden;
+    }
+    .filmbar {
+      height: 3.64583333cqw;
+      background: #000;
+      color: #fff;
+      padding: 0.52083333cqw 1.14583333cqw;
+      font:
+        600 2.08333333cqw "Space Grotesk",
+        sans-serif;
+      letter-spacing: 0.10416667cqw;
+    }
+    .folio {
+      position: absolute;
+      bottom: 3.64583333cqw;
+      left: 7.8125cqw;
+      font:
+        600 1.5625cqw "Space Grotesk",
+        "Noto Sans SC",
+        sans-serif;
+      letter-spacing: 0.10416667cqw;
+    }
+    .content {
+      position: absolute;
+      inset: 0;
+    }
+    .hold {
+      position: absolute;
+      left: 7.8125cqw;
+      bottom: 7.91666667cqw;
+      font-size: 2.1875cqw;
+      font-weight: 800;
+    }
+    .tag {
+      display: inline-block;
+      background: #f7cb46;
+      border: 0.15625cqw solid #000;
+      box-shadow: 0.20833333cqw 0.20833333cqw #000;
+      padding: 0.41666667cqw 0.9375cqw;
+      font-size: 1.51041667cqw;
+      font-weight: 800;
+    }
+    .papertext {
+      font-size: 2.08333333cqw;
+      line-height: 1.55;
+      font-weight: 700;
+    }
+    .dotline {
+      height: 0.67708333cqw;
+      border-bottom: 0.20833333cqw solid #000;
+      width: 100%;
+      margin-top: 1.875cqw;
+    }
+    .stamp {
+      position: absolute;
+      background: #99e885;
+      border: 0.20833333cqw solid #000;
+      box-shadow: 0.41666667cqw 0.41666667cqw #000;
+      font-size: 2.29166667cqw;
+      font-weight: 900;
+      padding: 0.78125cqw 1.45833333cqw;
+    }
+    .item {
+      position: absolute;
+      border: 0.20833333cqw solid #000;
+      box-shadow: 0.41666667cqw 0.41666667cqw #000;
+      padding: 1.14583333cqw;
+      font-size: 1.92708333cqw;
+      line-height: 1.35;
+      font-weight: 800;
+    }
+    .item small {
+      display: block;
+      font-size: 1.66666667cqw;
+      margin-top: 0.625cqw;
+      font-weight: 600;
+    }
+    .screenlabel {
+      position: absolute;
+      font:
+        600 1.5625cqw "Space Grotesk",
+        "Noto Sans SC",
+        sans-serif;
+      letter-spacing: 0.10416667cqw;
+    }
+  </style>
+  <div
+    id="root"
+    data-composition-id="s03"
+    data-width="1920"
+    data-height="1080"
+    style="background: #fe90e8"
+  >
+    <div
+      id="s03-content"
+      class="clip content"
+      data-start="0"
+      data-duration="10"
+      data-track-index="0"
+    >
+      <div class="eyebrow">03 / EDIT THE ACTUAL SCENE</div>
+      <h1 class="headline" style="font-size: 4.58333333cqw">
+        改的是成片里的这一幕。
+      </h1>
+      <div
+        id="s03-edit"
+        class="box"
+        style="
+          left: 7.8125cqw;
+          top: 19.01041667cqw;
+          width: 30.72916667cqw;
+          height: 20.83333333cqw;
+          padding: 1.97916667cqw;
+          background: #fffdf5;
+        "
+      >
+        <div class="tag">口播稿</div>
+        <div
+          id="s03-old"
+          data-layout-allow-occlusion
+          style="
+            position: absolute;
+            left: 1.97916667cqw;
+            right: 1.97916667cqw;
+            top: 6.77083333cqw;
+            font-size: 2.08333333cqw;
+            line-height: 1.5;
+            font-weight: 700;
+          "
+        >
+          把所有信息一次讲完
+        </div>
+        <div
+          id="s03-strike"
+          style="
+            position: absolute;
+            left: 1.66666667cqw;
+            right: 1.66666667cqw;
+            top: 8.59375cqw;
+            height: 0.36458333cqw;
+            background: #000;
+            transform-origin: left;
+          "
+        ></div>
+        <div
+          id="s03-new"
+          style="
+            position: absolute;
+            left: 1.97916667cqw;
+            right: 1.97916667cqw;
+            top: 12.23958333cqw;
+            font-size: 3.02083333cqw;
+            font-weight: 900;
+            background: #99e885;
+            padding: 0.41666667cqw 0.625cqw;
+          "
+        >
+          先讲一个问题
+        </div>
+      </div>
+      <div
+        id="s03-film"
+        class="film"
+        style="
+          left: 44.79166667cqw;
+          top: 19.01041667cqw;
+          width: 47.39583333cqw;
+          height: 26.66666667cqw;
+        "
+      >
+        <div class="filmbar">同一个场景源文件</div>
+        <div
+          style="
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 3.64583333cqw;
+            bottom: 0;
+            background: #c0f7fe;
+          "
+        >
+          <div
+            id="s03-crowd1"
+            class="item"
+            style="
+              left: 2.08333333cqw;
+              top: 2.08333333cqw;
+              width: 19.79166667cqw;
+              height: 7.29166667cqw;
+              background: #ffdc8b;
+              font-size: 1.92708333cqw;
+            "
+          >
+            原因、例子、方法
+          </div>
+          <div
+            id="s03-crowd2"
+            class="item"
+            style="
+              left: 23.69791667cqw;
+              top: 2.08333333cqw;
+              width: 20.3125cqw;
+              height: 7.29166667cqw;
+              background: #99e885;
+              font-size: 1.92708333cqw;
+            "
+          >
+            所有条件一起展开
+          </div>
+          <div
+            id="s03-focus"
+            class="box"
+            style="
+              left: 6.51041667cqw;
+              top: 5.10416667cqw;
+              width: 33.85416667cqw;
+              height: 12.5cqw;
+              background: #fe90e8;
+              padding: 2.08333333cqw;
+            "
+          >
+            <div style="font-size: 3.28125cqw; font-weight: 900">
+              先讲一个问题。
+            </div>
+            <div class="line" style="margin-top: 1.30208333cqw"></div>
+          </div>
+        </div>
+      </div>
+      <div
+        id="s03-track"
+        style="
+          position: absolute;
+          left: 7.8125cqw;
+          right: 7.8125cqw;
+          top: 38.54166667cqw;
+          height: 3.75cqw;
+          border: 0.20833333cqw solid #000;
+          background: #000;
+          display: flex;
+          gap: 0.625cqw;
+          padding: 0.41666667cqw;
+        "
+      >
+        <div
+          style="
+            flex: 1;
+            background: #ffdc8b;
+            font-size: 1.45833333cqw;
+            font-weight: 800;
+            padding: 0.15625cqw 1.04166667cqw;
+          "
+        >
+          01 场景
+        </div>
+        <div
+          style="
+            flex: 1;
+            background: #99e885;
+            font-size: 1.45833333cqw;
+            font-weight: 800;
+            padding: 0.15625cqw 1.04166667cqw;
+          "
+        >
+          02 场景
+        </div>
+        <div
+          style="
+            flex: 1;
+            background: #fe90e8;
+            font-size: 1.45833333cqw;
+            font-weight: 800;
+            padding: 0.15625cqw 1.04166667cqw;
+          "
+        >
+          03 同一份 HTML
+        </div>
+      </div>
+      <div
+        id="s03-close"
+        class="hold"
+        style="
+          bottom: 5.52083333cqw;
+          background: #000;
+          color: #fff;
+          padding: 0.83333333cqw 1.5625cqw;
+          box-shadow: 0.625cqw 0.625cqw #f7cb46;
+          border: 0.20833333cqw solid #fff;
+          left: 7.8125cqw;
+        "
+        data-hold
+      >
+        场景改完，后面只负责拼接。
+      </div>
+      <div
+        class="stripe"
+        style="
+          right: 4.16666667cqw;
+          top: 4.16666667cqw;
+          width: 11.97916667cqw;
+          height: 2.86458333cqw;
+          transform: rotate(8deg);
+        "
+        data-layout-ignore
+      ></div>
+      <div class="folio">BLOCKFRAME · S03 · 教学示意</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo(
+      "#s03-edit",
+      { x: -35, opacity: 0 },
+      { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" },
+      0.1,
+    );
+    tl.fromTo(
+      "#s03-strike",
+      { scaleX: 0 },
+      { scaleX: 1, duration: 0.35, ease: "power2.inOut" },
+      1.6,
+    );
+    tl.fromTo(
+      "#s03-new",
+      { y: 20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.25)" },
+      2.1,
+    );
+    tl.fromTo(
+      "#s03-focus",
+      { opacity: 0, scale: 0.84 },
+      { opacity: 1, scale: 1, duration: 0.55, ease: "back.out(1.15)" },
+      5,
+    );
+    tl.fromTo(
+      ["#s03-crowd1", "#s03-crowd2"],
+      { opacity: 1, y: 0 },
+      { opacity: 0, y: -30, duration: 0.3 },
+      4.7,
+    );
+    tl.to("#s03-edit", { opacity: 0, duration: 0.25 }, 6.6);
+    tl.fromTo(
+      "#s03-film",
+      { x: 0, y: 0, scale: 1 },
+      { x: -320, y: -100, scale: 0.72, duration: 0.6, ease: "power3.inOut" },
+      6.7,
+    );
+    tl.fromTo(
+      "#s03-track",
+      { y: 35, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.45, ease: "power3.out" },
+      7,
+    );
+    tl.fromTo(
+      "#s03-close",
+      { opacity: 0 },
+      { opacity: 1, duration: 0.25 },
+      7.6,
+    );
+    window.__timelines["s03"] = tl;
+  </script></template
+>

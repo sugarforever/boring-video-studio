@@ -1,0 +1,74 @@
+<!doctype html>
+<html
+  lang="zh-CN"
+  data-composition-variables='[{"id":"color-ground","type":"color","label":"Background","default":"#FFDC8B"}]'
+>
+  <head>
+    <meta charset="utf-8" />
+    <script src="assets/gsap.min.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--color-ground, #ffdc8b);
+      }
+      * {
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-width="1920"
+      data-height="1080"
+      data-start="0"
+      data-duration="28"
+    >
+      <div
+        id="s01"
+        class="clip"
+        data-composition-id="s01"
+        data-composition-src="compositions/s01.html"
+        data-start="0"
+        data-duration="8"
+        data-track-index="1"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <div
+        id="s02"
+        class="clip"
+        data-composition-id="s02"
+        data-composition-src="compositions/s02.html"
+        data-start="8"
+        data-duration="10"
+        data-track-index="1"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <div
+        id="s03"
+        class="clip"
+        data-composition-id="s03"
+        data-composition-src="compositions/s03.html"
+        data-start="18"
+        data-duration="10"
+        data-track-index="1"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines.main = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>
