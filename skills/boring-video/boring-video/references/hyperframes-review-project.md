@@ -1,94 +1,59 @@
 # HyperFrames review project
 
-Use one HyperFrames project from scene direction through final production. Create or select it during `/to-scenes`, record its path and revision in the planning artifacts, leave it unchanged while `/to-storyboard` plans frames, and continue it during `/to-video`. A stage does not rebuild an approved visual language in a second project.
+Use one project from scene implementation through export. `/to-scenes` finishes and reviews scenes; `/to-storyboard` plans their assembly without changing them; `/to-video` implements joins and delivers the assembled film. Each stage reads the relevant sections below.
 
 ## Shared project state
 
-Keep a review manifest in project state with:
+Keep a review manifest with project path, revision, selected HyperFrames route, delivery dimensions, and:
 
-- project path and revision;
-- delivery aspect ratio and resolution;
-- source artifact digests;
-- approved composition and asset digests, final scene durations, local shot/cue timings, and representative parity-check timestamps;
+- planning-source digests and scene-to-composition/frame mapping;
+- composition and asset digests, delivery durations, local shot/cue timings, and parity-check timestamps;
 - font sources and loaded families/weights;
-- scene-to-frame or scene-to-composition mapping;
-- HTML review entry point, scene composition paths, narration/audio cue mappings, reviewed intervals, findings, and decisions;
-- supplemental rendered-proof paths and reviewed risks;
-- evidence-manifest paths for terminal, code, data, or other factual replays.
+- HTML review entry point, narration/audio mappings, review intervals, findings, reviewer identities, and decisions;
+- referenced supplemental renders and terminal/code/data evidence manifests.
 
-A source or design change that invalidates a reviewed image or timeline marks the affected proof stale. Re-render the smallest affected scope and update its decision record.
+`SCENES.md` owns scene intent and links each scene to its composition and manifest record. A source or design change invalidates affected review decisions and evidence; refresh their lineage and repeat the affected review.
 
 ## Font contract
 
-Unless project design truth overrides the typography, use these roles:
+Use project design truth; otherwise default to Noto Sans SC for Chinese body/labels (400, 700, 800, 900 as used) and Montserrat 700 for English interface headings. Define shared CSS family tokens with an explicit Chinese fallback and `font-synthesis: none`. Terminal surfaces use `/record-terminal`'s font contract.
 
-| Role | Family | Weights |
-| --- | --- | --- |
-| Chinese body and labels | `Noto Sans SC` | 400, 700, 800, 900 as used |
-| English interface headings | `Montserrat` | 700 |
+Before review, inspect rendered output and resolved fonts for Chinese, Latin, and emphasized text. Verify that every used family and weight is loaded rather than merely declared.
 
-Define shared CSS tokens rather than component-local stacks:
+## Scene delivery
 
-```css
-:root {
-  --font-zh: "Noto Sans SC", sans-serif;
-  --font-en: Montserrat, "Noto Sans SC", sans-serif;
-}
+An approved scene is the finished scene that appears in the final video: content, final copy/assets/fonts, composition, internal shots and animation, easing, readable holds, local timing, narration, and scene-local effects. Implement it using the current `/hyperframes` composition contract at the `BRIEF.md` delivery dimensions. Only scene placement, boundary transitions, and whole-film mastering remain downstream.
 
-html { font-synthesis: none; }
-```
+### Voice
 
-Chinese glyphs keep an explicit `Noto Sans SC` fallback. A brand family may replace the defaults; retain a verified Chinese fallback and disable synthetic faces. Terminal and full-screen TUI surfaces follow the independent font contract owned by `record-terminal`.
+Resolve the selected HyperFrames route and its voice contract during `/to-scenes`. For ListenHub or MiniMax, use the installed `/listenhub-tts` or `/minimax-tts` and ingest the audio/subtitles through `/media-use`. Preserve locked narration and user-recorded audio.
 
-Before review, inspect rendered output and the browser's resolved font for representative Chinese, Latin, and emphasized text. Confirm every used family and weight is actually loaded, not merely named in CSS.
+Scratch tracks and provisional sentence cues support unfinished review. Replace them with delivery audio before passing narrated scenes. Missing or explicitly deferred audio keeps that review pending; deliberately silent scenes receive silent review. Audio/subtitle changes invalidate affected decisions.
 
-## Scene HTML review
+### HTML review entry point
 
-During `/to-scenes`, implement each scene as playable HTML in the shared HyperFrames project. Load `/hyperframes` and follow its current composition and preview contract. Each approved scene is the finished scene that appears in the final video. This stage owns its content, composition, assets, typography, internal camera work, animation, local timing, and scene-local audio. Subsequent stages assemble these exact compositions and add boundary transitions. Use the delivery aspect ratio and resolution from `BRIEF.md`.
+Load the production compositions directly, with their actual animation logic. Keep review controls outside the delivery frame. Provide scene selection, play/pause/replay, seeking, complete narration text with stable IDs and an active-sentence cue, synchronized delivery audio, and separate content/visual findings and status for the current revision.
 
-Provide an HTML scene review entry point in the project with:
+Use the existing HyperFrames preview capabilities where sufficient; add the missing review shell around the same compositions. Persist findings in the manifest; editable browser controls are optional. Stills supplement playback evidence.
 
-- a scene index and direct access to each scene;
-- the actual composition, with play, pause, replay, and seeking through the scene;
-- the scene's complete narration text, stable narration IDs, and a visible indication of the current sentence;
-- the delivery narration audio synchronized to the visual sequence; scratch tracks are explicitly provisional and keep approval pending;
-- separate content and visual findings, review status, and the project revision being reviewed.
+## Scene review gate
 
-The review entry point loads the production compositions rather than copying their markup or animation logic. Review controls and narration text sit outside the delivery frame. If Studio supplies only part of this interface, add the missing review shell around the same compositions; do not defer per-scene review until final production. Persist findings in the project review manifest and reference them from `SCENES.md`; editable browser controls are optional.
+Present the working HTML entry point alongside `SCENES.md`. Play every scene at delivery size and normal speed, reviewing content suitability/accuracy, visual explanation, metaphor, density, legibility, cue alignment, and readable holds. Play scenes consecutively to judge repetition, continuity, and rhythm before planning final joins. This sequence review covers the scenes; final transition playback belongs to assembly.
 
-Complete the scene at delivery quality: final copy, fonts, media, code or evidence-backed surfaces, entrances, camera moves, easing, state changes, demonstrations, readable holds, scene-local effects, and narration cues. A deliberately static scene still plays for its narration duration. Resolve every scene-internal content or design finding here. Only assembly work may remain: scene placement, boundary transitions, and whole-film audio mastering. Scene-internal finishing is not deferred to `/to-video`.
+Record actual reviewed intervals, source revision, audio/timing basis, content/visual findings, limitations, reviewer, and `pending`, `changes_requested`, or `passed` decisions. A pass requires finished scene internals, delivery assets/audio or declared silence, verified local timing, and resolved content/visual findings. Under user-review collaboration, require explicit user acceptance; under agent-executed collaboration, perform and record that review yourself as agreed in `BRIEF.md`.
 
-Resolve the selected voice route and its voice approval before marking scenes passed. Read the selected HyperFrames workflow's current voice contract; when ListenHub or MiniMax is chosen, use the installed `/listenhub-tts` or `/minimax-tts` and ingest the resulting audio and subtitles through `/media-use` during this stage. Preserve locked narration and user-recorded audio. Scratch audio and sentence cues support work in progress only: replace them with delivery audio and repeat the affected review before approval. Unavailable audio keeps narrated scenes pending; a scene explicitly intended to be silent is reviewed as silent. Audio or subtitle replacements after approval reopen the affected scenes.
-
-### Viewing and decisions
-
-Play every scene with its narration. Review both whether the content earns its place and whether the visual event explains it: claim accuracy, redundancy, metaphor, density, legibility, cue alignment, and time to inspect. Watch adjacent scenes together, then the assembled sequence, to judge repetition, continuity, and rhythm. Hero or Start/Hero/End images may supplement this review but do not replace playback.
-
-Record actual reviewed scene intervals, narration source and timing basis, source digests, composition paths, content findings, visual findings, unresolved limitations, and decisions against the reviewed project revision. Distinguish `pending`, `changes_requested`, and `passed`. A pass requires completed content and visual review, resolved scene-internal findings, delivery assets and audio, and verified scene-local timing. Record intentional silence where applicable. Scene completion is judged against the final-video scene, not a representative prototype. Record reviewer identity; in user-review collaboration, only explicit user acceptance marks a scene passed. In agent-executed collaboration, perform and record the viewing review yourself under the agreed `BRIEF.md` mode.
-
-Apply content feedback to `NARRATION.md` or its owning upstream artifact while preserving beat claims and lineage. Apply visual feedback to the same composition files. Refresh affected digests, audio, cues, and review state, then replay the affected scenes and boundaries. A source or design change marks affected decisions stale; completion requires current passed decisions for every scene and the assembled sequence.
-
-`SCENES.md` remains the authoritative scene intent and decision record. Link the HTML review entry point and each scene's composition, narration anchors, review record, and current project revision from it. Present the working HTML entry point for joint review alongside the Markdown; merely generating files does not establish that playback works or has been reviewed.
+The gate passes when every scene and the consecutive sequence have current passed decisions. A visual-only checkpoint leaves the joint review pending. Findings return to the owning content artifact or composition; refresh digests, affected audio/cues, and review decisions before advancing.
 
 ## Storyboard plan
 
-During `/to-storyboard`, write the assembly plan in HyperFrames-native `STORYBOARD.md`:
+`STORYBOARD.md` records scene order/placement, approved durations and source references, inherited local shot moments/cues, cuts, transition durations/overlaps, handles, and continuity expectations. Internal design and timing come from the reviewed scenes; required changes return to `/to-scenes`.
 
-- placement and order of finished scenes, with their approved durations;
-- references to existing composition sources and inherited local shot moments, cues, and deliberate silence;
-- hard cuts or boundary transitions, with duration, overlap, and required handles;
-- continuity expectations at every join.
-
-Read internal timings from the reviewed scenes. New internal reveals, camera work, timing budgets, or scene designs return to `/to-scenes` before the assembly plan advances.
-
-Keep new storyboard frames at `status: outline` until the canonical HyperFrames checks justify a later status. Reference the existing reviewed scene HTML in each frame's narrative body; its presence alone does not establish an implemented canonical frame `src`. This stage records the project revision it inherits without mutating the compositions. Distinguish already viewed scene timing from planned changes to frame boundaries or transitions; changes that invalidate scene decisions return to `/to-scenes`.
-
-`STORYBOARD.md` is the review surface for the integration plan. Existing scene playback remains the evidence for inherited decisions. HyperFrames production implements new integration decisions, and Studio reviews their actual timing, motion, transitions, and scrubbing on the assembled timeline.
+Keep new assembly frames at `status: outline` until canonical HyperFrames checks justify a later status. Existing scene HTML does not by itself certify an implemented canonical frame `src`. Storyboard planning leaves scene compositions unchanged.
 
 ## Production continuation
 
-During `/to-video`, mount the finished scene compositions according to `STORYBOARD.md`, add the planned boundary transitions, complete whole-film audio mastering, and run rendering/export checks. Advance canonical frame statuses only when HyperFrames checks justify them.
+Mount approved scene compositions according to `STORYBOARD.md`, add boundary transitions, master global audio levels and cross-scene music continuity, then run HyperFrames playback/export checks. Reuse reviewed narration, subtitles, and scene-local effects.
 
-Verify composition and asset digests against the approved manifest. Compare representative scene-local timestamps in isolated scene playback and the assembled timeline outside declared transition overlaps; the picture and local audio/cues must match after accounting for each scene's global offset. Review every join for clipping, hidden first/last states, overlapping speech, and continuity. Transition handles or overlaps must preserve approved readable holds and narration; insufficient handles return the affected scene to `/to-scenes`.
+Verify composition/asset digests and compare representative local timestamps in isolated and assembled playback outside declared transition overlaps. Pictures and local audio/cues must match after accounting for global placement. Check every join for clipped first/last states, shortened readable holds, overlapping speech, and continuity. Transition overlaps must fit declared handles and protect narration/holds.
 
-New scene-internal problems discovered in full playback also return to `/to-scenes` for correction and reapproval, then propagate into assembly. A production pass never silently redesigns an approved scene or replaces its voice, assets, or timing.
+Scene-internal findings, missing required audio, or inadequate handles return to `/to-scenes` for correction and reapproval before reassembly. Record actual viewing intervals and the validated project revision for export.

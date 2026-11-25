@@ -35,7 +35,7 @@ html_review: Path or URL to the working scene review entry point
 - review: Review record link, project revision, reviewed intervals, reviewer, and pending | changes_requested | passed status
 - content_findings: Content suitability, accuracy, redundancy, and unresolved decisions
 - visual_findings: Scene design, readability, cue alignment, and unresolved decisions
-- assembly_work: Only scene placement, boundary transitions, and whole-film mastering still to do; scene-internal work must be complete before passed status
+- assembly_work: Remaining scene placement, boundary transitions, or whole-film mastering
 - proof: Optional supplemental images or media with render IDs and state names
 - visual_risks: Typography, density, evidence surface, motion, continuity, or other risks playback and supplemental evidence resolve
 
@@ -43,7 +43,7 @@ For screen evidence or explanatory visual sequences, read [`screen-evidence.md`]
 
 - `viewer_question`: What the viewer should understand or be able to repeat.
 - `cue_evidence`: Narration anchor → exact source state or explanatory relationship → visible interval.
-- `temporal_structure`: Causal, operational, comparison, concurrent, or inspection structure, with meaningful state dependencies and what remains visible. Scene HTML and this scene's timing record supply the approved numeric local timing; storyboard shot moments inherit it.
+- `temporal_structure`: Causal, operational, comparison, concurrent, or inspection structure, with meaningful state dependencies and what remains visible. Use this scene's approved local timing record.
 - `framing`: Full view, detail, inset, or diagram, with the inspection purpose of each crop or move.
 - `setup_delta`: For configuration or repeated startup, the normal path, observed restriction, and behavior-changing differences from the earlier setup; omit when irrelevant.
 
@@ -55,7 +55,7 @@ When the scene contains a demonstration, add a `demo_contract`:
 
 Two or three sentences describing what the viewer experiences.
 
-Link each scene to the HTML review entry point and its persisted review record. For supplemental proofs, use Markdown image syntax or supported media links with render ID, state, and current project revision. The HTML loads the same production compositions; `SCENES.md` owns scene intent and decision references.
+Link each scene to the HTML review entry point and its persisted review record. For supplemental proofs, use Markdown image syntax or supported media links with render ID, state, and current project revision.
 ```
 
 Compute `artifact_digest` as SHA-256 of the complete scenes file after removing only the `artifact_digest:` line.
@@ -67,12 +67,8 @@ Compute `artifact_digest` as SHA-256 of the complete scenes file after removing 
 - Adjacent scenes vary at least two of world, scale, camera behavior, action, and rhythm where the sequence permits; record intentional matched views or inspection holds instead of adding cosmetic motion.
 - The full film includes establishing, medium, and detail scales where the content supports them.
 - Continuity fields form an unbroken chain or name an intentional cut.
-- Feasibility identifies expensive or uncertain treatments before storyboarding.
-- Every scene has playable production HTML and corresponding narration, with current passed joint review recorded under [the shared review contract](../../boring-video/references/hyperframes-review-project.md).
-- Adjacent scenes and the assembled sequence have been played to check repetition, continuity, and rhythm; unresolved content, visual, or spoken pacing findings keep the review open.
-- Supplemental stills expose named risks without substituting for playback.
-- Scene review uses final typography, copy, assets, animation, and delivery audio; scratch narration or unfinished scene-internal work keeps the scene pending.
-- Composition and asset digests, approved local timing, protected holds, and transition handles allow assembly to preserve the reviewed result.
+- Feasibility identifies expensive or uncertain treatments before implementation.
+- The [shared scene review gate](../../boring-video/references/hyperframes-review-project.md#scene-review-gate) passes for the current compositions and project revision.
 - Screen scenes satisfy the viewing contract in `screen-evidence.md`; their proof set exposes the stated framing, evidence, and reveal risks.
 - Any scene declaring a `preset` from `scene-presets.md` satisfies that preset's selection condition, declared mode, input bounds, readable-hold timing, and fallback rules without weakening `screen-evidence.md` or `demo_contract` truthfulness.
 - Every demonstration specifies its complete visible content, truth mode, and code-surface labels; its presentation does not imply stronger evidence than the declared mode.

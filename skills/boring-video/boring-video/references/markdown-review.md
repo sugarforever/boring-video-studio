@@ -21,7 +21,7 @@ When a planning decision needs pixels or media, keep the decision in Markdown an
 - identify the project revision and scene, frame, state, or timestamp that produced the evidence;
 - refresh stale evidence after a source or design change.
 
-During `/to-scenes`, present the project's HTML scene review entry point alongside `SCENES.md` for joint narration and visual review. It loads the production compositions and links to the canonical Markdown and review records. Use HyperFrames Studio for subsequent full timeline, transition, and final-look review; keep the scene review entry point available for targeted revisions.
+For scene playback and approval, follow [the shared scene review gate](hyperframes-review-project.md#scene-review-gate); the Markdown presentation criterion below does not replace it.
 
 ## Completion criterion
 

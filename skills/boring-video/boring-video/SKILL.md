@@ -42,7 +42,7 @@ When this intake creates or adapts `content/ARTICLE.md`, read [`references/markd
 For content-driven work, ask one compact question for any missing production choices:
 
 1. **Presentation:** faceless, footage, screen capture, talking head, or mixed media?
-2. **Collaboration:** storyboard reviews or agent-executed production with final preview?
+2. **Collaboration:** scene/storyboard reviews or agent-executed production with final preview?
 3. **Voice:** HyperFrames voice, ListenHub TTS, MiniMax TTS (`minimax-tts`), user recording, or no narration?
 4. **Design:** existing design truth, named direction, or agent-proposed direction?
 5. **Publishing:** which covers, platform adaptations, blog/article variants, subtitles, or social copy are requested, if any?
@@ -51,7 +51,7 @@ Record the answers and adopted production defaults in the workflow `BRIEF.md`. I
 
 ## Chain
 
-Before `/to-scenes` starts the renderable project, read [`references/hyperframes-review-project.md`](references/hyperframes-review-project.md). Pass its project identity and review state forward through `SCENES.md`, `STORYBOARD.md`, and the HyperFrames project manifest; downstream skills consume those artifacts rather than this internal reference.
+For `/to-scenes` through `/to-video`, use [the shared project contract](references/hyperframes-review-project.md) for project identity, scene approval, and assembly boundaries. Each stage reads its applicable sections and carries project/review state in its artifacts.
 
 For content-driven work, start at the first missing or explicitly revised artifact:
 
@@ -73,7 +73,7 @@ When the user begins with an approved complete article, recompute its digest bef
 
 ## Handoff
 
-Presentation and workflow are separate decisions. Collect the presentation intent without selecting a workflow from memory. For content-driven work, `/to-video` reads the current `/hyperframes` contract and performs the route. Direct-production work remains in `/hyperframes`; this wrapper resumes only to produce any requested publication branch.
+Presentation and workflow are separate decisions. Collect the presentation intent without selecting a workflow from memory. For content-driven work, `/to-scenes` resolves the current `/hyperframes` route when it creates the project; `/to-video` continues that recorded route under the current contract. Direct-production work remains in `/hyperframes`; this wrapper resumes only to produce any requested publication branch.
 
 ## Done
 
