@@ -52,9 +52,9 @@ This uses ffmpeg-normalize to measure and apply a uniform gain, then transcribes
 
 ## 4. Resolve retakes before correcting subtitles
 
-For every continuous narration take, read [retakes.md](references/retakes.md) and perform its review before correcting recognition text, including when the transcript appears fluent. This reference defines evidence, review coverage and handling of unavailable audio understanding. Preserve the uncorrected transcript as evidence throughout editing.
+Before subtitle correction, follow [retakes.md](references/retakes.md), even when transcription is fluent. Preserve raw recognition as evidence.
 
-**Editing stage complete:** `REVIEW.md` accounts for review coverage, candidate decisions and every user-reported interval under the reference's criteria. Applied cuts have an edit report and the resulting audio has a fresh transcript. Unresolved alternatives remain in the audio and are identified for review. With no cuts, reuse step 3's audio and transcript. Correction below always uses the transcript of the final audio.
+**Supported edits exported:** cuts have an edit report and a fresh transcript; without cuts, reuse step 3's artifacts. The audio-review ledger accounts for candidates, user reports and remaining gaps; `REVIEW.md` summarizes its status. Correct only the final audio's transcript.
 
 ## 5. Correct recognition against the script
 
@@ -83,4 +83,4 @@ Read [subtitles.md](references/subtitles.md) and generate delivery subtitles fro
 
 Deliver clickable absolute paths to the final WAV, final subtitle SRT and corresponding transcript JSON, script snapshot and review notes; include the edit report when cuts were made. If cues were merged, link the delivery exports and retain the reviewed originals as provenance. Keep original takes and chunks available. Pass these artifacts to the next production step; replacing an existing project's audio requires the user's requested scope to cover that change.
 
-**Delivery complete:** audio and subtitles are usable together, and the delivery carries the audio-review status defined in the retake reference. Pending audio review is stated in the final response as well as the review notes.
+**Delivery status:** report the audio-review result under the retake reference's completion criteria alongside subtitle verification. Unfinished speech review remains incomplete work in both `REVIEW.md` and the final response.
