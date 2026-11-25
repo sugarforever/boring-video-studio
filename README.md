@@ -74,6 +74,26 @@ npx skills add sugarforever/boring-video-studio --skill record-terminal to-story
 $to-storyboard Turn SCENES.md into a HyperFrames storyboard.
 ```
 
+## Learn your writing preferences
+
+[`learn-writing-taste`](skills/boring-video/learn-writing-taste/SKILL.md) learns reusable writing preferences from your article and narration corrections. It follows [Emil Kowalski's learn-taste](https://github.com/emilkowalski/skills/tree/main/skills/learn-taste) pattern: collect evidence, propose scoped rules, and save the items you approve.
+
+Install this optional companion separately:
+
+```bash
+npx skills add sugarforever/boring-video-studio --skill learn-writing-taste
+```
+
+After editing or reviewing an article or narration, invoke it in the conversation containing your feedback:
+
+```text
+$learn-writing-taste Learn my writing preferences from the article and narration corrections in this chat.
+```
+
+Review the proposed rules and approve all or selected IDs. Approved preferences go into the project's `WRITING-TASTE.md` (or its existing writing profile), with a loading pointer in `AGENTS.md`. Future article and narration drafts apply rules matching their language, medium, and audience. Each rule retains its supporting evidence and any stated reason; one-off factual or topic-boundary corrections stay local to the piece.
+
+Invoke `$learn-writing-taste prune` to propose merges, conflict resolutions, or removal of obsolete rules. The skill updates the approved profile and pointer while preserving source drafts and their approval metadata.
+
 ## MiniMax narration
 
 Install the optional provider skill:
@@ -148,7 +168,3 @@ PLAYWRIGHT_MODULE=/absolute/path/node_modules/playwright \
 NARRATION_PYTHON=/absolute/path/venv/bin/python \
   node skills/boring-video/record-narration/tests/browser.cjs
 ```
-
-## Learn your writing preferences
-
-Install the optional companion with `npx skills add sugarforever/boring-video-studio --skill learn-writing-taste`. After reviewing an article or narration, invoke `/learn-writing-taste` to extract reusable preferences from your corrections. It proposes evidence-backed rules, then saves approved items in `WRITING-TASTE.md` with an `AGENTS.md` loading pointer. `/learn-writing-taste prune` proposes maintenance of an existing profile.
