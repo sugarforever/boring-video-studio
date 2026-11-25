@@ -1,0 +1,449 @@
+<template
+  ><style>
+    @font-face {
+      font-family: "Noto Sans SC";
+      src: url("assets/fonts/noto-400.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Noto Sans SC";
+      src: url("assets/fonts/noto-600.ttf") format("truetype");
+      font-weight: 600;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Noto Sans SC";
+      src: url("assets/fonts/noto-700.ttf") format("truetype");
+      font-weight: 700;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Noto Sans SC";
+      src: url("assets/fonts/noto-800.ttf") format("truetype");
+      font-weight: 800;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Noto Sans SC";
+      src: url("assets/fonts/noto-900.ttf") format("truetype");
+      font-weight: 900;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Inter";
+      src: url("assets/fonts/inter-400.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Inter";
+      src: url("assets/fonts/inter-600.ttf") format("truetype");
+      font-weight: 600;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Inter";
+      src: url("assets/fonts/inter-700.ttf") format("truetype");
+      font-weight: 700;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Inter";
+      src: url("assets/fonts/inter-800.ttf") format("truetype");
+      font-weight: 800;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Inter";
+      src: url("assets/fonts/inter-900.ttf") format("truetype");
+      font-weight: 900;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Space Grotesk";
+      src: url("assets/fonts/space-600.ttf") format("truetype");
+      font-weight: 600;
+      font-style: normal;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      container-type: size;
+      overflow: hidden;
+      color: #000;
+      font-family: Inter, "Noto Sans SC", sans-serif;
+      font-synthesis: none;
+    }
+    #root {
+      --pink: #fe90e8;
+      --blue: #c0f7fe;
+      --green: #99e885;
+      --yellow: #f7cb46;
+      --cream: #ffdc8b;
+      --white: #ffffff;
+      --offwhite: #fffdf5;
+      --black: #000000;
+    }
+    .scene {
+      position: absolute;
+      inset: 0;
+    }
+    .eyebrow {
+      position: absolute;
+      left: 7.8125cqw;
+      top: 5.625cqw;
+      font:
+        600 1.51041667cqw "Space Grotesk",
+        "Noto Sans SC",
+        sans-serif;
+      letter-spacing: 0.10416667cqw;
+      text-transform: uppercase;
+      background: #fff;
+      border: 0.15625cqw solid #000;
+      box-shadow: 0.20833333cqw 0.20833333cqw #000;
+      border-radius: 5.15625cqw;
+      padding: 0.625cqw 1.35416667cqw;
+    }
+    .headline {
+      position: absolute;
+      left: 7.8125cqw;
+      top: 10.83333333cqw;
+      margin: 0;
+      font-size: 5.20833333cqw;
+      font-weight: 900;
+      letter-spacing: -0.20833333cqw;
+      line-height: 1.1;
+    }
+    .caption {
+      font-size: 1.97916667cqw;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+    .note {
+      font-size: 1.45833333cqw;
+      line-height: 1.5;
+    }
+    .box {
+      position: absolute;
+      border: 0.20833333cqw solid #000;
+      box-shadow: 0.41666667cqw 0.41666667cqw #000;
+      background: #fff;
+    }
+    .line {
+      height: 0.20833333cqw;
+      background: #000;
+    }
+    .star {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      clip-path: polygon(
+        50% 0%,
+        61% 20%,
+        79% 10%,
+        79% 32%,
+        100% 35%,
+        86% 52%,
+        100% 72%,
+        77% 75%,
+        79% 100%,
+        58% 88%,
+        44% 100%,
+        36% 79%,
+        10% 90%,
+        16% 66%,
+        0% 55%,
+        20% 42%,
+        6% 21%,
+        31% 23%,
+        36% 2%
+      );
+    }
+    .stripe {
+      position: absolute;
+      border: 0.20833333cqw solid #000;
+      background: repeating-linear-gradient(
+        45deg,
+        #000 0 0.625cqw,
+        var(--yellow) 0.625cqw 1.5625cqw
+      );
+    }
+    .film {
+      position: absolute;
+      border: 0.20833333cqw solid #000;
+      box-shadow: 0.41666667cqw 0.41666667cqw #000;
+      background: #fffdf5;
+      overflow: hidden;
+    }
+    .filmbar {
+      height: 3.64583333cqw;
+      background: #000;
+      color: #fff;
+      padding: 0.52083333cqw 1.14583333cqw;
+      font:
+        600 2.08333333cqw "Space Grotesk",
+        sans-serif;
+      letter-spacing: 0.10416667cqw;
+    }
+    .folio {
+      position: absolute;
+      bottom: 3.64583333cqw;
+      left: 7.8125cqw;
+      font:
+        600 1.5625cqw "Space Grotesk",
+        "Noto Sans SC",
+        sans-serif;
+      letter-spacing: 0.10416667cqw;
+    }
+    .content {
+      position: absolute;
+      inset: 0;
+    }
+    .hold {
+      position: absolute;
+      left: 7.8125cqw;
+      bottom: 7.91666667cqw;
+      font-size: 2.1875cqw;
+      font-weight: 800;
+    }
+    .tag {
+      display: inline-block;
+      background: #f7cb46;
+      border: 0.15625cqw solid #000;
+      box-shadow: 0.20833333cqw 0.20833333cqw #000;
+      padding: 0.41666667cqw 0.9375cqw;
+      font-size: 1.51041667cqw;
+      font-weight: 800;
+    }
+    .papertext {
+      font-size: 2.08333333cqw;
+      line-height: 1.55;
+      font-weight: 700;
+    }
+    .dotline {
+      height: 0.67708333cqw;
+      border-bottom: 0.20833333cqw solid #000;
+      width: 100%;
+      margin-top: 1.875cqw;
+    }
+    .stamp {
+      position: absolute;
+      background: #99e885;
+      border: 0.20833333cqw solid #000;
+      box-shadow: 0.41666667cqw 0.41666667cqw #000;
+      font-size: 2.29166667cqw;
+      font-weight: 900;
+      padding: 0.78125cqw 1.45833333cqw;
+    }
+    .item {
+      position: absolute;
+      border: 0.20833333cqw solid #000;
+      box-shadow: 0.41666667cqw 0.41666667cqw #000;
+      padding: 1.14583333cqw;
+      font-size: 1.92708333cqw;
+      line-height: 1.35;
+      font-weight: 800;
+    }
+    .item small {
+      display: block;
+      font-size: 1.66666667cqw;
+      margin-top: 0.625cqw;
+      font-weight: 600;
+    }
+    .screenlabel {
+      position: absolute;
+      font:
+        600 1.5625cqw "Space Grotesk",
+        "Noto Sans SC",
+        sans-serif;
+      letter-spacing: 0.10416667cqw;
+    }
+  </style>
+  <div
+    id="root"
+    data-composition-id="s01"
+    data-width="1920"
+    data-height="1080"
+    style="background: #ffdc8b"
+  >
+    <div
+      id="s01-content"
+      class="clip content"
+      data-start="0"
+      data-duration="8"
+      data-track-index="0"
+    >
+      <div class="eyebrow">01 / SCRIPT → SCREEN</div>
+      <h1 id="s01-title" class="headline" style="width: 38.54166667cqw">
+        纸上，<br />都讲得通。
+      </h1>
+      <div
+        id="s01-sub"
+        class="caption"
+        style="
+          position: absolute;
+          left: 7.8125cqw;
+          top: 26.04166667cqw;
+          width: 31.25cqw;
+        "
+      >
+        逻辑写清楚了，<br />画面却还没发生。
+      </div>
+      <div
+        id="s01-paper"
+        class="box"
+        style="
+          left: 53.125cqw;
+          top: 10.9375cqw;
+          width: 34.89583333cqw;
+          height: 33.33333333cqw;
+          padding: 2.29166667cqw;
+        "
+      >
+        <div class="tag">SCENE PLAN</div>
+        <div class="papertext" style="margin-top: 2.08333333cqw">问题</div>
+        <div class="dotline"></div>
+        <div class="papertext" style="margin-top: 1.5625cqw">原因与例子</div>
+        <div class="dotline"></div>
+        <div class="papertext" style="margin-top: 1.5625cqw">方法</div>
+        <div
+          id="s01-ok"
+          class="stamp"
+          style="right: -2.1875cqw; bottom: 2.5cqw"
+        >
+          逻辑成立 ✓
+        </div>
+      </div>
+      <div
+        id="s01-playback"
+        class="film"
+        style="
+          left: 17.44791667cqw;
+          top: 12.29166667cqw;
+          width: 65.10416667cqw;
+          height: 33.54166667cqw;
+        "
+      >
+        <div class="filmbar">ACTUAL SCENE / 画面开始发生</div>
+        <div
+          style="
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 3.64583333cqw;
+            bottom: 0;
+            background: #c0f7fe;
+          "
+        >
+          <div
+            id="s01-block-a"
+            class="box"
+            style="
+              left: 4.89583333cqw;
+              top: 4.6875cqw;
+              width: 28.125cqw;
+              height: 17.1875cqw;
+              background: #fe90e8;
+              padding: 1.97916667cqw;
+            "
+          >
+            <span style="font-size: 3.4375cqw; font-weight: 900">一个问题</span>
+            <div class="line" style="margin: 1.5625cqw 0"></div>
+            <span style="font-size: 1.92708333cqw; font-weight: 700"
+              >观众应该先看哪里？</span
+            >
+          </div>
+          <div
+            id="s01-block-b"
+            class="box"
+            style="
+              left: 36.97916667cqw;
+              top: 10.67708333cqw;
+              width: 21.35416667cqw;
+              height: 11.19791667cqw;
+              background: #f7cb46;
+              padding: 1.71875cqw;
+              font-size: 1.97916667cqw;
+              font-weight: 900;
+            "
+          >
+            文字没法预演，<br />画面可以。
+          </div>
+        </div>
+      </div>
+      <div id="s01-end" class="hold">画面，要真的播放。</div>
+      <div
+        class="stripe"
+        style="
+          right: -1.04166667cqw;
+          top: 3.64583333cqw;
+          width: 10.41666667cqw;
+          height: 3.38541667cqw;
+          transform: rotate(8deg);
+        "
+        data-layout-ignore
+      ></div>
+      <div class="folio">BLOCKFRAME · S01 · 教学示意</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo(
+      "#s01-paper",
+      { rotation: -5, y: 22 },
+      { rotation: 2, y: 0, duration: 0.7, ease: "back.out(1.25)" },
+      0.2,
+    );
+    tl.fromTo(
+      "#s01-ok",
+      { scale: 1.7, rotation: -14, opacity: 0 },
+      {
+        scale: 1,
+        rotation: -8,
+        opacity: 1,
+        duration: 0.35,
+        ease: "power4.out",
+      },
+      1.6,
+    );
+    tl.fromTo(
+      "#s01-title",
+      { opacity: 1 },
+      { opacity: 0, duration: 0.25 },
+      3.7,
+    );
+    tl.fromTo("#s01-sub", { opacity: 1 }, { opacity: 0, duration: 0.25 }, 3.7);
+    tl.fromTo(
+      "#s01-paper",
+      { scale: 1, opacity: 1 },
+      { scale: 0.72, opacity: 0, duration: 0.45, ease: "power3.in" },
+      3.7,
+    );
+    tl.fromTo(
+      "#s01-playback",
+      { scale: 0.72, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.65, ease: "power3.out" },
+      4,
+    );
+    tl.fromTo(
+      "#s01-block-a",
+      { x: -90, opacity: 0 },
+      { x: 0, opacity: 1, duration: 0.55, ease: "back.out(1.15)" },
+      4.25,
+    );
+    tl.fromTo(
+      "#s01-block-b",
+      { x: 65, opacity: 0 },
+      { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" },
+      4.8,
+    );
+    tl.fromTo("#s01-end", { opacity: 0 }, { opacity: 1, duration: 0.25 }, 5.4);
+    window.__timelines["s01"] = tl;
+  </script></template
+>

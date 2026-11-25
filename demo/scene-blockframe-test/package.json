@@ -1,0 +1,11 @@
+{
+  "name": "blockframe-scene-review-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "review": "python3 -m http.server 3121 --bind 127.0.0.1",
+    "dev": "npx --yes hyperframes@0.9.92 preview",
+    "check": "npx --yes hyperframes@0.9.92 check",
+    "render": "npx --yes hyperframes@0.9.92 render"
+  }
+}

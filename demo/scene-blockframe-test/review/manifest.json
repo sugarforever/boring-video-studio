@@ -1,0 +1,265 @@
+{
+  "project_revision": "blockframe-pr-r1",
+  "skill_commit": "9d5abf11",
+  "design_source": "frame.md (installed HyperFrames blockframe preset)",
+  "review_entry": "review.html",
+  "source_beats_digest": "sha256:2d18b3081a3a495676ba0710c8421f936340d2048ec6b0548d0f4176d5f5c253",
+  "source_narration_digest": "sha256:38f5249693baf8f6e57c74103944a1bda7aaabb15a18a302dd23cd255f799ab9",
+  "audio_status": "deferred_by_user",
+  "spoken_pacing": "pending",
+  "sequence_review": {
+    "status": "pending",
+    "reviewed_intervals": [],
+    "findings": []
+  },
+  "scenes": [
+    {
+      "id": "s01",
+      "title": "文字规划看着都合理",
+      "start": 0,
+      "duration": 8,
+      "beat": "B01",
+      "question": "文字规划能确认什么，还有什么看不见？",
+      "cues": [
+        {
+          "id": "b01-p01",
+          "start": 0,
+          "end": 4,
+          "text": "文字规划里，每个场景都能写得很合理。"
+        },
+        {
+          "id": "b01-p02",
+          "start": 4,
+          "end": 8,
+          "text": "但画面到底好不好看，只读文字还判断不了。"
+        }
+      ],
+      "composition": "compositions/s01.html",
+      "source_digest": "sha256:d07cf49ba24f2fb7f7b709437fdede64fde3f9490f2f593b771f6297697f0c48",
+      "status": "pending",
+      "audio_status": "deferred_by_user",
+      "content_findings": [],
+      "visual_findings": [],
+      "reviewed_intervals": [],
+      "reviewer": "user visual acceptance pending",
+      "sampled_states": [],
+      "timing_basis": "visual test; narration timing provisional by explicit user choice",
+      "boundary_handles": {
+        "entry": 0,
+        "exit": 0,
+        "transition": "hard cut only; overlaps require new review"
+      },
+      "local_moments": [
+        {
+          "start": 0,
+          "end": 3.7,
+          "state": "纸面规划与逻辑通过印章"
+        },
+        {
+          "start": 4,
+          "end": 5.4,
+          "state": "进入实际画面；先建立问题，再出现说明"
+        },
+        {
+          "start": 5.4,
+          "end": 8,
+          "state": "结果阅读停留"
+        }
+      ],
+      "parity_timestamps": [
+        2,
+        6
+      ],
+      "visual_status": "pending_user_review",
+      "spoken_pacing": "pending_by_user_choice"
+    },
+    {
+      "id": "s02",
+      "title": "播放才看见问题",
+      "start": 8,
+      "duration": 10,
+      "beat": "B02",
+      "question": "为什么同样的说明，实际画面读起来不同？",
+      "cues": [
+        {
+          "id": "b02-p01",
+          "start": 0,
+          "end": 5,
+          "text": "一播放，才发现信息太挤，观众来不及看。"
+        },
+        {
+          "id": "b02-p02",
+          "start": 5,
+          "end": 10,
+          "text": "留住一个重点，再给它足够的停留时间。"
+        }
+      ],
+      "composition": "compositions/s02.html",
+      "source_digest": "sha256:d14a9ac412f086ed83effa126c04a4e9c5a736a555d8245e074ed1005eeb57e5",
+      "status": "pending",
+      "audio_status": "deferred_by_user",
+      "content_findings": [],
+      "visual_findings": [],
+      "reviewed_intervals": [],
+      "reviewer": "user visual acceptance pending",
+      "sampled_states": [],
+      "timing_basis": "visual test; narration timing provisional by explicit user choice",
+      "boundary_handles": {
+        "entry": 0,
+        "exit": 0,
+        "transition": "hard cut only; overlaps require new review"
+      },
+      "local_moments": [
+        {
+          "start": 0,
+          "end": 0.9,
+          "state": "六块内容进入"
+        },
+        {
+          "start": 0.9,
+          "end": 4.6,
+          "state": "同时保留六项供密度判断"
+        },
+        {
+          "start": 4.6,
+          "end": 5.8,
+          "state": "收起多余内容，替换为单一重点"
+        },
+        {
+          "start": 6.1,
+          "end": 10,
+          "state": "单一问题与阅读停留"
+        }
+      ],
+      "parity_timestamps": [
+        2,
+        7
+      ],
+      "visual_status": "pending_user_review",
+      "spoken_pacing": "pending_by_user_choice"
+    },
+    {
+      "id": "s03",
+      "title": "口播和画面一起改",
+      "start": 18,
+      "duration": 10,
+      "beat": "B03",
+      "question": "逐场审阅后，修改应该写回哪里？",
+      "cues": [
+        {
+          "id": "b03-p01",
+          "start": 0,
+          "end": 5,
+          "text": "所以，场景阶段就该把口播和画面放在一起审。"
+        },
+        {
+          "id": "b03-p02",
+          "start": 5,
+          "end": 10,
+          "text": "内容不合适就改稿，画面不满意就改同一份场景。"
+        }
+      ],
+      "composition": "compositions/s03.html",
+      "source_digest": "sha256:3c7d2af08996711b996e7d1c9347264a78ddf009e6906100c22309253196550b",
+      "status": "pending",
+      "audio_status": "deferred_by_user",
+      "content_findings": [],
+      "visual_findings": [],
+      "reviewed_intervals": [],
+      "reviewer": "user visual acceptance pending",
+      "sampled_states": [],
+      "timing_basis": "visual test; narration timing provisional by explicit user choice",
+      "boundary_handles": {
+        "entry": 0,
+        "exit": 0,
+        "transition": "hard cut only; overlaps require new review"
+      },
+      "local_moments": [
+        {
+          "start": 0,
+          "end": 1.6,
+          "state": "建立稿子和当前场景"
+        },
+        {
+          "start": 1.6,
+          "end": 2.6,
+          "state": "划掉旧句，显示新句"
+        },
+        {
+          "start": 4.7,
+          "end": 5.55,
+          "state": "移走多余信息，显示修改后的重点"
+        },
+        {
+          "start": 6.6,
+          "end": 7.6,
+          "state": "退出稿子，播放器缩到装配时间线"
+        },
+        {
+          "start": 7.6,
+          "end": 10,
+          "state": "拼接结论阅读停留"
+        }
+      ],
+      "parity_timestamps": [
+        2.5,
+        8
+      ],
+      "visual_status": "pending_user_review",
+      "spoken_pacing": "pending_by_user_choice"
+    }
+  ],
+  "asset_digests": {
+    "assets/fonts/inter-400.ttf": "sha256:af5e18efd2ee17104b8f26096dbdbe04d1cc0d6b950a57ffe59a09b295bdfddb",
+    "assets/fonts/inter-600.ttf": "sha256:2df469d1ac7f2ebb524fcbfbb1a8e9b920edab7b0ea7393e71d32a20de4abd94",
+    "assets/fonts/inter-700.ttf": "sha256:5ce4dcaa735c59723aa4b4c44b4344a0847bc82e1cf579662ee8a74ecd471b76",
+    "assets/fonts/inter-800.ttf": "sha256:b9f4a2e747e918db19654ab1655227a29531ad14c70bf79f8452871a1f3358a7",
+    "assets/fonts/inter-900.ttf": "sha256:75f84b3d9dba7020827d276738a5023d41f937fdf4bbdaf182ce9d5c3d912318",
+    "assets/fonts/noto-400.ttf": "sha256:bbd0d9bca1f12a3b8e132e166c33f9fb7e00f5bdece16c18cfcf13a77b05d6cb",
+    "assets/fonts/noto-600.ttf": "sha256:3788b37bb2180ace80cc172685c25385c3e2593d97331eba823dd53179dbb154",
+    "assets/fonts/noto-700.ttf": "sha256:c4a9f7d811ccf66d503ffa62fbef1316a2b272942a24501726c5810257895da2",
+    "assets/fonts/noto-800.ttf": "sha256:b51ac593ec3f7ee819e5a626bbaa0e2e0c1e7c6ffb58a133aef5af66e0592b5f",
+    "assets/fonts/noto-900.ttf": "sha256:6b0d2d45302ef288bb91c4ea862d17eec3217236503279d2661c6418303f554b",
+    "assets/fonts/space-600.ttf": "sha256:46c44aa09ace7a50ddcb1f27a72eb45417a790278fd72365dba2b6bbc488bc17",
+    "assets/gsap.min.js": "sha256:c3a03a345e45bc954cd48c43f11572891f5dca7a5d99348d5bc14753a728618c"
+  },
+  "design_digest": "sha256:ef8d9d47a209bed4ccc2d928c14a81cdaecb5129f5dc0cdc0dc40afc7ef92931",
+  "structural_checks": {
+    "lint": {
+      "ok": true,
+      "errors": 0,
+      "warnings": 0
+    },
+    "runtime": {
+      "ok": true,
+      "errors": 0,
+      "warnings": 0
+    },
+    "layout": {
+      "ok": true,
+      "errors": 0,
+      "warnings": 0
+    },
+    "contrast": {
+      "ok": true,
+      "errors": 0,
+      "warnings": 0
+    },
+    "craft": {
+      "ok": true,
+      "errors": 0,
+      "warnings": 2
+    }
+  },
+  "verification": {
+    "source_identity": "single-scene review loads the same compositions mounted by index.html; current source digests recorded",
+    "browser_checks": [
+      "scene switching",
+      "S02 direct seek to 7s, backward seek to 2s; six-block state restored",
+      "mobile review controls remain usable"
+    ],
+    "pixel_parity": "not separately certified; actual source files are shared",
+    "audio": "deferred by explicit user choice",
+    "visual_acceptance": "pending user review"
+  }
+}

@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Blockframe 场景审阅测试</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #f5f4ef;
+        color: #18352f;
+        font-family: system-ui, sans-serif;
+      }
+      header {
+        padding: 24px 30px;
+        background: #fffdf8;
+        border-bottom: 1px solid #d5dcd2;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 23px;
+      }
+      .muted,
+      small {
+        color: #5d6e65;
+        font-size: 12px;
+        line-height: 1.7;
+      }
+      .badge {
+        background: #fff0d7;
+        border: 1px solid #d6b991;
+        border-radius: 40px;
+        padding: 9px 14px;
+        font-size: 12px;
+        color: #785020;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 225px minmax(0, 1fr);
+      }
+      nav {
+        padding: 26px 18px;
+        border-right: 1px solid #d5dcd2;
+      }
+      nav > p {
+        font-size: 11px;
+        letter-spacing: 2px;
+        color: #5d6e65;
+        margin: 0 10px 20px;
+      }
+      .scene {
+        display: block;
+        border: 0;
+        background: none;
+        border-radius: 9px;
+        width: 100%;
+        text-align: left;
+        padding: 15px 12px;
+        margin: 0 0 8px;
+        color: #18352f;
+      }
+      .scene b {
+        display: block;
+        font-size: 14px;
+        margin: 6px 0;
+      }
+      .scene.active {
+        background: #e1e9df;
+        box-shadow: inset 3px 0 #136b56;
+      }
+      .links {
+        display: grid;
+        gap: 14px;
+        margin: 30px 12px;
+      }
+      a {
+        font-size: 13px;
+        color: #276750;
+      }
+      main {
+        padding: 25px 30px;
+        min-width: 0;
+      }
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+      h2 {
+        margin: 0;
+        font-size: 18px;
+      }
+      .canvas {
+        width: 100%;
+        aspect-ratio: 16/9;
+        overflow: hidden;
+        position: relative;
+        background: #f3f0e7;
+        border-radius: 9px;
+        box-shadow: 0 5px 25px #25372a15;
+      }
+      iframe {
+        width: 1920px;
+        height: 1080px;
+        position: absolute;
+        border: 0;
+        transform-origin: 0 0;
+      }
+      .controls {
+        display: flex;
+        gap: 13px;
+        align-items: center;
+        margin: 16px 0 22px;
+      }
+      button,
+      textarea,
+      input {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      button.action {
+        border: 0;
+        background: #18352f;
+        color: white;
+        padding: 10px 17px;
+        border-radius: 7px;
+        font-size: 13px;
+      }
+      button.secondary {
+        border: 1px solid #c3d0c3;
+        background: #fffdf8;
+        color: #18352f;
+        padding: 9px 13px;
+        border-radius: 7px;
+        font-size: 13px;
+      }
+      input[type="range"] {
+        flex: 1;
+        min-width: 60px;
+        accent-color: #136b56;
+      }
+      .clock {
+        font: 12px monospace;
+        min-width: 90px;
+        color: #5d6e65;
+      }
+      .below {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+      }
+      .box {
+        border: 1px solid #d5dcd2;
+        border-radius: 9px;
+        background: #fffdf8;
+        padding: 19px;
+      }
+      h3 {
+        font-size: 14px;
+        margin: 0 0 13px;
+      }
+      .cue {
+        padding: 10px 12px;
+        border-left: 3px solid transparent;
+        font-size: 15px;
+        line-height: 1.8;
+        cursor: pointer;
+        margin-bottom: 8px;
+      }
+      .cue.active {
+        border-color: #136b56;
+        background: #e8eee3;
+      }
+      .cue small {
+        display: block;
+        font: 11px monospace;
+        margin-bottom: 4px;
+      }
+      .notice {
+        font-size: 12px;
+        line-height: 1.6;
+        color: #875126;
+      }
+      label {
+        display: block;
+        color: #5d6e65;
+        font-size: 12px;
+        margin: 12px 0 6px;
+      }
+      textarea {
+        width: 100%;
+        min-height: 57px;
+        resize: vertical;
+        padding: 10px;
+        border: 1px solid #cbd3c9;
+        border-radius: 6px;
+        background: #f9f9f4;
+        font-size: 13px;
+        color: #18352f;
+      }
+      .foot {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        margin-top: 13px;
+      }
+      @media (max-width: 1000px) {
+        .below {
+          grid-template-columns: 1fr;
+        }
+        .layout {
+          grid-template-columns: 185px 1fr;
+        }
+      }
+      @media (max-width: 650px) {
+        .layout {
+          display: block;
+        }
+        nav {
+          display: block;
+          padding: 8px;
+          overflow: auto;
+        }
+        #scenes {
+          display: flex;
+          gap: 8px;
+        }
+        .scene {
+          min-width: 160px;
+        }
+        .links,
+        nav > p {
+          display: none;
+        }
+        main {
+          padding: 14px;
+        }
+        .badge {
+          display: none;
+        }
+      }
+      :root {
+        --pink: #fe90e8;
+        --blue: #c0f7fe;
+        --green: #99e885;
+        --yellow: #f7cb46;
+        --cream: #ffdc8b;
+      }
+      body {
+        background: #fffdf5;
+        color: #000;
+      }
+      header {
+        background: #ffdc8b;
+        border-bottom: 3px solid #000;
+      }
+      .badge {
+        background: #fe90e8;
+        color: #000;
+        border: 2px solid #000;
+        border-radius: 0;
+        box-shadow: 3px 3px #000;
+      }
+      nav {
+        border-right: 3px solid #000;
+      }
+      .scene.active {
+        background: #c0f7fe;
+        box-shadow: inset 4px 0 #000;
+      }
+      .scene {
+        border-radius: 0;
+        color: #000;
+      }
+      .canvas,
+      .box {
+        border-radius: 0;
+        border: 3px solid #000;
+        box-shadow: 5px 5px #000;
+      }
+      .box {
+        background: #fff;
+      }
+      button.action {
+        border: 2px solid #000;
+        border-radius: 0;
+        background: #f7cb46;
+        color: #000;
+        box-shadow: 3px 3px #000;
+      }
+      button.secondary {
+        border: 2px solid #000;
+        border-radius: 0;
+        color: #000;
+      }
+      input[type="range"] {
+        accent-color: #000;
+      }
+      .cue.active {
+        background: #c0f7fe;
+        border-color: #000;
+      }
+      textarea {
+        border-radius: 0;
+        border: 1px solid #000;
+        background: #fffdf5;
+      }
+      a {
+        color: #000;
+      }
+      .notice {
+        color: #000;
+      }
+      @media (max-width: 650px) {
+        .controls {
+          flex-wrap: wrap;
+        }
+        .controls button {
+          white-space: nowrap;
+          flex: 1;
+        }
+        .controls input {
+          order: 3;
+          flex-basis: calc(100% - 112px);
+        }
+        .clock {
+          order: 4;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Blockframe：直接审成片场景。</h1>
+        <div class="muted">
+          to-scenes 示例输出 · 3 个场景 · 28 秒 · blockframe-pr-r1
+        </div>
+      </div>
+      <span class="badge">联合审阅待完成 · 本轮按要求只审画面</span>
+    </header>
+    <div class="layout">
+      <nav>
+        <p>SCENE REVIEW</p>
+        <div id="scenes"></div>
+        <div class="links">
+          <a href="INPUT.md" target="_blank">查看示例输入 ↗</a
+          ><a href="SCENES.md" target="_blank">查看场景规划 ↗</a
+          ><a href="NARRATION.md" target="_blank">查看完整口播 ↗</a
+          ><a href="review/manifest.json" target="_blank">源审阅记录 ↗</a>
+        </div>
+      </nav>
+      <main>
+        <div class="top">
+          <h2 id="title">正在加载</h2>
+          <small id="part"></small>
+        </div>
+        <div class="canvas">
+          <iframe
+            id="frame"
+            src="viewer.html"
+            title="实际生产场景预览"
+          ></iframe>
+        </div>
+        <div class="controls">
+          <button id="play" class="action" disabled>播放本场</button
+          ><button id="all" class="secondary" disabled>连播全片</button
+          ><input
+            id="seek"
+            type="range"
+            min="0"
+            max="8"
+            step="0.01"
+            value="0"
+            aria-label="场景进度"
+          /><span class="clock" id="clock"></span>
+        </div>
+        <div class="below">
+          <section class="box">
+            <h3>对应口播</h3>
+            <div id="cues"></div>
+            <p class="notice">
+              使用暂定句子时间；本轮只审画面，口播速度与画面停留仍待审。
+            </p>
+            <div id="question" class="muted"></div>
+          </section>
+          <section class="box">
+            <h3>分别记录内容与画面的问题</h3>
+            <label for="content">内容：这段是否必要，解释是否清楚？</label
+            ><textarea id="content" placeholder="写下需要改稿的地方"></textarea
+            ><label for="visual">画面：构图、可读性、动作是否满意？</label
+            ><textarea
+              id="visual"
+              placeholder="写下需要改场景的地方"
+            ></textarea>
+            <div class="foot">
+              <button id="download" class="secondary">导出审阅意见</button
+              ><small id="saved">草稿仅保存在当前浏览器</small>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <script>
+      const $ = (id) => document.getElementById(id),
+        frame = $("frame"),
+        key = "blockframe-review-r1";
+      let m,
+        i = 0,
+        t = 0,
+        playing = false,
+        whole = false,
+        last = 0,
+        ready = false,
+        notes = {};
+      try {
+        notes = JSON.parse(localStorage.getItem(key) || "{}");
+      } catch {}
+      function save() {
+        if (!m) return;
+        notes[m.scenes[i].id] = {
+          content: $("content").value,
+          visual: $("visual").value,
+          status: "pending",
+        };
+        localStorage.setItem(key, JSON.stringify(notes));
+        $("saved").textContent = "已存当前浏览器；未标记通过";
+      }
+      function paint() {
+        if (!m) return;
+        const s = m.scenes[i];
+        $("seek").max = s.duration;
+        $("seek").value = t;
+        $("clock").textContent = `${t.toFixed(1)} / ${s.duration.toFixed(1)} s`;
+        $("play").textContent = playing ? "暂停" : "播放本场";
+        frame.contentWindow.postMessage(
+          { type: "seek", id: s.id, time: t },
+          location.origin,
+        );
+        document
+          .querySelectorAll(".cue")
+          .forEach((e, n) =>
+            e.classList.toggle(
+              "active",
+              t >= s.cues[n].start && t < s.cues[n].end,
+            ),
+          );
+      }
+      function select(n) {
+        i = n;
+        t = 0;
+        const s = m.scenes[i];
+        $("title").textContent = s.title;
+        $("part").textContent =
+          s.id.toUpperCase() +
+          " · " +
+          s.duration +
+          " 秒 · " +
+          (s.status === "changes_requested" ? "需修改" : "待审");
+        document
+          .querySelectorAll(".scene")
+          .forEach((e, k) => e.classList.toggle("active", k === i));
+        $("cues").replaceChildren();
+        for (const c of s.cues) {
+          const p = document.createElement("div");
+          p.className = "cue";
+          const small = document.createElement("small");
+          small.textContent = c.id + " · " + c.start + "–" + c.end + "s";
+          p.append(small, document.createTextNode(c.text));
+          p.onclick = () => {
+            t = c.start;
+            paint();
+          };
+          $("cues").append(p);
+        }
+        $("content").value = notes[s.id]?.content || "";
+        $("visual").value = notes[s.id]?.visual || "";
+        $("question").textContent = "本场要回答：" + s.question;
+        history.replaceState(null, "", "?scene=" + s.id);
+        paint();
+      }
+      function tick(now) {
+        if (playing) {
+          t += Math.min((now - last) / 1000, 0.1);
+          if (t >= m.scenes[i].duration) {
+            if (whole && i < m.scenes.length - 1) select(i + 1);
+            else {
+              t = m.scenes[i].duration - 0.001;
+              playing = false;
+              whole = false;
+            }
+          }
+          paint();
+        }
+        last = now;
+        requestAnimationFrame(tick);
+      }
+      $("play").onclick = () => {
+        whole = false;
+        if (t >= m.scenes[i].duration - 0.01) t = 0;
+        playing = !playing;
+        paint();
+      };
+      $("all").onclick = () => {
+        select(0);
+        whole = true;
+        playing = true;
+        paint();
+      };
+      $("seek").oninput = (e) => {
+        playing = false;
+        whole = false;
+        t = Number(e.target.value);
+        paint();
+      };
+      $("content").oninput = save;
+      $("visual").oninput = save;
+      $("download").onclick = () => {
+        save();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(
+          new Blob(
+            [
+              JSON.stringify(
+                {
+                  project_revision: m.project_revision,
+                  source_narration_digest: m.source_narration_digest,
+                  status: "pending",
+                  spoken_pacing: "pending",
+                  notes,
+                },
+                null,
+                2,
+              ),
+            ],
+            { type: "application/json" },
+          ),
+        );
+        a.download = "blockframe-review-r1.json";
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      };
+      new ResizeObserver(
+        () =>
+          (frame.style.transform =
+            "scale(" + frame.parentElement.clientWidth / 1920 + ")"),
+      ).observe(frame.parentElement);
+      addEventListener("message", (e) => {
+        if (e.origin !== location.origin || e.source !== frame.contentWindow)
+          return;
+        if (e.data.type === "ready") {
+          ready = true;
+          if (m) {
+            $("play").disabled = false;
+            $("all").disabled = false;
+            paint();
+          }
+        }
+        if (e.data.type === "error")
+          $("title").textContent = "加载失败：" + e.data.message;
+      });
+      fetch("review/manifest.json")
+        .then((r) => r.json())
+        .then((data) => {
+          m = data;
+          for (const [n, s] of m.scenes.entries()) {
+            const b = document.createElement("button");
+            b.className = "scene";
+            b.innerHTML =
+              "<small>" +
+              s.id.toUpperCase() +
+              " / " +
+              s.duration +
+              " 秒</small><b>" +
+              s.title +
+              "</b><small>口播 + 画面 · 待审</small>";
+            b.onclick = () => {
+              playing = false;
+              whole = false;
+              select(n);
+            };
+            $("scenes").append(b);
+          }
+          const id = new URLSearchParams(location.search).get("scene");
+          select(
+            Math.max(
+              0,
+              m.scenes.findIndex((s) => s.id === id),
+            ),
+          );
+          if (ready) {
+            $("play").disabled = false;
+            $("all").disabled = false;
+          }
+        })
+        .catch((e) => ($("title").textContent = "读取失败：" + e.message));
+      requestAnimationFrame(tick);
+      window.getReviewState = () => ({
+        i,
+        t,
+        playing,
+        whole,
+        ready,
+        scene: m?.scenes[i].id,
+      });
+    </script>
+  </body>
+</html>

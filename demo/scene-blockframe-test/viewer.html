@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script src="assets/gsap.min.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #f3f0e7;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      window.__timelines = {};
+      const frames = {};
+      async function load() {
+        const m = await (await fetch("review/manifest.json")).json();
+        for (const s of m.scenes) {
+          const doc = new DOMParser().parseFromString(
+            await (await fetch(s.composition)).text(),
+            "text/html",
+          );
+          const host = document.createElement("section");
+          host.style.cssText = "position:absolute;inset:0;display:none";
+          const sh = host.attachShadow({ mode: "open" });
+          sh.append(doc.querySelector("template").content.cloneNode(true));
+          document.body.append(host);
+          const scoped = {
+            timeline: (opts) => {
+              const tl = gsap.timeline(opts),
+                ft = tl.fromTo.bind(tl);
+              tl.to = (target, ...args) =>
+                gsap.core.Timeline.prototype.to.call(
+                  tl,
+                  typeof target === "string"
+                    ? sh.querySelectorAll(target)
+                    : target,
+                  ...args,
+                );
+              tl.fromTo = (target, ...args) =>
+                ft(
+                  typeof target === "string"
+                    ? sh.querySelectorAll(target)
+                    : Array.isArray(target)
+                      ? target.flatMap((v) =>
+                          typeof v === "string"
+                            ? [...sh.querySelectorAll(v)]
+                            : v,
+                        )
+                      : target,
+                  ...args,
+                );
+              return tl;
+            },
+          };
+          for (const script of sh.querySelectorAll("script"))
+            new Function("gsap", script.textContent)(scoped);
+          frames[s.id] = { host, sh };
+        }
+        await document.fonts.ready;
+        parent.postMessage({ type: "ready" }, location.origin);
+      }
+      addEventListener("message", (e) => {
+        if (
+          e.origin !== location.origin ||
+          e.source !== parent ||
+          e.data.type !== "seek"
+        )
+          return;
+        for (const [id, f] of Object.entries(frames))
+          f.host.style.display = id === e.data.id ? "block" : "none";
+        window.__timelines[e.data.id]?.seek(e.data.time, false);
+        window.reviewState = {
+          id: e.data.id,
+          time: e.data.time,
+          loaded: Object.keys(frames),
+        };
+      });
+      load().catch((e) => {
+        document.body.textContent = e.message;
+        parent.postMessage(
+          { type: "error", message: e.message },
+          location.origin,
+        );
+      });
+    </script>
+  </body>
+</html>
