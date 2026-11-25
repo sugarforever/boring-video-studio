@@ -1,170 +1,69 @@
 # Boring Video Studio
 
-Boring Video Studio is a collection of [Agent Skills](https://agentskills.io) for planning high-quality videos before production.
+Agent skills for turning a topic, article, or script into a reviewed video with [HyperFrames](https://www.hyperframes.dev).
 
-For content-driven work, the main `boring-video` skill establishes and approves the content before it plans the video:
+## 1. Copy and paste to your agent
 
-```text
-content/TOPIC.md → content/ARTICLE.md → BEATS.md → NARRATION.md → SCENES.md → STORYBOARD.md
-```
-
-Research notes and experiment reports live beside the content contracts under `content/`. Product promos, UI demonstrations, music-led pieces, locked scripts, and other direct-production inputs can bypass the article chain and enter HyperFrames through its own intake.
-
-It then hands the approved plan to [HyperFrames](https://www.hyperframes.dev), which owns video production, review, timing, animation, verification, and rendering. Optional [ListenHub](https://listenhub.ai) and [MiniMax](https://platform.minimax.io) TTS support can provide narration audio and subtitles through the `listenhub-tts` and `minimax-tts` skills, respectively.
-
-The existing `verysmallwoods-video` skill remains available as the complete VerySmallWoods publishing workflow for videos, covers, platform copy, blog posts, and social posts.
-
-## Installation
-
-Install `boring-video`, its planning stages, and the setup verifier:
-
-```bash
-npx skills add sugarforever/boring-video-studio \
-  --skill setup-boring-video-skills boring-video develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video record-terminal
-```
-
-Add `--global` to make the skills available across projects:
-
-```bash
-npx skills add sugarforever/boring-video-studio --global \
-  --skill setup-boring-video-skills boring-video develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video record-terminal
-```
-
-The repository groups these coordinated skills under `skills/boring-video/`, but installation exposes their existing names as a flat skill set. `verysmallwoods-video` stays at `skills/verysmallwoods-video/` and can be installed independently.
-
-After installation, invoke `$setup-boring-video-skills` once to verify the complete set and run the HyperFrames environment check.
-
-Video production requires HyperFrames and its local dependencies. Check the environment with:
-
-```bash
-npx hyperframes doctor
-```
-
-## Usage
-
-Invoke `$boring-video` with a topic or source document:
+**Install** - paste this into an agent that supports skills:
 
 ```text
-$boring-video Turn this article into a planned eight-minute faceless explainer.
+Install the Boring Video core skills in this project:
+
+npx skills add sugarforever/boring-video-studio --skill setup-boring-video-skills boring-video develop-topic to-article to-spec-beats to-narration to-scenes to-storyboard to-video record-terminal
+
+Ensure the separate hyperframes skill and its production dependencies are available.
+Run setup-boring-video-skills, including npx hyperframes doctor.
+Report any missing dependencies; confirm readiness only when verification passes.
 ```
 
-For a content-driven video, the skill asks for any missing production choices and runs the planning chain:
+For installation across projects, add `--global` to the command. Optional skills below can be installed with `npx skills add sugarforever/boring-video-studio --skill <name>`.
 
-1. `develop-topic` researches the topic, records experiments, and obtains approval for the thesis, argument, evidence, and boundaries.
-2. `to-article` writes the platform-independent content master and obtains article approval.
-3. `to-spec-beats` reorganizes the approved article into the video's learning progression.
-4. `to-narration` writes the spoken draft without adding new content.
-5. `to-scenes` finishes each scene exactly as it should appear in the final video, including internal animation and delivery narration, and resolves content/design findings through joint review.
-6. `to-storyboard` plans placement, cuts, and boundary transitions between the finished scenes.
-7. `to-video` assembles the approved scenes, adds boundary transitions, masters whole-film audio, and checks/exports the result in HyperFrames.
-
-Every planning stage maintains one authoritative Markdown artifact at a stable path. Codex opens that file directly for reading and uses the source or diff review surface for line comments; Git holds its history. At the scene stage, an HTML review entry point plays the production compositions alongside their narration; content and visual findings return to the same source files before storyboarding. Markdown records scene intent and review decisions. HyperFrames Studio later reviews scene joins and the assembled timeline. Scene-local pictures, motion, and audio match the approved scene review; a newly discovered internal problem returns to the scene stage for correction.
-
-An existing complete article can start at `to-spec-beats` after the user explicitly confirms it as the content master. Later artifacts are resumable only when their lineage traces to that approved article.
-
-You can also invoke an individual stage when you already have its input:
-
-Install an individual stage together with the Skills it invokes. For example, add `record-terminal` when the storyboard contains terminal, CLI, database, or TUI shots:
-
-```bash
-npx skills add sugarforever/boring-video-studio --skill record-terminal to-storyboard
-```
+**Create a video** - replace the brackets and paste:
 
 ```text
-$to-storyboard Turn SCENES.md into a HyperFrames storyboard.
+Use boring-video to make a [duration] video about [topic or source path].
+Language: [language]. Audience: [audience]. Voice: [recording, TTS, or none].
+Develop and review the content, finish and review the scenes, then assemble the video.
+Ask me to approve the content and scene reviews before proceeding. Export the final MP4.
 ```
 
-## Learn your writing preferences
-
-[`learn-writing-taste`](skills/boring-video/learn-writing-taste/SKILL.md) learns reusable writing preferences from your article and narration corrections. It follows [Emil Kowalski's learn-taste](https://github.com/emilkowalski/skills/tree/main/skills/learn-taste) pattern: collect evidence, propose scoped rules, and save the items you approve.
-
-Install this optional companion separately:
-
-```bash
-npx skills add sugarforever/boring-video-studio --skill learn-writing-taste
-```
-
-After editing or reviewing an article or narration, invoke it in the conversation containing your feedback:
+**Continue or revise**:
 
 ```text
-$learn-writing-taste Learn my writing preferences from the article and narration corrections in this chat.
+Use boring-video to continue the project at [project path].
+Requested change: [change, or "continue from the last approved stage"].
+Check the existing approvals and source versions, then resume at the affected stage.
 ```
 
-Review the proposed rules and approve all or selected IDs. Approved preferences go into the project's `WRITING-TASTE.md` (or its existing writing profile), with a loading pointer in `AGENTS.md`. Future article and narration drafts apply rules matching their language, medium, and audience. Each rule retains its supporting evidence and any stated reason; one-off factual or topic-boundary corrections stay local to the piece.
+## 2. User guide
 
-Invoke `$learn-writing-taste prune` to propose merges, conflict resolutions, or removal of obsolete rules. The skill updates the approved profile and pointer while preserving source drafts and their approval metadata.
-
-## MiniMax narration
-
-Install the optional provider skill:
-
-```bash
-npx skills add sugarforever/boring-video-studio --skill minimax-tts
-```
-
-Choose MiniMax at the voice gate in `boring-video` or `verysmallwoods-video`,
-or invoke `$minimax-tts` directly. Set `MINIMAX_API_KEY` in the environment;
-`MINIMAX_API_BASE` selects the international (default), domestic, or US West endpoint.
-The bundled Python 3.10+ CLI lists account voices and generates MP3 + sentence-level SRT,
-with no extra Python dependencies. It uses native subtitle timestamps and preserves
-audio if subtitle retrieval fails. Each synthesis accepts 1–9999 characters;
-longer narration requires separate parts and timeline assembly.
-
-See [MiniMax setup, commands and recovery](skills/boring-video/minimax-tts/SKILL.md).
-Local tests use a substitute HTTP server and do not call the paid API:
-
-```bash
-python3 -m unittest discover -s skills/boring-video/minimax-tts/tests -v
-```
-
-## Record your own narration
-
-`record-narration` provides a local browser teleprompter and microphone recorder,
-multiple takes, WaveSurfer waveform selection/playback, interruption recovery, and selected-take handoff to the
-agent. The agent identifies abandoned retries against the script and applies
-reviewed cuts while retaining originals and an edit map. The bundled processing CLI normalizes loudness with ffmpeg-normalize in linear mode, generates
-local Whisper subtitles, and applies agent-reviewed recognition corrections
-without changing subtitle timing. Original recordings are retained.
-
-```bash
-npx skills add sugarforever/boring-video-studio --skill record-narration
-```
+Start with **boring-video**. It coordinates research, writing, narration, scenes, and final assembly. You supply the topic or material, audience, duration, and preferences; the agent asks for missing choices and presents work for review. In Codex, invoke it as `$boring-video`; other agents can use the skill name in natural language.
 
 ```text
-$record-narration Record my voice reading /absolute/path/NARRATION.md.
+topic → article → beats → narration → finished scenes → assembly plan → video
 ```
 
-Run directly from a checkout:
+Scenes are reviewed as playable HTML with narration before assembly. The storyboard plans scene order, cuts, and boundary transitions; final production joins those approved scenes and checks the complete film.
 
-```bash
-python3 skills/boring-video/record-narration/scripts/recorder.py \
-  --script /absolute/path/NARRATION.md \
-  --session /absolute/path/project/narration/session-01 --port 0
-```
+An article you approve as the content master can start at beats. Existing projects resume after approval and source-version checks. Locked scripts, promos, and UI demos can go directly to HyperFrames. Request covers, platform copy, or other publishing outputs when needed.
 
-Recording uses Python 3.10+ and Chrome or Safari. Processing additionally needs
-FFmpeg; local transcription uses a Python 3.11/3.12 environment with
-`pip install -r skills/boring-video/record-narration/requirements.txt`. Model weights download on first use;
-recorded audio stays local. After selecting a take and submitting it in the page,
-return to the chat and ask the agent to continue. The workflow preserves speaking speed and intended content;
-automatic noise reduction and general pause compression are deferred.
+### Skills at a glance
 
-See [the skill](skills/boring-video/record-narration/SKILL.md) for processing and
-subtitle correction commands.
+| Skill | Purpose |
+| --- | --- |
+| [boring-video](skills/boring-video/boring-video/SKILL.md) | Coordinate the workflow and choose where to start or resume. |
+| [setup-boring-video-skills](skills/boring-video/setup-boring-video-skills/SKILL.md) | Verify the installed suite and HyperFrames environment. |
+| [develop-topic](skills/boring-video/develop-topic/SKILL.md) | Research evidence and agree on the thesis and scope. |
+| [to-article](skills/boring-video/to-article/SKILL.md) | Write the complete article that establishes the content. |
+| [to-spec-beats](skills/boring-video/to-spec-beats/SKILL.md) | Organize the approved article into the video's narrative beats. |
+| [to-narration](skills/boring-video/to-narration/SKILL.md) | Write the spoken script from those beats. |
+| [to-scenes](skills/boring-video/to-scenes/SKILL.md) | Build and review finished scenes, including internal motion and narration. |
+| [to-storyboard](skills/boring-video/to-storyboard/SKILL.md) | Plan scene placement, cuts, and boundary transitions. |
+| [to-video](skills/boring-video/to-video/SKILL.md) | Assemble scenes, master audio, review playback, and export. |
+| [record-terminal](skills/boring-video/record-terminal/SKILL.md) | Capture terminal, CLI, code-entry, and TUI demonstrations. |
+| [record-narration](skills/boring-video/record-narration/SKILL.md) *(optional)* | Record your voice with a teleprompter; review takes and prepare audio/subtitles. |
+| [minimax-tts](skills/boring-video/minimax-tts/SKILL.md) *(optional)* | Generate MiniMax narration and subtitles; requires API credentials. |
+| [learn-writing-taste](skills/boring-video/learn-writing-taste/SKILL.md) *(optional)* | Save writing preferences from your corrections after you approve them. |
+| [verysmallwoods-video](skills/verysmallwoods-video/SKILL.md) *(optional)* | Run the VerySmallWoods workflow for video, covers, platform copy, blog, and social posts. |
 
-Development checks (activate the processing virtual environment first):
-
-```bash
-python -m unittest discover -s skills/boring-video/record-narration/tests -v
-node --check skills/boring-video/record-narration/assets/recorder.js
-```
-
-The optional Chrome integration test uses Playwright and a synthetic microphone;
-it covers scrolling, pause/resume, playback, failed uploads, recovery and handoff.
-Install Playwright in a temporary directory, then run:
-
-```bash
-PLAYWRIGHT_MODULE=/absolute/path/node_modules/playwright \
-NARRATION_PYTHON=/absolute/path/venv/bin/python \
-  node skills/boring-video/record-narration/tests/browser.cjs
-```
+Use an individual skill when its inputs are ready. Follow its linked instructions for dependencies and detailed commands. HyperFrames is required for production and is installed separately; paid voice services require their own credentials.
