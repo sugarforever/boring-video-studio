@@ -1,0 +1,112 @@
+{
+  "date": "2026-11-25",
+  "revision": "2",
+  "cases": 20,
+  "mediaAssets": 5,
+  "referenceInformationScan": "No video identity, URL, timestamp or study dependency in distributable library",
+  "renderChecks": {
+    "variants": 80,
+    "seekPass": 80,
+    "overflows": [],
+    "errors": [],
+    "inputChecks": [
+      {
+        "id": "rank-bars",
+        "rejected": true
+      },
+      {
+        "id": "cost-time-map",
+        "rejected": true
+      },
+      {
+        "id": "task-brief",
+        "rejected": true
+      },
+      {
+        "id": "elapsed-breakdown",
+        "rejected": true
+      },
+      {
+        "id": "escaped-content",
+        "passed": true
+      }
+    ]
+  },
+  "interactionChecks": {
+    "revealed": true,
+    "hidden": true,
+    "edited": true,
+    "played": true,
+    "errors": [],
+    "fontResults": [
+      {
+        "theme": "blockframe",
+        "fonts": [
+          {
+            "familyName": "Noto Sans SC Thin",
+            "postScriptName": "NotoSansSC-Thin_Black",
+            "isCustomFont": true,
+            "glyphCount": 4
+          },
+          {
+            "familyName": "Inter",
+            "postScriptName": "Inter-Regular_opsz200000_wght3840000",
+            "isCustomFont": true,
+            "glyphCount": 12
+          }
+        ]
+      },
+      {
+        "theme": "swiss-minimalism",
+        "fonts": [
+          {
+            "familyName": "Noto Sans SC Thin",
+            "postScriptName": "NotoSansSC-Thin_Bold",
+            "isCustomFont": true,
+            "glyphCount": 4
+          },
+          {
+            "familyName": "Inter Tight",
+            "postScriptName": "InterTight-Regular_Bold",
+            "isCustomFont": true,
+            "glyphCount": 12
+          }
+        ]
+      },
+      {
+        "theme": "raycast-dark",
+        "fonts": [
+          {
+            "familyName": "Inter",
+            "postScriptName": "Inter-Regular_opsz200000_wght2580000",
+            "isCustomFont": true,
+            "glyphCount": 12
+          },
+          {
+            "familyName": "Noto Sans SC Thin",
+            "postScriptName": "NotoSansSC-Thin_SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 4
+          }
+        ]
+      },
+      {
+        "theme": "claude-warm",
+        "fonts": [
+          {
+            "familyName": "Newsreader 16pt",
+            "postScriptName": "Newsreader16pt-Regular_wght1F40000_opsz480000",
+            "isCustomFont": true,
+            "glyphCount": 12
+          },
+          {
+            "familyName": "Noto Sans SC Thin",
+            "postScriptName": "NotoSansSC-Thin_Medium",
+            "isCustomFont": true,
+            "glyphCount": 4
+          }
+        ]
+      }
+    ]
+  }
+}
