@@ -4,7 +4,6 @@
   const clamp = n => Math.max(0, Math.min(1, n));
   const media = m => m?.src ? `<img class="evidence" src="${E(m.src)}" alt="${E(m.alt || '项目证据')}"/>` : '<div class="media-slot">接入真实截图 / 录屏 / 人物素材</div>';
   const item = (v, i) => `<div class="row reveal" data-step="${i}"><span class="ordinal">${String(i+1).padStart(2,'0')}</span><b>${E(v.label)}</b><span>${E(v.detail)}</span></div>`;
-  const defaults = {title:'示例 · 由项目内容替换',source:'演示数据 · 非视频事实',statement:'从结果出发，决定下一步',qualifier:'先确认任务、条件与证据',destination:'替换为项目的真实入口',quote:'把观点放回可以核查的语境里。',attribution:'示例作者 · 日期 · 原始出处',prompt:'用相同输入完成一个可验证的演示。保留运行条件，展示真实结果，并记录耗时。',highlight:'相同输入',protocol:'相同输入 / 相同环境 / 明确判定规则',command:'示意命令 --example',output:'示意输出：等待进程结束。',truthMode:'示意',unit:'示例单位',max:100,xMax:100,yMax:100,xLabel:'示例成本 →',yLabel:'示例耗时 ↑',rangeLabel:'示例时间范围',columns:['方案 A','方案 B'],items:[{label:'任务一',detail:'对应条件 / 结果',value:72,date:'日期一',position:0.12},{label:'任务二',detail:'对应条件 / 结果',value:54,date:'日期二',position:0.46},{label:'任务三',detail:'对应条件 / 结果',value:38,date:'日期三',position:0.83}],events:[{label:'事件一',date:'日期一',position:.1},{label:'事件二',date:'日期二',position:.4},{label:'事件三',date:'日期三',position:.85}],points:[{label:'方案 A',x:25,y:65},{label:'方案 B',x:60,y:30}],segments:[{label:'工作',value:12},{label:'等待',value:48}],metrics:[{label:'耗时',a:'12',b:'24',unit:'分钟 · 示例'},{label:'费用',a:'3',b:'5',unit:'元 · 示例'},{label:'资源',a:'4',b:'6',unit:'单位 · 示例'}],left:{label:'方案 A',detail:'条件与适用范围'},right:{label:'方案 B',detail:'条件与适用范围'},relation:'↔',revealAt:5};
   function content(id,p){
     const items=p.items;
     switch(id){
@@ -33,11 +32,11 @@
   }
   function render(host,id,props={},options={}){
     const record=window.SCENE_CATALOG.find(v=>v.id===id);if(!record)throw Error('Unknown pattern');
-    const p={...defaults,title:record.title,...record.example,...props};
+    const p={title:record.title,...record.example,...props};
     host.className='scene theme-'+(options.theme || 'blockframe');host.dataset.pattern=id;
-    host.innerHTML=`<div class="scene-inner"><header><span class="kicker">${E(record.category)} / ${E(id)}</span><h1>${E(p.title)}</h1></header><main>${content(id,p)}</main><footer><span>${E(p.source)}</span><span>独立案例 · v2 · 16:9</span></footer></div>`;
+    host.innerHTML=`<div class="scene-inner"><header><span class="kicker">${E(record.category)} / ${E(id)}</span><h1>${E(p.title)}</h1></header><main>${content(id,p)}</main><footer><span>${E(p.source)}</span><span>独立案例 · v${E(record.revision)} · ${E(window.SCENE_LIBRARY.preview.ratio)}</span></footer></div>`;
     const setTime=time=>{const t=Number(time);if(!Number.isFinite(t))throw Error('Time must be finite');host.querySelectorAll('.reveal').forEach(el=>{const start=.5+Number(el.dataset.step)*.55;const phase=clamp((t-start)/.4);el.style.opacity=phase;el.style.transform=`translateY(${(1-phase)*20}px)`;});host.querySelectorAll('.identity').forEach(el=>{el.style.opacity=t>=p.revealAt?'1':'0';});const note=host.querySelector('.blind-note');if(note)note.textContent=t>=p.revealAt?'身份揭晓 · 对照项目证据':'先观察，后揭晓';};
     setTime(options.time??4);return {setTime,record,props:p};
   }
-  window.ScenePatterns={render,defaults,revision:'2'};
+  window.ScenePatterns={render,revision:'2'};
 })();

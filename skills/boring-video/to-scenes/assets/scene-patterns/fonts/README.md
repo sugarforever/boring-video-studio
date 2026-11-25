@@ -1,6 +1,6 @@
 # Bundled review fonts
 
-These fonts let the standalone gallery render offline. Each family is covered by its adjacent SIL Open Font License. Font names and project FRAME.md requirements remain authoritative.
+These fonts let the standalone gallery render offline. Each family is covered by its adjacent SIL Open Font License.
 
 - Inter: Google Fonts `ofl/inter/Inter[opsz,wght].ttf`.
 - Inter Tight: Google Fonts `ofl/intertight/InterTight[wght].ttf`.
@@ -9,4 +9,4 @@ These fonts let the standalone gallery render offline. Each family is covered by
 - Space Grotesk: existing local BlockFrame demo asset, Google Fonts family.
 - JetBrains Mono 400: existing HyperFrames code-editorial preset font asset, Google Fonts family.
 
-Upstream sources and licenses: [Google Fonts repository](https://github.com/google/fonts/tree/main/ofl). Original family metadata is retained. The large CJK font is intentional: the earlier demonstration subset did not cover arbitrary Chinese props.
+Upstream sources and licenses: [Google Fonts repository](https://github.com/google/fonts/tree/main/ofl).

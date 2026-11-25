@@ -1,18 +1,20 @@
 # Scene-pattern library review
 
-Reviewed on 2026-11-25 using `writing-for-agents` and its `SKILL-MECHANICS.md` reference. Scope: the `to-scenes` routing addition, scene-pattern reference, catalog, and gallery handoff. This is an applied skill review, not a separate GitHub approval.
+Applied `writing-for-agents` and `SKILL-MECHANICS.md` on 2026-11-25. Reviewed all PR additions: routing, references, catalog/schema, generated output, renderer/gallery guidance, verification scripts, assets, and font notices. License text and illustrative case copy are content, not workflow instructions.
 
-## Findings resolved
+## Resolved
 
-- **Context pointers:** Added an explicit branch for chronology, comparison, evidence, evaluation, closing examples, and reference-video analysis. Kept details behind the reference instead of expanding the main workflow.
-- **Single source of truth:** Removed the parallel family/ID table from the reference. `catalog.json` owns record metadata and example props; the generated browser catalog has a freshness check.
-- **Contract ownership:** The current main branch already defines matched comparison and grouped-card presets. The new reference defers to those bounds and timing rules and retains the shared HTML scene-review gate. Gallery acceptance remains separate from scene acceptance.
-- **Reachability:** Replaced a link to an unrelated uncommitted component-review draft with the committed shared project contract. Checked all new local Markdown links in the isolated checkout.
-- **Completion criteria:** Original patterns require explicit viewer questions, inputs, constraints, themes, and inspectable examples. Reference-derived work retains research separately; the distributed gallery contains independent fictional cases and original SVG assets.
-- **Co-location:** Moved catalog generation and verification instructions into their own maintenance section, separate from reference-video analysis.
+| Rule | Change |
+| --- | --- |
+| Context pointers | Replaced repeated purpose lists with one pointer for reusable examples or reference-video analysis. |
+| Pruning | Reduced the scene-pattern reference from 823 to 370 words; retained selection, API, production limits, reference provenance, and maintenance. |
+| Single source of truth | Catalog owns case props and shared preview settings; renderer fallback cases and repeated per-pattern settings removed. Generated JavaScript remains checked output. |
+| Accuracy | Removed unsupported `activeIndex` and catalog `inspectedTimes`; renamed proposed `motion` to production `direction`. Corrected constraints for illustrative media, general pricing, and result states. |
+| Contract ownership | Existing presets own bounds/timing; the shared project contract owns scene acceptance. Removed the uncommitted-document dependency. |
+| Co-location | Grouped API semantics and maintenance separately; documented shallow overrides and page-relative media paths. |
 
-## Validation and limits
+## Verification
 
-The browser verification script checks 20 patterns across four themes, image loading, layout bounds, direct/sequential/backward seeking, filtering, theme selection, blind reveal, and edited copy. The catalog generation check and JavaScript syntax checks pass. Historical case/font inspection is recorded in `docs/research/scene-pattern-examples-review.json`.
+The updated browser check passes all 80 default-case theme variants and gallery interactions. Catalog freshness, JavaScript syntax, local links, and diff whitespace checks pass. Case/font evidence remains in `docs/research/scene-pattern-examples-review.json`.
 
-The library is an opaque 16:9 design scaffold. Production media, narration, alternate ratios, scene exits, and assembled playback still require the project's normal review. No remaining findings from this writing-for-agents review.
+No remaining findings in this writing review. Opaque 16:9 gallery acceptance does not establish production media, narration, other ratios, or assembled playback acceptance.
