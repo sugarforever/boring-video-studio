@@ -148,3 +148,7 @@ PLAYWRIGHT_MODULE=/absolute/path/node_modules/playwright \
 NARRATION_PYTHON=/absolute/path/venv/bin/python \
   node skills/boring-video/record-narration/tests/browser.cjs
 ```
+
+## Learn your writing preferences
+
+Install the optional companion with `npx skills add sugarforever/boring-video-studio --skill learn-writing-taste`. After reviewing an article or narration, invoke `/learn-writing-taste` to extract reusable preferences from your corrections. It proposes evidence-backed rules, then saves approved items in `WRITING-TASTE.md` with an `AGENTS.md` loading pointer. `/learn-writing-taste prune` proposes maintenance of an existing profile.
