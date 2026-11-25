@@ -54,11 +54,11 @@ For a content-driven video, the skill asks for any missing production choices an
 2. `to-article` writes the platform-independent content master and obtains article approval.
 3. `to-spec-beats` reorganizes the approved article into the video's learning progression.
 4. `to-narration` writes the spoken draft without adding new content.
-5. `to-scenes` implements playable scene HTML and reviews each scene's narration and visual design together, then checks adjacent scenes and the assembled sequence.
-6. `to-storyboard` translates the scenes into buildable shots.
-7. `to-video` hands the complete plan and optional ListenHub or MiniMax narration to the appropriate HyperFrames workflow.
+5. `to-scenes` finishes each scene exactly as it should appear in the final video, including internal animation and delivery narration, and resolves content/design findings through joint review.
+6. `to-storyboard` plans placement, cuts, and boundary transitions between the finished scenes.
+7. `to-video` assembles the approved scenes, adds boundary transitions, masters whole-film audio, and checks/exports the result in HyperFrames.
 
-Every planning stage maintains one authoritative Markdown artifact at a stable path. Codex opens that file directly for reading and uses the source or diff review surface for line comments; Git holds its history. At the scene stage, an HTML review entry point plays the production compositions alongside their narration; content and visual findings return to the same source files before storyboarding. Markdown records scene intent and review decisions. HyperFrames Studio later reviews the integrated timeline and final motion; production refines the reviewed scene HTML.
+Every planning stage maintains one authoritative Markdown artifact at a stable path. Codex opens that file directly for reading and uses the source or diff review surface for line comments; Git holds its history. At the scene stage, an HTML review entry point plays the production compositions alongside their narration; content and visual findings return to the same source files before storyboarding. Markdown records scene intent and review decisions. HyperFrames Studio later reviews scene joins and the assembled timeline. Scene-local pictures, motion, and audio match the approved scene review; a newly discovered internal problem returns to the scene stage for correction.
 
 An existing complete article can start at `to-spec-beats` after the user explicitly confirms it as the content master. Later artifacts are resumable only when their lineage traces to that approved article.
 

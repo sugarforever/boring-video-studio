@@ -42,4 +42,4 @@ Every material fact, viewpoint, and conclusion must trace through its beat to th
 
 Before presenting `NARRATION.md` or any later revision, follow [`../boring-video/references/markdown-review.md`](../boring-video/references/markdown-review.md). Present the authoritative Markdown for inspection without starting or replacing HyperFrames' later voice-review loop.
 
-The draft is complete when it is ready for visual planning, every material sentence traces to both a beat and the approved article, no later visual has been prematurely prescribed, and the Markdown review completion criterion is satisfied. The shared HyperFrames project owns review timing and the voice-ready narration version once `/to-scenes` begins.
+The draft is complete when it is ready for visual planning, every material sentence traces to both a beat and the approved article, no later visual has been prematurely prescribed, and the Markdown review completion criterion is satisfied. During `/to-scenes`, the shared HyperFrames project resolves delivery narration audio and finishes each scene's local timing before joint scene approval; later stages reuse those approved results for assembly.

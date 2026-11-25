@@ -30,7 +30,7 @@ For configuration, establish the normal entry path, selection, apply/save action
 
 ## Plan states and readable holds
 
-Carry the temporal structure and meaningful dependencies in the existing scene contract. In storyboard `Shot moments`, give each important state:
+Carry the temporal structure and meaningful dependencies in the existing scene contract. During `/to-scenes`, implement and record each important state with the finished scene; storyboard `Shot moments` inherit these local timings:
 
 - A stable element/state ID and narration cue, or `silent`.
 - Numeric intervals for entry and settling, emphasis or change, readable hold, and exit or handoff where timing matters.

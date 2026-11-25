@@ -5,7 +5,7 @@ description: Use when developing a content-driven video from a topic, research b
 
 # Boring video
 
-Orchestrate content development and a progressively refined HyperFrames project as one chain. Content is established before it is adapted for speech or visuals; scene direction implements playable HTML for joint narration and visual review, storyboard plans the integrated frames, and HyperFrames continues those compositions into final production.
+Orchestrate content development and a progressively refined HyperFrames project as one chain. Content is established before it is adapted for speech or visuals; the scene stage finishes the actual video scenes and jointly reviews narration and visuals, storyboard plans their assembly, and HyperFrames joins them with boundary transitions for final delivery.
 
 ## Intake
 
@@ -59,13 +59,13 @@ For content-driven work, start at the first missing or explicitly revised artifa
 2. `/to-article` → approved `content/ARTICLE.md`
 3. `/to-spec-beats` → `BEATS.md`
 4. `/to-narration` → `NARRATION.md`
-5. `/to-scenes` → `SCENES.md`, reusable scene HTML in the shared HyperFrames project, and passed joint narration/visual review through its HTML review entry point
-6. `/to-storyboard` → HyperFrames-native `STORYBOARD.md`
+5. `/to-scenes` → `SCENES.md`, finished scene HTML and delivery audio in the shared HyperFrames project, and passed joint narration/visual review through its HTML review entry point
+6. `/to-storyboard` → HyperFrames-native `STORYBOARD.md` assembly plan for the finished scenes
 7. `/to-video` → production continuation and Studio review in that project
 
 Finish each skill's completion criterion before advancing. A downstream finding returns to the artifact that owns the decision, then propagates forward.
 
-For revisions to an existing video, start from its current project, review record, and user-approved constraints. Route changes in scene intent or evidence to `/to-scenes`, timing and reveal plans to `/to-storyboard`, and implementation or viewing review to `/to-video`; update only the affected scope and its dependent artifacts. Carry explicit user feedback into those decisions so the same finding is checked across comparable scenes, rather than fixed only at the reported timestamp.
+For revisions to an existing video, start from its current project, review record, and user-approved constraints. Route scene content, assets, narration, internal shots, reveals, and local timing changes to `/to-scenes`; scene placement and boundary-transition plans to `/to-storyboard`; and assembly, mastering, export, or integrated viewing checks to `/to-video`; update only the affected scope and its dependent artifacts. Carry explicit user feedback into those decisions so the same finding is checked across comparable scenes, rather than fixed only at the reported timestamp.
 
 When publishing outputs were requested for content-driven work, open a **publication branch** after the article, narration, and scene direction are stable. Derive cover direction from the approved design truth and scene evidence; derive platform copy, blog/article adaptations, subtitles, and social copy from the approved content and narration. For direct-production work, this wrapper owns the same branch beside `/hyperframes`: open it after the locked source and HyperFrames design direction are stable, deriving copy from that source and covers from that design direction. Record requested outputs, source digests, target platforms or ratios, and output paths in `PUBLISHING.md`. Video production may continue while this branch is prepared, but neither branch may silently invent new claims or a competing visual identity.
 
