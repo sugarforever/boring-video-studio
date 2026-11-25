@@ -10,7 +10,8 @@ artifact_digest: sha256:<digest>
 concept: One sentence naming the visual world
 continuity: What carries through the whole film
 hyperframes_project: Path to the shared review and production project
-hyperframes_revision: Revision containing the current rendered proofs
+hyperframes_revision: Revision containing the current scene HTML and review decisions
+html_review: Path or URL to the working scene review entry point
 ---
 
 ## Scene 01 — Title
@@ -27,8 +28,14 @@ hyperframes_revision: Revision containing the current rendered proofs
 - audio_intent: Narration emphasis and meaningful sound opportunity
 - feasibility: Envelope class, named dependency, and fallback when required
 - preset: Optional mapping with `family` and `mode` from [`scene-presets.md`](scene-presets.md), for example `{family: matched-comparison, mode: before-after}`; omit for custom scenes. Include the selected family’s required evidence labels and theme tokens in this mapping.
-- proof: Markdown image references or media links for the Hero or Start/Hero/End render IDs, selected by what must be judged
-- visual_risks: Typography, density, evidence surface, motion, continuity, or other risks the proof resolves
+- composition: Production HTML path and scene-specific playback link
+- narration: Stable narration IDs and exact corresponding text, with audio source and cue mapping
+- review: Review record link, project revision, reviewed intervals, reviewer, and pending | changes_requested | passed status
+- content_findings: Content suitability, accuracy, redundancy, and unresolved decisions
+- visual_findings: Scene design, readability, cue alignment, and unresolved decisions
+- remaining_work: Finishing work deferred to production and its effect on review
+- proof: Optional supplemental images or media with render IDs and state names
+- visual_risks: Typography, density, evidence surface, motion, continuity, or other risks playback and supplemental evidence resolve
 
 For screen evidence or explanatory visual sequences, read [`screen-evidence.md`](screen-evidence.md) and add a `screen_contract`:
 
@@ -46,7 +53,7 @@ When the scene contains a demonstration, add a `demo_contract`:
 
 Two or three sentences describing what the viewer experiences.
 
-Embed each declared proof below the scene with Markdown image syntax or link its supported media file. Give every reference the render ID, state, and current HyperFrames project revision; keep the media beside the project rather than encoding it into a parallel review document.
+Link each scene to the HTML review entry point and its persisted review record. For supplemental proofs, use Markdown image syntax or supported media links with render ID, state, and current project revision. The HTML loads the same production compositions; `SCENES.md` owns scene intent and decision references.
 ```
 
 Compute `artifact_digest` as SHA-256 of the complete scenes file after removing only the `artifact_digest:` line.
@@ -59,7 +66,9 @@ Compute `artifact_digest` as SHA-256 of the complete scenes file after removing 
 - The full film includes establishing, medium, and detail scales where the content supports them.
 - Continuity fields form an unbroken chain or name an intentional cut.
 - Feasibility identifies expensive or uncertain treatments before storyboarding.
-- Each proof set is the smallest set that exposes its scene's declared risks; scenes are not mechanically assigned three frames.
+- Every scene has playable production HTML and corresponding narration, with current passed joint review recorded under [the shared review contract](../../boring-video/references/hyperframes-review-project.md).
+- Adjacent scenes and the assembled sequence have been played to check repetition, continuity, and rhythm; unresolved content, visual, or spoken pacing findings keep the review open.
+- Supplemental stills expose named risks without substituting for playback.
 - Typography, code, terminal, and component risks use real or near-final material rather than generic placeholders.
 - Screen scenes satisfy the viewing contract in `screen-evidence.md`; their proof set exposes the stated framing, evidence, and reveal risks.
 - Any scene declaring a `preset` from `scene-presets.md` satisfies that preset's selection condition, declared mode, input bounds, readable-hold timing, and fallback rules without weakening `screen-evidence.md` or `demo_contract` truthfulness.

@@ -1,6 +1,6 @@
 # Markdown artifact review
 
-Every planning stage owns one authoritative Markdown file at its canonical path. Update that file in place; do not create version-suffixed copies such as `BEATS-v2.md`, `NARRATION-final.md`, or parallel HTML previews. The canonical path is the current version, Git records history, and the artifact digest records machine-readable lineage.
+Every planning stage owns one authoritative Markdown file at its canonical path. Update that file in place; do not create version-suffixed copies such as `BEATS-v2.md`, `NARRATION-final.md`, or competing copies of the planning document. Scene HTML and its review entry point are executable project artifacts governed by [the scene review contract](hyperframes-review-project.md). The canonical path is the current version, Git records history, and the artifact digest records machine-readable lineage.
 
 ## Present for review
 
@@ -21,7 +21,7 @@ When a planning decision needs pixels or media, keep the decision in Markdown an
 - identify the project revision and scene, frame, state, or timestamp that produced the evidence;
 - refresh stale evidence after a source or design change.
 
-Use HyperFrames Studio for playable timeline, motion, transition, and final-look review. A generated Markdown-adjacent HTML player is not a planning artifact.
+During `/to-scenes`, present the project's HTML scene review entry point alongside `SCENES.md` for joint narration and visual review. It loads the production compositions and links to the canonical Markdown and review records. Use HyperFrames Studio for subsequent full timeline, transition, and final-look review; keep the scene review entry point available for targeted revisions.
 
 ## Completion criterion
 

@@ -5,7 +5,7 @@ description: Use when developing a content-driven video from a topic, research b
 
 # Boring video
 
-Orchestrate content development and a progressively refined HyperFrames project as one chain. Content is established before it is adapted for speech or visuals; scene direction establishes rendered visual evidence, storyboard plans buildable frames, and HyperFrames owns production and playable review.
+Orchestrate content development and a progressively refined HyperFrames project as one chain. Content is established before it is adapted for speech or visuals; scene direction implements playable HTML for joint narration and visual review, storyboard plans the integrated frames, and HyperFrames continues those compositions into final production.
 
 ## Intake
 
@@ -59,7 +59,7 @@ For content-driven work, start at the first missing or explicitly revised artifa
 2. `/to-article` → approved `content/ARTICLE.md`
 3. `/to-spec-beats` → `BEATS.md`
 4. `/to-narration` → `NARRATION.md`
-5. `/to-scenes` → `SCENES.md`, shared HyperFrames project, and rendered visual evidence referenced from the Markdown
+5. `/to-scenes` → `SCENES.md`, reusable scene HTML in the shared HyperFrames project, and passed joint narration/visual review through its HTML review entry point
 6. `/to-storyboard` → HyperFrames-native `STORYBOARD.md`
 7. `/to-video` → production continuation and Studio review in that project
 
