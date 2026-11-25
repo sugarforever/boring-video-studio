@@ -30,7 +30,7 @@ For configuration, establish the normal entry path, selection, apply/save action
 
 ## Plan states and readable holds
 
-Carry the temporal structure and meaningful dependencies in the existing scene contract. In storyboard `Shot moments`, give each important state:
+Carry the temporal structure and meaningful dependencies in the existing scene contract. During `/to-scenes`, implement and record each important state with the finished scene; storyboard `Shot moments` inherit these local timings:
 
 - A stable element/state ID and narration cue, or `silent`.
 - Numeric intervals for entry and settling, emphasis or change, readable hold, and exit or handoff where timing matters.
@@ -56,7 +56,7 @@ For a destination established in an earlier moment, retain it and apply arrival 
 
 ## Check the built timeline
 
-Derive acceptance conditions from the viewer job and storyboard dependencies. Compare actual visibility, emphasis, and timing with those conditions, rather than validating timing copied from the implementation generator.
+Derive acceptance conditions from the viewer job and declared scene dependencies; assembled checks also include storyboard joins. Compare actual visibility, emphasis, and timing with those conditions, rather than validating timing copied from the implementation generator.
 
 Sample boundary and intermediate states, including a pre-arrival state that exposes premature content. Direct and backward seeking must match forward evaluation at the same time. When adding or changing a timing check, verify it rejects a deliberately wrong order or premature result and accepts the intended order, including an applicable simultaneous or established-target case. A universal “both endpoints visible during drawing” test cannot validate new-target causal reveals.
 
@@ -64,4 +64,4 @@ Sample boundary and intermediate states, including a pre-arrival state that expo
 
 For each changed sequence, play the affected interval at delivery size and normal speed with audio; deliberately silent scenes receive silent playback review. Confirm cue alignment, readable controls and values, purposeful framing, declared state dependencies, and clear evidence labels. Layout checks and sampled stills establish different evidence from playback; a preview URL establishes access only.
 
-In the existing review record, distinguish structural checks, timeline-state checks, and playback review. Record the project/source revision, actual reviewed interval, sampled states and holds, speed, audio status, and unresolved limitations. Keep unavailable playback or audio assessment pending rather than certifying delivery readiness. Timing, content, or audio changes invalidate the affected review; export the reviewed revision.
+Record structural checks, timeline-state checks, and playback as separate evidence under [the shared scene review gate](../../boring-video/references/hyperframes-review-project.md#scene-review-gate).
