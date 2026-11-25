@@ -15,7 +15,7 @@ Return to `/develop-topic` when writing exposes a missing material claim, contra
 
 ## Voice
 
-Resolve the article voice from the approved topic. Before drafting, inspect the available skills for a writing-style skill matching the output language and content type, then load every applicable user, project, or brand style source named in `voice.skills` or `voice.documents`.
+Resolve the article voice from the approved topic. Read any writing profile linked from applicable `AGENTS.md` instructions, apply its matching rules, and record its path in `voice.documents`. Before drafting, inspect the available skills for a writing-style skill matching the output language and content type, then load every applicable user, project, or brand style source named in `voice.skills` or `voice.documents`.
 
 If no reliable source exists for a publication-grade article, ask one compact question for the desired voice or a sample. When the user delegates that choice, or the article is explicitly an internal draft, use a clear explanatory default and record `voice.status: assumed`. Record unavailable named sources under `voice.unavailable`; they are not evidence that their rules were applied. An unavailable source does not block drafting when another available source resolves the voice.
 
