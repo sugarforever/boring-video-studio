@@ -68,4 +68,4 @@ An article you approve as the content master can start at beats. Existing projec
 
 Use an individual skill when its inputs are ready. Follow its linked instructions for dependencies and detailed commands. HyperFrames is required for production and is installed separately; paid voice services require their own credentials.
 
-For webcam narration, enable “同步录制摄像头” in the recorder menu. [Camera recording and export](skills/boring-video/record-narration/references/camera.md) covers synchronized retake cuts, corner picture-in-picture composition and hardware testing.
+For webcam framing, reading layouts and synchronized exports, see the [camera workflow](skills/boring-video/record-narration/references/camera.md).

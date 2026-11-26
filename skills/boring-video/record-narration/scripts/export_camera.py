@@ -26,7 +26,7 @@ def probe(path, kind):
     if not data['streams']:
         raise ValueError(f'Missing {kind} track: {path}')
     stream = data['streams'][0]
-    duration = stream.get('duration', data.get('format', {}).get('duration'))
+    duration = stream.get('duration')
     if duration is None:
         # Browser streaming WebM has no duration header. Packet times retain pauses removed by MediaRecorder.
         packets = json.loads(subprocess.check_output([
@@ -35,7 +35,9 @@ def probe(path, kind):
         times = [(float(p['pts_time']), float(p.get('duration_time', 0))) for p in packets if 'pts_time' in p]
         if not times:
             raise ValueError(f'No timed packets: {path}')
-        duration = max(t + d for t, d in times) - min(t for t, _ in times)
+        first = min(t for t, _ in times)
+        stream.setdefault('start_time', str(first))
+        duration = max(t + d for t, d in times) - first
     duration = float(duration)
     if not math.isfinite(duration) or duration <= 0:
         raise ValueError(f'Invalid media duration: {path}')
@@ -51,6 +53,7 @@ def export(video, audio, output, edit_report=None, background=None, corner='bott
     if not math.isfinite(width) or not .1 <= width <= .5 or not 0 <= margin <= 500:
         raise ValueError('Width must be 0.1–0.5 and margin 0–500 pixels')
     source_duration, camera_stream = probe(video, 'v')
+    camera_duration = source_duration
     offset = 0.
     try:
         original_audio_duration, original_audio_stream = probe(video, 'a')
@@ -70,6 +73,8 @@ def export(video, audio, output, edit_report=None, background=None, corner='bott
             raise ValueError('Camera duration differs from the audio edit source; use the matching original take')
         cuts = report['cuts']
     kept = keep_ranges(cuts, duration)
+    if kept[-1]['source_end'] > camera_duration + offset + .2:
+        raise ValueError('Camera track ends before the retained narration; recover or trim the incomplete take')
     expected = sum(item['source_end'] - item['source_start'] for item in kept)
     if edit_report and abs(float(report['duration_after']) - expected) > .001:
         raise ValueError('Edit report duration does not match its cuts')

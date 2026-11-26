@@ -87,6 +87,30 @@ class CameraExportTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse((self.root/'out.mp4').exists())
 
+    def test_incomplete_camera_track_cannot_freeze_over_background(self):
+        short = self.root/'short-camera.mp4'
+        long_audio = self.root/'long.wav'
+        self.run_ffmpeg('-f', 'lavfi', '-i', 'color=red:s=160x120:r=30:d=1', '-f', 'lavfi', '-i', 'sine=frequency=440:duration=4', '-map', '0:v', '-map', '1:a', str(short))
+        self.run_ffmpeg('-f', 'lavfi', '-i', 'sine=frequency=440:duration=4', str(long_audio))
+        self.background.unlink()
+        self.run_ffmpeg('-f', 'lavfi', '-i', 'color=green:s=320x240:r=30:d=4', str(self.background))
+        self.video, self.audio = short, long_audio
+        self.report.write_text(json.dumps({'duration_before': 4, 'duration_after': 4, 'cuts': []}))
+        for container in ('mp4', 'webm'):
+            if container == 'webm':
+                webm = self.root/'short-camera.webm'
+                self.run_ffmpeg('-i', str(short), '-c:v', 'libvpx', '-c:a', 'libopus', str(webm))
+                self.video = webm
+            result = self.export('--background', str(self.background))
+            self.assertNotEqual(result.returncode, 0, container)
+            self.assertIn('Camera track ends', result.stderr)
+            self.assertFalse((self.root/'out.mp4').exists())
+        self.audio = self.root/'kept.wav'
+        self.run_ffmpeg('-f', 'lavfi', '-i', 'sine=frequency=440:duration=1', str(self.audio))
+        self.report.write_text(json.dumps({'duration_before': 4, 'duration_after': 1, 'cuts': [{'start': 1, 'end': 4}]}))
+        result = self.export('--background', str(self.background))
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_selected_aspect_crops_export_without_changing_duration(self):
         result = self.export('--aspect', '1:1')
         self.assertEqual(result.returncode, 0, result.stderr)
