@@ -1,0 +1,25 @@
+<div data-scene="1" style="position:absolute; inset:0; padding:96px 128px 176px; display:flex; flex-direction:column">
+<div style="display:flex; align-items:center; gap:14px; align-self:flex-start; padding:{{t.kPad}}; background:{{t.kBg}}; border:{{t.kBd}}; border-radius:{{t.kR}}; color:{{t.kInk}}; font-family:{{t.kF}}; font-style:{{t.kSt}}; font-weight:{{t.kW}}; font-size:26px; line-height:1.2"><div style="flex:none; width:{{t.kMW}}; height:{{t.kMH}}; border-radius:{{t.kMR}}; background:{{t.kMark}}"></div>温室监测 · 原创演示</div>
+<div data-headline="" style="margin-top:24px; font-family:{{t.fd}}; font-weight:{{t.dw}}; letter-spacing:{{t.tls}}; font-size:72px; line-height:1.12">温度平稳，土壤水分偏低</div>
+<div data-media="primary" style="margin-top:32px; flex:1; display:flex; flex-direction:column; background:{{t.sf}}; border:{{t.bd}}; border-radius:{{t.r}}; box-shadow:{{t.sh}}; overflow:hidden">
+<div style="height:64px; flex:none; display:flex; align-items:center; gap:16px; padding:0 30px; border-bottom:1px solid {{t.hair}}; font-size:26px">
+<div style="width:14px; height:14px; border-radius:{{t.dotR}}; background:{{t.ac3}}"></div><div style="font-weight:600">温室 2 号 · 实时监测</div><div style="margin-left:auto; font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">更新于 22:00</div>
+</div>
+<div style="flex:1; display:grid; grid-template-columns:440px 1fr">
+<div style="display:flex; flex-direction:column; border-right:1px solid {{t.hair}}">
+<div style="flex:1; padding:20px 32px; border-bottom:1px solid {{t.hair}}; display:flex; flex-direction:column; justify-content:center; gap:4px"><div style="font-size:26px; color:{{t.mu}}">温度</div><div style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:72px; line-height:1.05; color:{{t.ac}}">{{ d.current }}<span style="font-size:34px; margin-left:6px">℃</span></div></div>
+<div style="flex:1; padding:20px 32px; border-bottom:1px solid {{t.hair}}; display:flex; flex-direction:column; justify-content:center; gap:6px"><div style="font-size:26px; color:{{t.mu}}">空气湿度</div><div style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:64px; line-height:1.05">62<span style="font-size:32px; margin-left:6px">%</span></div><div style="height:10px; background:{{t.track}}; border-radius:{{t.rS}}"><div data-grow="1" style="height:100%; width:62%; background:{{t.bN}}; border-radius:{{t.rS}}"></div></div></div>
+<div style="flex:1; padding:20px 32px; display:flex; flex-direction:column; justify-content:center; gap:6px"><div style="display:flex; justify-content:space-between; font-size:26px; color:{{t.mu}}"><span>土壤水分</span><span style="font-size:24px">浇水线 45%</span></div><div style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:64px; line-height:1.05; color:{{t.ac}}">41<span style="font-size:32px; margin-left:6px">%</span></div><div style="position:relative; height:10px; background:{{t.track}}; border-radius:{{t.rS}}"><div data-grow="1" style="height:100%; width:41%; background:{{t.b1}}; border-radius:{{t.rS}}"></div><div style="position:absolute; left:45%; top:-8px; bottom:-8px; width:3px; background:{{t.ink}}"></div></div></div>
+</div>
+<div style="padding:24px 36px 20px; display:flex; flex-direction:column">
+<div style="display:flex; justify-content:space-between; align-items:baseline"><div style="font-size:28px; font-weight:600">今日温度趋势</div><div style="font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">单位：℃</div></div>
+<div style="position:relative; margin:22px 0 0 64px; width:1060px; height:300px">
+<sc-for list="{{ d.tyt }}" as="y" hint-placeholder-count="4"><div style="position:absolute; left:0; right:0; top:{{ y.tp }}; height:1px; background:{{t.hair}}"></div><div style="position:absolute; right:calc(100% + 16px); top:{{ y.tp }}; transform:translateY(-50%); font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">{{ y.v }}</div></sc-for>
+<svg width="1060" height="300" viewBox="0 0 1060 300" style="position:absolute; inset:0; overflow:visible"><polygon points="{{ d.tr.area }}" fill="{{ t.ac }}" fill-opacity="0.12"></polygon><polyline data-draw="1" points="{{ d.tr.line }}" fill="none" stroke="{{ t.ac }}" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"></polyline><circle cx="{{ d.tr.lx }}" cy="{{ d.tr.ly }}" r="11" fill="{{ t.ac }}" stroke="{{ t.sf }}" stroke-width="4"></circle></svg>
+<div style="position:absolute; left:{{ d.tr.lxp }}; top:{{ d.tr.lyp }}; transform:translate(-100%,-150%); font-size:26px; font-weight:700; color:{{t.ac}}; white-space:nowrap">现在 {{ d.current }} ℃</div>
+<sc-for list="{{ d.txt }}" as="x" hint-placeholder-count="6"><div style="position:absolute; top:calc(100% + 12px); left:{{ x.l }}; transform:translateX(-50%); font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">{{ x.lab }}</div></sc-for>
+</div>
+</div>
+</div>
+</div>
+</div>

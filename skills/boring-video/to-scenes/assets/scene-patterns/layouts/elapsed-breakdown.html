@@ -1,0 +1,21 @@
+<div data-scene="1" style="position:absolute; inset:0; padding:96px 128px 176px; display:flex; flex-direction:column">
+<div style="display:flex; justify-content:space-between; align-items:flex-end; gap:48px">
+<div style="display:flex; flex-direction:column">
+<div style="display:flex; align-items:center; gap:14px; align-self:flex-start; padding:{{t.kPad}}; background:{{t.kBg}}; border:{{t.kBd}}; border-radius:{{t.kR}}; color:{{t.kInk}}; font-family:{{t.kF}}; font-style:{{t.kSt}}; font-weight:{{t.kW}}; font-size:26px; line-height:1.2"><div style="flex:none; width:{{t.kMW}}; height:{{t.kMH}}; border-radius:{{t.kMR}}; background:{{t.kMark}}"></div>陶器制作 · 单件耗时</div>
+<div data-headline="" style="margin-top:28px; font-family:{{t.fd}}; font-weight:{{t.dw}}; letter-spacing:{{t.tls}}; font-size:80px; line-height:1.12">干燥占去一大半时间</div>
+</div>
+<div style="display:flex; flex-direction:column; align-items:flex-end"><div style="font-size:28px; color:{{t.mu}}">总计</div><div style="display:flex; align-items:baseline; gap:10px"><span style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:160px; line-height:0.95; letter-spacing:-0.03em">{{ d.total }}</span><span style="font-size:40px">分钟</span></div></div>
+</div>
+<div style="margin-top:auto; display:flex">
+<sc-for list="{{ d.segs }}" as="s" hint-placeholder-count="3">
+<div style="flex-grow:{{ s.f }}; flex-shrink:1; flex-basis:0px; min-width:0; display:flex; flex-direction:column; gap:20px">
+<div style="display:flex; align-items:baseline; gap:12px; padding-right:12px; white-space:nowrap"><span style="font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">{{ s.k }}</span><span style="font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:44px">{{ s.n }}</span></div>
+<div data-grow="1" style="height:150px; background:{{ s.c }}; border:{{t.barBd}}"></div>
+<div style="display:flex; flex-direction:column; gap:4px; white-space:nowrap"><span style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:48px; line-height:1">{{ s.v }} <span style="font-size:28px">分钟</span></span><span style="font-size:26px; color:{{t.mu}}">占 {{ s.pct }}</span></div>
+</div>
+</sc-for>
+</div>
+<div style="margin-top:28px; position:relative; height:52px; border-top:{{t.rule}}">
+<sc-for list="{{ d.ruler }}" as="r" hint-placeholder-count="4"><div style="position:absolute; left:{{ r.l }}; top:0; transform:{{ r.tx }}; display:flex; flex-direction:column; align-items:center"><div style="width:2px; height:14px; background:{{t.ink}}"></div><div style="font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}; white-space:nowrap">{{ r.lab }}</div></div></sc-for>
+</div>
+</div>

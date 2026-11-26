@@ -1,0 +1,25 @@
+<div data-scene="1" style="position:absolute; inset:0; padding:96px 128px 176px; display:flex; flex-direction:column">
+<div style="display:flex; justify-content:space-between; align-items:flex-end; gap:48px">
+<div style="display:flex; flex-direction:column">
+<div style="display:flex; align-items:center; gap:14px; align-self:flex-start; padding:{{t.kPad}}; background:{{t.kBg}}; border:{{t.kBd}}; border-radius:{{t.kR}}; color:{{t.kInk}}; font-family:{{t.kF}}; font-style:{{t.kSt}}; font-weight:{{t.kW}}; font-size:26px; line-height:1.2"><div style="flex:none; width:{{t.kMW}}; height:{{t.kMH}}; border-radius:{{t.kMR}}; background:{{t.kMark}}"></div>仓库拣货 · 两种方式</div>
+<div data-headline="" style="margin-top:28px; font-family:{{t.fd}}; font-weight:{{t.dw}}; letter-spacing:{{t.tls}}; font-size:76px; line-height:1.12">分区合单：更快、更近、更少错</div>
+</div>
+<div style="flex:none; padding:18px 30px; background:{{t.sf}}; border:{{t.bd}}; border-radius:{{t.r}}; box-shadow:{{t.sh}}; display:flex; flex-direction:column; gap:4px"><div style="font-size:24px; color:{{t.mu}}">统计口径</div><div style="font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:48px; color:{{t.ac}}">同为 100 单</div></div>
+</div>
+<div style="margin-top:40px; display:flex; gap:40px; font-size:28px">
+<div style="display:flex; align-items:center; gap:12px"><div style="width:28px; height:28px; background:{{t.bN}}; border:{{t.barBd}}; border-radius:{{t.rS}}"></div>逐单拣货</div>
+<div style="display:flex; align-items:center; gap:12px"><div style="width:28px; height:28px; background:{{t.b1}}; border:{{t.barBd}}; border-radius:{{t.rS}}"></div>分区合单</div>
+</div>
+<div style="margin-top:auto; display:flex; flex-direction:column">
+<sc-for list="{{ d.metrics }}" as="m" hint-placeholder-count="3">
+<div style="display:grid; grid-template-columns:280px 1fr 220px; gap:32px; align-items:center; padding:24px 0; border-top:{{t.rule}}">
+<div style="display:flex; flex-direction:column; gap:6px"><div style="font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:46px; line-height:1">{{ m.n }}</div><div style="font-size:26px; color:{{t.mu}}">单位：{{ m.u }}</div></div>
+<div style="margin-right:140px; display:flex; flex-direction:column; gap:12px">
+<div style="position:relative; height:40px"><div data-grow="1" style="height:100%; width:{{ m.aw }}; background:{{t.bN}}; border:{{t.barBd}}; border-radius:{{t.rS}}"></div><div style="position:absolute; left:calc(100% + 20px); top:50%; transform:translateY(-50%); font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:38px; white-space:nowrap">{{ m.a }}</div></div>
+<div style="position:relative; height:40px"><div data-grow="1" style="height:100%; width:{{ m.bw }}; background:{{t.b1}}; border:{{t.barBd}}; border-radius:{{t.rS}}"></div><div style="position:absolute; left:{{ m.bl }}; top:50%; transform:translateY(-50%); font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:38px; color:{{t.ac}}; white-space:nowrap">{{ m.b }}</div></div>
+</div>
+<div style="text-align:right; font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:76px; line-height:1; color:{{t.ac}}">{{ m.dl }}</div>
+</div>
+</sc-for>
+</div>
+</div>

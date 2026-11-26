@@ -1,0 +1,27 @@
+<div data-scene="1" style="position:absolute; inset:0; padding:96px 128px 176px; display:flex; flex-direction:column">
+<div style="display:flex; align-items:center; gap:14px; align-self:flex-start; padding:{{t.kPad}}; background:{{t.kBg}}; border:{{t.kBd}}; border-radius:{{t.kR}}; color:{{t.kInk}}; font-family:{{t.kF}}; font-style:{{t.kSt}}; font-weight:{{t.kW}}; font-size:26px; line-height:1.2"><div style="flex:none; width:{{t.kMW}}; height:{{t.kMH}}; border-radius:{{t.kMR}}; background:{{t.kMark}}"></div>社区活动报名</div>
+<div data-headline="" style="margin-top:28px; font-family:{{t.fd}}; font-weight:{{t.dw}}; letter-spacing:{{t.tls}}; font-size:80px; line-height:1.12">旧物交换最受欢迎</div>
+<div style="margin-top:auto; position:relative; display:flex; flex-direction:column; gap:26px">
+<div style="position:absolute; left:400px; right:200px; top:0; bottom:52px">
+<sc-for list="{{ d.rankAxis }}" as="a" hint-placeholder-count="5"><div style="position:absolute; top:0; bottom:0; left:{{ a.l }}; width:1px; background:{{t.hair}}"></div></sc-for>
+</div>
+<sc-for list="{{ d.rank }}" as="r" hint-placeholder-count="4">
+<div style="position:relative; display:grid; grid-template-columns:100px 300px 1fr 200px; align-items:center; height:100px">
+<div style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:64px; line-height:1; color:{{ r.rc }}">{{ r.r }}</div>
+<div style="font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:46px">{{ r.n }}</div>
+<div style="position:relative; height:76px">
+<div data-grow="1" style="position:absolute; left:0; top:0; bottom:0; width:{{ r.w }}; background:{{ r.c }}; border:{{t.barBd}}; border-radius:{{t.rS}}"></div>
+<div style="position:absolute; left:{{ r.lx }}; top:50%; transform:translateY(-50%); display:flex; align-items:baseline; gap:6px; white-space:nowrap"><span style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:56px; color:{{ r.rc }}">{{ r.v }}</span><span style="font-size:28px; color:{{t.mu}}">人</span></div>
+</div>
+<div></div>
+</div>
+</sc-for>
+<div style="display:grid; grid-template-columns:100px 300px 1fr 200px; height:26px">
+<div></div><div></div>
+<div style="position:relative">
+<sc-for list="{{ d.rankAxis }}" as="a" hint-placeholder-count="5"><div style="position:absolute; left:{{ a.l }}; top:0; transform:translateX(-50%); font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">{{ a.v }}</div></sc-for>
+</div>
+<div style="padding-left:28px; font-size:24px; color:{{t.mu}}">单位：人</div>
+</div>
+</div>
+</div>
