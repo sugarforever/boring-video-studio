@@ -5,14 +5,15 @@ Choose a pattern by viewer question in the [gallery](../assets/scene-patterns/ga
 ## Use
 
 1. Edit `data` for chart values. Use **读取当前文字槽** to edit visible copy; keys remain the template’s original text. Inspect both the hidden and revealed states of blind comparisons.
-2. Copy the selection into the scene record: ID, revision, props, theme, mode, duration, ratio, and background. Preserve the renderer, layouts, themes, catalog, CSS, and fonts with the project. Revision 2 selections require their original implementation; revision 3 changes props and example content.
-3. Implement the event in HyperFrames, align reveals and holds with narration, and pass [scene review](../../boring-video/references/hyperframes-review-project.md) with actual content.
+2. Before scene generation, pass [content preflight](content-preflight.md). Resolve reported issues through its user-confirmation workflow.
+3. Copy the selection into the scene record: ID, revision, props, theme, mode, duration, ratio, and background. Preserve the entire `scene-patterns` asset directory with the project. Revision 2 selections require their original implementation; revision 3 changes props and example content.
+4. Implement the event in HyperFrames, align reveals and holds with narration, and pass [scene review](../../boring-video/references/hyperframes-review-project.md) with actual content.
 
 All patterns support all four styles in both modes. The gallery provides opaque 1920×1080 scenes with deterministic staged reveals. Its eight-second preview is a design reference; production timing, voice, camera moves, exits, and other ratios require project implementation and review.
 
 ## Renderer
 
-Load `patterns.css`, then `catalog.js`, `themes.js`, `layouts.js`, and `patterns.js` in order.
+Load `patterns.css`, then `catalog.js`, `themes.js`, `layouts.js`, `validation.js`, and `patterns.js` in order.
 
 ```js
 const scene = ScenePatterns.render(element, 'metric-scorecard', {

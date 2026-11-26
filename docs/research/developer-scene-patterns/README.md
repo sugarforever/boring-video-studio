@@ -14,3 +14,5 @@ Each sheet shows Terminal, code, JSON, XML, and VS Code in reading order; the si
 Checks cover all 200 default variants for text/caption bounds and deterministic seeking, plus source round trips, literal markup, invalid JSON/XML, focus paths, line limits, and editor file selection. Source text is excluded from caption replacement. The illustrations run no commands or application code.
 
 Writing-for-agents review kept the source-panel API behind one conditional pointer, placed case data in the catalog, removed cached pattern counts from the guide, and distinguished illustrative panels from real terminal/editor evidence. Real terminal demonstrations retain the `/record-terminal` workflow.
+
+Follow-up preflight regression: the previously overflowing nine-line JSON now fails on `data.focusValue`. Its proposed sidebar excerpt passes all eight appearances after explicit application, while the complete source stays unchanged. UI and CLI checks also cover rejected drafts and revalidation.

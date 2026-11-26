@@ -12,7 +12,9 @@ Choose the viewer's task, then edit the selected case's `data`:
 
 All use `source`, `fileName`, and a one-based `highlightLine`. Edit source through `data.source`; `copy` changes surrounding labels. Whitespace is preserved and line endings normalize to LF. `code-block` and `vscode-editor` accept `language: javascript | json | xml | shell | text`; other languages use `text`. Coloring does not execute or compile code. JSON must parse; XML must be well formed.
 
-Keep each page within ten lines and 56 characters per line. Split longer excerpts, and check wide characters at full size. After changing source, update the highlight and JSON/XML focus to match; the highlighted line is selected independently of the focus field.
+Use the selected pattern’s `validation` budgets; terminal, standalone blocks, and editor panes have different capacities. Use a plain-text code block for an explicitly labeled raw fragment; ellipses in a sidebar are presentation text, not parsed JSON/XML. After changing source, update the highlight and JSON/XML focus to match. Their positions are selected independently.
+
+After user approval, `data.focusPreview` can show a prefix of the derived value ending in `…` or `...`. It is labeled “节选”; full source stays intact. It still passes the sidebar budget and prefix check.
 
 Example JSON data override:
 

@@ -37,7 +37,6 @@
   function codeData(n,t,id){
     if(typeof n.source!=='string')throw Error('source must be text');
     const source=n.source.replace(/\r\n?/g,'\n'),lines=source.split('\n');
-    if(lines.length>10||lines.some(line=>line.length>56))throw Error('Split code into pages of at most 10 lines and 56 characters per line');
     const language={ 'terminal-session':'shell','code-block':n.language,'json-data':'json','xml-data':'xml','vscode-editor':n.language }[id];
     if(!['javascript','text','json','xml','shell'].includes(language))throw Error('Unsupported code language');
     if(!Number.isInteger(n.highlightLine)||n.highlightLine<1||n.highlightLine>lines.length)throw Error('highlightLine must identify an existing line');
@@ -69,10 +68,18 @@
       }
       if(offset<line.length)out.push({text:line.slice(offset),color:t.ink});return out;
     };
-    const code={fileName:n.fileName,language,count:lines.length,highlight:String(n.highlightLine).padStart(2,'0'),focusLabel,focusValue,
+    let excerpt=false;
+    if(n.focusPreview!==undefined){
+      const original=focusValue.replace(/\s+/g,' ').trim();
+      if(typeof n.focusPreview!=='string'||!/(?:…|\.\.\.)$/.test(n.focusPreview))throw Error('focusPreview must be a prefix ending with an ellipsis');
+      const prefix=n.focusPreview.replace(/(?:…|\.\.\.)$/,'');
+      if(!prefix||!original.startsWith(prefix))throw Error('focusPreview must preserve the beginning of the original value');
+      focusValue=n.focusPreview;excerpt=true;
+    }
+    const code={excerpt,fileName:n.fileName,language,count:lines.length,highlight:String(n.highlightLine).padStart(2,'0'),focusLabel,focusValue,
       lines:lines.map((line,k)=>({n:k+1,tokens:tokens(line),bg:k+1===n.highlightLine?t.s2:'transparent',edge:k+1===n.highlightLine?t.ac:'transparent'}))};
     if(id==='vscode-editor'){
-      if(!Array.isArray(n.files)||n.files.length>5||!n.files.includes(n.fileName))throw Error('Editor files must include the active file, with at most five entries');
+      if(!n.files.includes(n.fileName))throw Error('files must include the active file');
       code.files=n.files.map(name=>({name,bg:name===n.fileName?t.sf:'transparent',color:name===n.fileName?t.ac:t.mu,edge:name===n.fileName?t.ac:'transparent'}));
     }
     return code;
@@ -111,12 +118,13 @@
     if(codePatterns.has(id))d.code=codeData(n,t,id);
     return d;
   }
+  function validate(id,props={},options={}){return SceneValidation.validate(id,props,options,dataFor);}
   function render(host,id,props={},options={}){
+    const report=validate(id,props,options);
+    if(!report.ok){const error=new Error('Scene content requires adjustment before rendering');error.name='SceneValidationError';error.report=report;throw error;}
+
     const record=window.SCENE_CATALOG.find(v=>v.id===id);
-    if(!record)throw Error('Unknown scene pattern: '+id);
     const theme=options.theme||'blockframe',mode=options.mode||'light';
-    if(!SceneThemes.keys[theme]||!['light','dark'].includes(mode))throw Error('Unknown theme or mode');
-    for(const key of Object.keys(props))if(!['title','copy','data','source','media'].includes(key))throw Error('Revision 3 uses title, copy and data props; keep the revision 2 implementation for older selections');
     const p={...record.example,...props,data:{...record.example.data,...props.data}};
     const t=SceneThemes.resolve(SceneThemes.keys[theme],mode);
     host.className='scene theme-'+theme;host.dataset.pattern=id;host.dataset.mode=mode;
@@ -163,5 +171,5 @@
     };
     setTime(options.time??4);return {setTime,getCopySlots:()=>({...copySlots}),record,props:p,theme,mode};
   }
-  window.ScenePatterns={render,revision:'3'};
+  window.ScenePatterns={render,validate,revision:'3'};
 })();

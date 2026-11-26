@@ -15,7 +15,11 @@ window.SCENE_LIBRARY = {
         "copy": {},
         "data": {}
       },
-      "direction": "先轴与范围，再按真实日期落点，最后强调区间。"
+      "direction": "先轴与范围，再按真实日期落点，最后强调区间。",
+      "validation": {
+        "titleColumns": 40,
+        "fields": []
+      }
     },
     {
       "id": "duel-cards",
@@ -30,7 +34,11 @@ window.SCENE_LIBRARY = {
         "copy": {},
         "data": {}
       },
-      "direction": "先对象，再关系符，最后一句判断。"
+      "direction": "先对象，再关系符，最后一句判断。",
+      "validation": {
+        "titleColumns": 64,
+        "fields": []
+      }
     },
     {
       "id": "chapter-agenda",
@@ -45,7 +53,11 @@ window.SCENE_LIBRARY = {
         "copy": {},
         "data": {}
       },
-      "direction": "逐条出现，再把焦点移到当前章节。"
+      "direction": "逐条出现，再把焦点移到当前章节。",
+      "validation": {
+        "titleColumns": 28,
+        "fields": []
+      }
     },
     {
       "id": "model-map",
@@ -60,7 +72,11 @@ window.SCENE_LIBRARY = {
         "copy": {},
         "data": {}
       },
-      "direction": "按阶段依次呈现对象及适用场景。"
+      "direction": "按阶段依次呈现对象及适用场景。",
+      "validation": {
+        "titleColumns": 56,
+        "fields": []
+      }
     },
     {
       "id": "quote-evidence",
@@ -75,7 +91,11 @@ window.SCENE_LIBRARY = {
         "copy": {},
         "data": {}
       },
-      "direction": "保留来源，展示原话，再点亮相关短语。"
+      "direction": "保留来源，展示原话，再点亮相关短语。",
+      "validation": {
+        "titleColumns": 96,
+        "fields": []
+      }
     },
     {
       "id": "price-pair",
@@ -110,7 +130,41 @@ window.SCENE_LIBRARY = {
           "hourlyMax": 25
         }
       },
-      "direction": "先计价单位，再报价，最后解释差异。"
+      "direction": "先计价单位，再报价，最后解释差异。",
+      "validation": {
+        "titleColumns": 52,
+        "fields": [
+          {
+            "path": "data.plans",
+            "minItems": 2,
+            "maxItems": 2
+          },
+          {
+            "path": "data.plans.*.name",
+            "maxColumns": 8
+          },
+          {
+            "path": "data.plans.*.scope",
+            "maxColumns": 24
+          },
+          {
+            "path": "data.plans.*.note",
+            "maxColumns": 52
+          },
+          {
+            "path": "data.plans.*.price",
+            "maxColumns": 4
+          },
+          {
+            "path": "data.plans.*.hours",
+            "maxColumns": 4
+          },
+          {
+            "path": "data.plans.*.per",
+            "maxColumns": 4
+          }
+        ]
+      }
     },
     {
       "id": "source-table",
@@ -145,7 +199,25 @@ window.SCENE_LIBRARY = {
           "ordersMax": 100
         }
       },
-      "direction": "先完整来源，再聚焦目标行，最后恢复上下文。"
+      "direction": "先完整来源，再聚焦目标行，最后恢复上下文。",
+      "validation": {
+        "titleColumns": 52,
+        "fields": [
+          {
+            "path": "data.rows",
+            "minItems": 1,
+            "maxItems": 3
+          },
+          {
+            "path": "data.rows.*.0",
+            "maxColumns": 8
+          },
+          {
+            "path": "data.rows.*.1",
+            "maxColumns": 4
+          }
+        ]
+      }
     },
     {
       "id": "rank-bars",
@@ -180,7 +252,25 @@ window.SCENE_LIBRARY = {
           "max": 100
         }
       },
-      "direction": "先共同尺度，再依次展开横条，最后突出目标。"
+      "direction": "先共同尺度，再依次展开横条，最后突出目标。",
+      "validation": {
+        "titleColumns": 48,
+        "fields": [
+          {
+            "path": "data.items",
+            "minItems": 1,
+            "maxItems": 4
+          },
+          {
+            "path": "data.items.*.0",
+            "maxColumns": 12
+          },
+          {
+            "path": "data.items.*.1",
+            "maxColumns": 5
+          }
+        ]
+      }
     },
     {
       "id": "cost-time-map",
@@ -220,7 +310,25 @@ window.SCENE_LIBRARY = {
           "yMax": 60
         }
       },
-      "direction": "先坐标与单位，再点位，最后标出比较区。"
+      "direction": "先坐标与单位，再点位，最后标出比较区。",
+      "validation": {
+        "titleColumns": 30,
+        "fields": [
+          {
+            "path": "data.points",
+            "minItems": 1,
+            "maxItems": 4
+          },
+          {
+            "path": "data.points.*.0",
+            "maxColumns": 10
+          }
+        ],
+        "pointSeparation": {
+          "x": 0.22,
+          "y": 0.18
+        }
+      }
     },
     {
       "id": "test-matrix",
@@ -274,7 +382,38 @@ window.SCENE_LIBRARY = {
           ]
         }
       },
-      "direction": "先测试条件，再项目矩阵，最后提示评判规则。"
+      "direction": "先测试条件，再项目矩阵，最后提示评判规则。",
+      "validation": {
+        "titleColumns": 48,
+        "fields": [
+          {
+            "path": "data.tests",
+            "minItems": 1,
+            "maxItems": 3
+          },
+          {
+            "path": "data.tests.*.name",
+            "maxColumns": 8
+          },
+          {
+            "path": "data.tests.*.m",
+            "maxColumns": 36
+          },
+          {
+            "path": "data.tests.*.u",
+            "maxColumns": 4
+          },
+          {
+            "path": "data.tests.*.vals",
+            "minItems": 3,
+            "maxItems": 3
+          },
+          {
+            "path": "data.tests.*.vals.*",
+            "maxColumns": 5
+          }
+        ]
+      }
     },
     {
       "id": "task-brief",
@@ -289,7 +428,11 @@ window.SCENE_LIBRARY = {
         "copy": {},
         "data": {}
       },
-      "direction": "先任务名，再原始要求，最后强调约束。"
+      "direction": "先任务名，再原始要求，最后强调约束。",
+      "validation": {
+        "titleColumns": 32,
+        "fields": []
+      }
     },
     {
       "id": "demo-stage",
@@ -321,7 +464,21 @@ window.SCENE_LIBRARY = {
           "max": 28
         }
       },
-      "direction": "先产物全貌，再录屏中的真实操作，最后结果停留。"
+      "direction": "先产物全貌，再录屏中的真实操作，最后结果停留。",
+      "validation": {
+        "titleColumns": 52,
+        "fields": [
+          {
+            "path": "data.temperatures",
+            "minItems": 12,
+            "maxItems": 12
+          },
+          {
+            "path": "data.temperatures.*",
+            "maxColumns": 6
+          }
+        ]
+      }
     },
     {
       "id": "blind-pair",
@@ -342,7 +499,21 @@ window.SCENE_LIBRARY = {
           "revealAt": 5
         }
       },
-      "direction": "先 A/B 同条件画面，给观察时间，再揭晓身份。"
+      "direction": "先 A/B 同条件画面，给观察时间，再揭晓身份。",
+      "validation": {
+        "titleColumns": 28,
+        "fields": [
+          {
+            "path": "data.votes",
+            "minItems": 2,
+            "maxItems": 2
+          },
+          {
+            "path": "data.votes.*",
+            "maxColumns": 5
+          }
+        ]
+      }
     },
     {
       "id": "metric-scorecard",
@@ -378,7 +549,33 @@ window.SCENE_LIBRARY = {
           ]
         }
       },
-      "direction": "固定列头，逐行给数值，最后给限定结论。"
+      "direction": "固定列头，逐行给数值，最后给限定结论。",
+      "validation": {
+        "titleColumns": 50,
+        "fields": [
+          {
+            "path": "data.metrics",
+            "minItems": 1,
+            "maxItems": 3
+          },
+          {
+            "path": "data.metrics.*.0",
+            "maxColumns": 12
+          },
+          {
+            "path": "data.metrics.*.1",
+            "maxColumns": 8
+          },
+          {
+            "path": "data.metrics.*.2",
+            "maxColumns": 6
+          },
+          {
+            "path": "data.metrics.*.3",
+            "maxColumns": 6
+          }
+        ]
+      }
     },
     {
       "id": "elapsed-breakdown",
@@ -408,7 +605,26 @@ window.SCENE_LIBRARY = {
           ]
         }
       },
-      "direction": "先总长度，再划分工作与等待，最后解释原因。"
+      "direction": "先总长度，再划分工作与等待，最后解释原因。",
+      "validation": {
+        "titleColumns": 44,
+        "fields": [
+          {
+            "path": "data.segments",
+            "minItems": 1,
+            "maxItems": 3
+          },
+          {
+            "path": "data.segments.*.0",
+            "maxColumns": 8
+          },
+          {
+            "path": "data.segments.*.1",
+            "maxColumns": 4
+          }
+        ],
+        "minSegmentShare": 0.12
+      }
     },
     {
       "id": "terminal-evidence",
@@ -423,7 +639,11 @@ window.SCENE_LIBRARY = {
         "copy": {},
         "data": {}
       },
-      "direction": "先说明证据用途，再命令和结果，最后指向关键输出。"
+      "direction": "先说明证据用途，再命令和结果，最后指向关键输出。",
+      "validation": {
+        "titleColumns": 52,
+        "fields": []
+      }
     },
     {
       "id": "results-ledger",
@@ -438,7 +658,11 @@ window.SCENE_LIBRARY = {
         "copy": {},
         "data": {}
       },
-      "direction": "逐项填入结果，再给总计，最后保留例外。"
+      "direction": "逐项填入结果，再给总计，最后保留例外。",
+      "validation": {
+        "titleColumns": 48,
+        "fields": []
+      }
     },
     {
       "id": "presenter-focus",
@@ -453,7 +677,11 @@ window.SCENE_LIBRARY = {
         "copy": {},
         "data": {}
       },
-      "direction": "证据退出，主讲画面扩大，关键判断后再回证据。"
+      "direction": "证据退出，主讲画面扩大，关键判断后再回证据。",
+      "validation": {
+        "titleColumns": 32,
+        "fields": []
+      }
     },
     {
       "id": "decision-statement",
@@ -468,7 +696,11 @@ window.SCENE_LIBRARY = {
         "copy": {},
         "data": {}
       },
-      "direction": "先保留结论依赖的证据，再突出决策句，最后限定条件。"
+      "direction": "先保留结论依赖的证据，再突出决策句，最后限定条件。",
+      "validation": {
+        "titleColumns": 48,
+        "fields": []
+      }
     },
     {
       "id": "action-close",
@@ -483,7 +715,11 @@ window.SCENE_LIBRARY = {
         "copy": {},
         "data": {}
       },
-      "direction": "判断结束后展示一个动作，保留目标入口。"
+      "direction": "判断结束后展示一个动作，保留目标入口。",
+      "validation": {
+        "titleColumns": 36,
+        "fields": []
+      }
     },
     {
       "id": "terminal-session",
@@ -503,7 +739,18 @@ window.SCENE_LIBRARY = {
           "highlightLine": 7
         }
       },
-      "direction": "先环境与命令，再输出，最后停留在关键行。"
+      "direction": "先环境与命令，再输出，最后停留在关键行。",
+      "validation": {
+        "titleColumns": 56,
+        "fields": [],
+        "source": {
+          "maxLines": 10,
+          "maxLineColumns": 64,
+          "fileNameColumns": 32,
+          "focusLabelColumns": 20,
+          "focusValueColumns": 56
+        }
+      }
     },
     {
       "id": "code-block",
@@ -523,7 +770,18 @@ window.SCENE_LIBRARY = {
           "highlightLine": 8
         }
       },
-      "direction": "先完整代码，再聚焦关键行。"
+      "direction": "先完整代码，再聚焦关键行。",
+      "validation": {
+        "titleColumns": 56,
+        "fields": [],
+        "source": {
+          "maxLines": 10,
+          "maxLineColumns": 56,
+          "fileNameColumns": 32,
+          "focusLabelColumns": 20,
+          "focusValueColumns": 56
+        }
+      }
     },
     {
       "id": "json-data",
@@ -547,7 +805,18 @@ window.SCENE_LIBRARY = {
           ]
         }
       },
-      "direction": "先整体结构，再字段路径与值。"
+      "direction": "先整体结构，再字段路径与值。",
+      "validation": {
+        "titleColumns": 56,
+        "fields": [],
+        "source": {
+          "maxLines": 10,
+          "maxLineColumns": 56,
+          "fileNameColumns": 32,
+          "focusLabelColumns": 20,
+          "focusValueColumns": 48
+        }
+      }
     },
     {
       "id": "xml-data",
@@ -568,7 +837,18 @@ window.SCENE_LIBRARY = {
           "focusTag": "moisture"
         }
       },
-      "direction": "先根节点，再嵌套关系与目标节点。"
+      "direction": "先根节点，再嵌套关系与目标节点。",
+      "validation": {
+        "titleColumns": 56,
+        "fields": [],
+        "source": {
+          "maxLines": 10,
+          "maxLineColumns": 56,
+          "fileNameColumns": 32,
+          "focusLabelColumns": 20,
+          "focusValueColumns": 48
+        }
+      }
     },
     {
       "id": "vscode-editor",
@@ -593,7 +873,26 @@ window.SCENE_LIBRARY = {
           ]
         }
       },
-      "direction": "先项目与文件位置，再活动文件和关键行。"
+      "direction": "先项目与文件位置，再活动文件和关键行。",
+      "validation": {
+        "titleColumns": 56,
+        "fields": [
+          {
+            "path": "data.files",
+            "minItems": 1,
+            "maxItems": 5
+          },
+          {
+            "path": "data.files.*",
+            "maxColumns": 15
+          }
+        ],
+        "source": {
+          "maxLines": 10,
+          "maxLineColumns": 72,
+          "fileNameColumns": 32
+        }
+      }
     }
   ],
   "preview": {
@@ -604,6 +903,11 @@ window.SCENE_LIBRARY = {
       "light",
       "dark"
     ]
+  },
+  "validationDefaults": {
+    "copyExpansion": 1.35,
+    "copyMinColumns": 16,
+    "copyMaxColumns": 120
   }
 };
 window.SCENE_CATALOG = window.SCENE_LIBRARY.patterns;

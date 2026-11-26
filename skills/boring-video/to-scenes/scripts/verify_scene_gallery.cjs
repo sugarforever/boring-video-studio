@@ -52,7 +52,7 @@ const {chromium}=require(process.argv[2]||'playwright');
    }catch{}
    let maxBounds=true;
    for(const id of ['code-block','vscode-editor'])for(const theme of SceneThemes.ids)for(const mode of ['light','dark']){
-    ScenePatterns.render(host,id,{data:{source:Array(10).fill('X'.repeat(56)).join('\n'),language:'text',highlightLine:10,fileName:'sample.txt',files:['sample.txt']}},{theme,mode,time:4});
+    ScenePatterns.render(host,id,{data:{source:Array(10).fill('X'.repeat(56)).join('\n'),language:'text',highlightLine:10,fileName:'sample.txt',...(id==='vscode-editor'?{files:['sample.txt']}:{})}},{theme,mode,time:4});
     const bounds=host.getBoundingClientRect();
     for(const el of host.querySelectorAll('.code-text')){
      const range=document.createRange();range.selectNodeContents(el);const r=range.getBoundingClientRect();
@@ -88,7 +88,7 @@ const {chromium}=require(process.argv[2]||'playwright');
   const revealed=Object.hasOwn(edited.copy,'社区设计组')&&edited.copy['作者已隐藏']==='第二次替换';
   const literal=await page.evaluate(()=>{
    const host=document.createElement('div'),text="$& / $$ / $` / $' / $100";
-   ScenePatterns.render(host,'metric-scorecard',{copy:{'同为 100 单':text}});
+   ScenePatterns.render(host,'metric-scorecard',{copy:{'分区合单：更快、更近、更少错':text}});
    return [...host.querySelectorAll('div')].some(el=>el.textContent===text);
   });
   assert.deepEqual({originalKey,repeated,revealed,literal},{originalKey:true,repeated:true,revealed:true,literal:true});
