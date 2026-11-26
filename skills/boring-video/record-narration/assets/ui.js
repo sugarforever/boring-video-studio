@@ -5,7 +5,7 @@
   const $ = id => document.getElementById(id);
   const PHRASE = '录好了，继续处理';
   const LEVEL_BARS = Array.from(document.querySelectorAll('#level .lv'));
-  const ERROR_META = {save: '部分分块未写入本地', mic: '录音已中断', perm: '麦克风未授权'};
+  const ERROR_META = {save: '部分分块未写入本地', mic: '录音已中断', perm: '设备未就绪'};
   let phase = 'idle';
   let scrollState = {on: false, speed: 24};
 
@@ -216,6 +216,7 @@
     if (Number.isInteger(saved?.width) && saved.width >= 10 && saved.width <= 24) $('readingWidth').value = saved.width;
   } catch (_) {}
   function readingLayout(save = false) {
+    document.documentElement.style.setProperty('--reading-font', getComputedStyle($('scriptInner')).fontSize);
     document.body.dataset.readingFocus = String($('readingFocus').checked);
     document.documentElement.style.setProperty('--reading-width', $('readingWidth').value);
     $('readingWidthOut').textContent = `${$('readingWidth').value} 字`;
@@ -224,6 +225,7 @@
   $('readingFocus').addEventListener('change', () => readingLayout(true));
   $('readingWidth').addEventListener('input', () => readingLayout(true));
   readingLayout();
+  window.addEventListener('resize', () => readingLayout());
 
   window.RecorderUI = {setPhase, showNotice, clearNotice, renderScript, setLevel, setScrolling, renderTakes, setPreview, setFinish, openMenu, closeMenu, say, fmt, PHRASE, get phase() { return phase; }};
 })();

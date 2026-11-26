@@ -51,9 +51,7 @@ const assert = require('node:assert/strict');
     await page.locator('#top').click();
     await page.locator('#closeMenu').click();
     if (process.env.CAMERA_TEST) {
-      await page.locator('#menu').click();
       await page.locator('#cameraEnabled').check();
-      await page.locator('#closeMenu').click();
     }
     await page.locator('#record').click();
     await page.waitForFunction(() => !document.querySelector('#stop').disabled);
@@ -128,7 +126,7 @@ const assert = require('node:assert/strict');
       const handoff = JSON.parse(readFileSync(path.join(root, 'session/handoff.json')));
       assert.equal(handoff.video, handoff.audio);
       assert.ok(state.takes[0].capture.width > 0);
-      assert.equal(await page.locator('#cameraPreview').evaluate(el => el.srcObject), null);
+      assert.equal(await page.locator('#cameraPreview').evaluate(el => el.srcObject.getVideoTracks()[0].readyState), 'live');
       assert.ok(await page.locator('#player').evaluate(el => el.videoWidth > 0));
       await page.locator('#menu').click();
       assert.ok((await page.locator('#player').boundingBox()).height > 100, 'camera playback must show a reviewable video frame');
@@ -213,9 +211,7 @@ const assert = require('node:assert/strict');
     assert.equal(JSON.parse(readFileSync(path.join(root, 'session/session.json'))).takes.length, 3);
     assert.equal(await page.locator('#record').isEnabled(), true);
     if (process.env.CAMERA_TEST) {
-      await page.locator('#menu').click();
       await page.locator('#cameraEnabled').check();
-      await page.locator('#closeMenu').click();
       await page.evaluate(() => {
         window.realGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
         navigator.mediaDevices.getUserMedia = async () => { throw new DOMException('Camera permission denied', 'NotAllowedError'); };

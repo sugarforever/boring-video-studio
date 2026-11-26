@@ -6,7 +6,7 @@ const key = `recorder-token:${location.host}`;
 const token = location.hash.slice(1) || sessionStorage.getItem(key) || '';
 sessionStorage.setItem(key, token);
 history.replaceState(null, '', location.pathname);
-let recorder, stream, context, analyser, levelData, takeId, chunks = [], nextUpload = 0, uploadQueue = Promise.resolve();
+let recorder, stream, cameraStream, context, analyser, levelData, takeId, chunks = [], nextUpload = 0, uploadQueue = Promise.resolve();
 let busy = false, selected = null, started = 0, elapsed = 0, scrollOn = false, lastFrame = 0, scrollCarry = 0;
 let playerURL, backupURL, activeRegion, captureWarning;
 const regions = WaveSurfer.Regions.create();
@@ -55,6 +55,9 @@ function controls() {
   $('mic').disabled = busy || active;
   $('cameraEnabled').disabled = busy || active;
   $('camera').disabled = busy || active || !$('cameraEnabled').checked;
+  $('cameraAspect').disabled = !$('cameraEnabled').checked;
+  $('cameraCenter').disabled = !$('cameraEnabled').checked;
+  $('cameraBehind').disabled = !$('cameraEnabled').checked;
   waveform.setOptions({interact: !busy && !active});
   $('playSelection').disabled = busy || active || !activeRegion;
   $('finish').disabled = busy || active || !selected;
@@ -165,19 +168,62 @@ async function flushChunks() {
 }
 function release() {
   stream?.getTracks().forEach(track => track.stop());
-  $('cameraPreview').srcObject = null;
-  window.CameraMonitor.stop();
   if (context) context.close().catch(() => {});
   analyser = null; context = null; UI.setLevel(0);
 }
-$('cameraEnabled').addEventListener('change', controls);
+function stopCameraPreview() {
+  cameraStream?.getTracks().forEach(track => track.stop());
+  cameraStream = null;
+  $('cameraPreview').srcObject = null;
+  window.CameraMonitor.stop();
+}
+function interruptRecording() {
+  if (!recorder || recorder.state === 'inactive') return false;
+  captureWarning = '录制设备已断开，已保存的部分需要试听确认。请检查设备并重新录制。';
+  if (recorder.state === 'recording') elapsed += performance.now() - started;
+  busy = true; recorder.stop(); controls();
+  phase('saving');
+  message('录制设备已断开，正在保存已录部分。请检查设备并试听后重录。');
+  return true;
+}
+async function cameraPreview() {
+  if (busy || (recorder && recorder.state !== 'inactive')) return;
+  busy = true; controls();
+  stopCameraPreview();
+  try {
+    if (!$('cameraEnabled').checked) return;
+    const id = $('camera').value;
+    const previewStream = await navigator.mediaDevices.getUserMedia({audio: false, video: {
+      width: {ideal: 1280}, height: {ideal: 720}, frameRate: {ideal: 30}, ...(id ? {deviceId: {exact: id}} : {})}});
+    cameraStream = previewStream;
+    previewStream.getVideoTracks()[0].addEventListener('ended', () => {
+      if (cameraStream !== previewStream) return;
+      const interrupted = interruptRecording();
+      stopCameraPreview(); $('cameraEnabled').checked = false; controls();
+      if (!interrupted) message('摄像头已断开，请重新开启或选择其他设备。');
+    }, {once: true});
+    $('cameraPreview').srcObject = previewStream;
+    window.CameraMonitor.show(true);
+    await microphones(); UI.clearNotice();
+  } catch (error) {
+    stopCameraPreview(); $('cameraEnabled').checked = false;
+    UI.showNotice({kind: 'error', title: '无法开启摄像头', detail: error.message});
+  } finally { busy = false; controls(); }
+}
+$('cameraEnabled').addEventListener('change', cameraPreview);
+$('camera').addEventListener('change', cameraPreview);
 $('record').addEventListener('click', async () => {
   busy = true; captureWarning = null; $('player').pause(); controls();
+  let startingTake = null;
   try {
     const mic = $('mic').value;
     const camera = $('cameraEnabled').checked;
-    const cameraId = $('camera').value;
-    stream = await navigator.mediaDevices.getUserMedia({video: camera ? {width: {ideal: 1280}, height: {ideal: 720}, frameRate: {ideal: 30}, ...(cameraId ? {deviceId: {exact: cameraId}} : {})} : false, audio: {echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1, ...(mic ? {deviceId: {exact: mic}} : {})}});
+    stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1, ...(mic ? {deviceId: {exact: mic}} : {})}, video: false});
+    if (camera) {
+      const track = cameraStream?.getVideoTracks()[0];
+      if (!track || track.readyState !== 'live') throw new Error('请先开启摄像头预览，再开始录音。');
+      stream = new MediaStream([...stream.getAudioTracks(), track.clone()]);
+    }
     await microphones();
     const mime = (camera ? ['video/webm;codecs=vp8,opus', 'video/webm;codecs=vp9,opus', 'video/mp4'] : ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus']).find(type => MediaRecorder.isTypeSupported(type));
     if (!mime) throw new Error('此浏览器不支持可保存的录音格式，请使用 Chrome 或 Safari。');
@@ -190,7 +236,7 @@ $('record').addEventListener('click', async () => {
     const settings = stream.getAudioTracks()[0].getSettings();
     const capture = Object.fromEntries(['sampleRate', 'channelCount', 'echoCancellation', 'noiseSuppression', 'autoGainControl'].filter(key => key in settings).map(key => [key, settings[key]]));
     if (camera) Object.assign(capture, Object.fromEntries(['width', 'height', 'frameRate'].map(key => [key, stream.getVideoTracks()[0].getSettings()[key]])));
-    const take = await api('/api/takes', {mime, capture, script: $('scriptInner').dataset.source}); takeId = take.id;
+    const take = await api('/api/takes', {mime, capture, script: $('scriptInner').dataset.source}); takeId = take.id; startingTake = take.id;
     chunks = []; nextUpload = 0; elapsed = 0; started = performance.now(); uploadQueue = Promise.resolve();
     recorder.addEventListener('dataavailable', event => {
       if (!event.data.size) return;
@@ -205,25 +251,21 @@ $('record').addEventListener('click', async () => {
       message(`录音发生错误：${event.error?.message || '设备不可用'}。请保存或恢复已有录音。`);
     });
     recorder.addEventListener('stop', saveRecording, {once: true});
-    stream.getTracks().forEach(track => track.addEventListener('ended', () => {
-      captureWarning = '录制设备已断开，已保存的部分需要试听确认。请检查设备并重新录制。';
-      if (recorder.state === 'inactive') return;
-      if (recorder.state === 'recording') elapsed += performance.now() - started;
-      busy = true; recorder.stop(); controls();
-      phase('saving');
-      message('录制设备已断开，正在保存已录部分。请检查设备并试听后重录。');
-    }, {once: true}));
-    recorder.start(2000);
-    if (camera) {
-      $('cameraPreview').srcObject = stream;
-      $('cameraMonitor').hidden = false;
-      window.CameraMonitor.show();
+    stream.getTracks().forEach(track => track.addEventListener('ended', interruptRecording, {once: true}));
+    if (stream.getTracks().some(track => track.readyState !== 'live') || (camera && !$('cameraEnabled').checked)) {
+      throw new Error('录制设备已断开，请重新开启后再录音。');
     }
+    recorder.start(2000);
+    startingTake = null;
     $('fallback').hidden = true;
     phase('recording'); UI.clearNotice();
     await refresh();
   } catch (error) {
     release();
+    if (startingTake) {
+      try { await api(`/api/takes/${startingTake}/abandon`, {}); await refresh(); }
+      catch (cleanup) { error = new Error(`${error.message}；空版本清理失败，请在版本菜单放弃后重试：${cleanup.message}`); }
+    }
     if (error.status === 409) {
       await refresh(); savedPhase();
       UI.showNotice({kind: 'warn', title: '口播稿已更新', detail: '请确认新稿，再点击开始录音。'});

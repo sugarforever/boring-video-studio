@@ -42,7 +42,7 @@
     place(centered ? (innerWidth - bounds.width)/2 : position?.x ?? bounds.x, centered ? 80 : position?.y ?? bounds.y);
   }
   monitor.addEventListener('pointerdown', event => {
-    if (event.button !== 0 || event.target.closest('.camera-toolbar')) return;
+    if (event.button !== 0) return;
     const bounds = monitor.getBoundingClientRect();
     centered = false;
     drag = {id: event.pointerId, x: event.clientX - bounds.x, y: event.clientY - bounds.y};
@@ -72,6 +72,10 @@
   });
   aspect.addEventListener('change', () => { layout(); persist(); });
   window.addEventListener('resize', layout);
+  new ResizeObserver(() => {
+    document.documentElement.style.setProperty('--recorder-bar-height', `${document.getElementById('bar').getBoundingClientRect().height}px`);
+    layout();
+  }).observe(document.getElementById('bar'));
   function visibility() {
     const active = !!video.srcObject;
     monitor.hidden = !active || previewHidden;
@@ -84,7 +88,10 @@
   behind.addEventListener('change', () => { layering(); persist(); });
   toggle.addEventListener('click', () => { previewHidden = !previewHidden; visibility(); persist(); });
   document.getElementById('cameraCenter').addEventListener('click', () => { centered = true; layout(); persist(); });
-  window.CameraMonitor = {show: visibility, stop: visibility};
+  window.CameraMonitor = {
+    show(reveal = false) { if (reveal) { previewHidden = false; persist(); } visibility(); },
+    stop: visibility,
+  };
   layering();
   visibility();
   layout();

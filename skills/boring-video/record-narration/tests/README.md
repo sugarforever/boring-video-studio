@@ -19,15 +19,15 @@ CAMERA_TEST=1 RECORDER_ONLY=1 node skills/boring-video/record-narration/tests/br
 node skills/boring-video/record-narration/tests/reading.cjs
 ```
 
-The first two cover audio-only/camera recording, pause removal, playback, save retry, recovery and handoff. The camera branch also checks permission failure, device disconnection and release, dragging, aspect ratios and streaming WebM export. The reading test checks viewport geometry, text/camera layering, preview track continuity, saved preferences and mobile bounds.
+The first two cover audio-only/camera recording, pause removal, playback, save retry, recovery and handoff. The camera branch also checks permission failure, device disconnection and release, dragging, aspect ratios and streaming WebM export. The reading test also checks video-only preflight without takes/files, camera switching/off, permission failure, viewport geometry, text/camera layering, preview continuity across recording, microphone cleanup, startup/idle disconnect, saved preferences and mobile/landscape toolbar bounds.
 
 `RECORDER_ONLY=1` skips normalization of constant-level fake input; Python tests exercise real FFmpeg normalization separately. Synthetic devices do not validate real hardware, Safari or human lip sync. Recovered partial WebM may emit FFprobe's premature-end warning; dependency deprecation/resource warnings may also appear.
 
 ## Manual hardware acceptance
 
 1. Start an audio-only take; verify existing recording/playback/handoff.
-2. Enable camera; deny permission, then grant it and retry. Check camera choice, framing and preview orientation.
-3. Record speech with visible hand claps at start/end; pause for several seconds, resume, stop. Confirm both device indicators turn off and playback stays aligned.
+2. Enable camera from the bottom toolbar; deny permission, then grant it and retry. Check framing before recording and confirm preview adds no takes.
+3. Record speech with visible hand claps at start/end; pause for several seconds, resume, stop. Confirm the microphone stops while camera preview continues; then turn camera off and confirm both indicators turn off. Check playback alignment.
 4. Save two takes, reload, choose a take and submit. Verify its video matches its script and sound. Exercise save retry and recover a partially uploaded take.
 5. Disconnect the camera during recording; confirm automatic saving stops both devices and leaves a visible warning before another take.
 6. Process the AV container, remove a deliberate retry, export camera and a corner overlay. Review lip sync around the cut and ensure the camera does not cover important content.
