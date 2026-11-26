@@ -4,7 +4,7 @@ Choose a pattern by viewer question in the [gallery](../assets/scene-patterns/ga
 
 ## Use
 
-1. Edit `data` for chart values. Use **读取当前文字槽** to expose visible copy, then replace it through `copy`. Inspect both the hidden and revealed states of blind comparisons.
+1. Edit `data` for chart values. Use **读取当前文字槽** to edit visible copy; keys remain the template’s original text. Inspect both the hidden and revealed states of blind comparisons.
 2. Copy the selection into the scene record: ID, revision, props, theme, mode, duration, ratio, and background. Preserve the renderer, layouts, themes, catalog, CSS, and fonts with the project. Revision 2 selections require their original implementation; revision 3 changes props and example content.
 3. Implement the event in HyperFrames, align reveals and holds with narration, and pass [scene review](../../boring-video/references/hyperframes-review-project.md) with actual content.
 
@@ -23,7 +23,7 @@ const scene = ScenePatterns.render(element, 'metric-scorecard', {
 scene.setTime(1.5); // local seconds; direct and backward seeking
 ```
 
-`title` replaces the marked heading; `copy` replaces exact trimmed text nodes, preserving adjacent styled spans. `data` shallowly overrides the selected case; arrays replace all items. Keep chart labels, units, and narrative conclusions consistent with new values. `source` is selection metadata, not a visible citation; add citations through copy or the project layout.
+`title` replaces the marked heading; `copy` replaces exact trimmed text nodes literally, preserving adjacent styled spans. `data` shallowly overrides the selected case; arrays replace all items. Keep chart labels, units, and narrative conclusions consistent with new values. `source` is selection metadata, not a visible citation; add citations through copy or the project layout.
 
 Use the case's fields and item counts as the layout budget. Price pairs require two plans; blind pairs require two nonnegative vote counts with a positive total; test matrices require three values per row and `best: 'min' | 'max'`; temperature charts require twelve two-hour samples within `min`/`max`. Scale maxima are positive, and values stay within their declared scales. Longer copy or extra rows require layout review.
 

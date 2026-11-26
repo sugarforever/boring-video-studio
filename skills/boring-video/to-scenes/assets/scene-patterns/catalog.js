@@ -53,14 +53,14 @@ window.SCENE_LIBRARY = {
       "category": "taxonomy",
       "question": "多个名字分别对应哪一层？",
       "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
-      "constraints": "每行一对映射；注明对应关系。",
+      "constraints": "每阶段对应一个对象；阶梯高度仅示意层级。",
       "revision": "3",
       "example": {
         "source": "独立案例 · 虚构演示数据",
         "copy": {},
         "data": {}
       },
-      "direction": "先同侧对象，再逐行建立对应关系。"
+      "direction": "按阶段依次呈现对象及适用场景。"
     },
     {
       "id": "quote-evidence",

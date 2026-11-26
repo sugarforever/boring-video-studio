@@ -44,6 +44,24 @@ const {chromium}=require(process.argv[2]||'playwright');
   assert.equal(await page.locator('#stage').getAttribute('data-mode'),'dark');
   await page.locator('summary').click();await page.locator('#props').fill(JSON.stringify({title:'替换后的项目标题',copy:{'作者已隐藏':'尚未揭晓'}}));await page.locator('#apply').click();
   assert.equal(await page.locator('[data-headline]').textContent(),'替换后的项目标题');assert.ok((await page.locator('#stage').textContent()).includes('尚未揭晓'));assert.equal(await page.locator('#error').textContent(),'');
+  // Repeated extraction must retain original keys, including across blind reveals.
+  await page.locator('#slots').click();
+  let edited=JSON.parse(await page.locator('#props').inputValue());
+  const originalKey=Object.hasOwn(edited.copy,'作者已隐藏')&&!Object.hasOwn(edited.copy,'尚未揭晓');
+  edited.copy['作者已隐藏']='第二次替换';
+  await page.locator('#props').fill(JSON.stringify(edited));await page.locator('#apply').click();
+  await page.locator('#slots').click();
+  edited=JSON.parse(await page.locator('#props').inputValue());
+  const repeated=Object.hasOwn(edited.copy,'作者已隐藏')&&!Object.hasOwn(edited.copy,'第二次替换');
+  await page.locator('#time').fill('6');await page.locator('#time').dispatchEvent('input');await page.locator('#slots').click();
+  edited=JSON.parse(await page.locator('#props').inputValue());
+  const revealed=Object.hasOwn(edited.copy,'社区设计组')&&edited.copy['作者已隐藏']==='第二次替换';
+  const literal=await page.evaluate(()=>{
+   const host=document.createElement('div'),text="$& / $$ / $` / $' / $100";
+   ScenePatterns.render(host,'metric-scorecard',{copy:{'同为 100 单':text}});
+   return [...host.querySelectorAll('div')].some(el=>el.textContent===text);
+  });
+  assert.deepEqual({originalKey,repeated,revealed,literal},{originalKey:true,repeated:true,revealed:true,literal:true});
   assert.deepEqual(errors,[]);console.log(`${count} variants passed: text bounds, resolved bindings, deterministic seeking; data geometry/labels, reveal, mode and editing checks passed`);
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -76,7 +76,7 @@
     const t=SceneThemes.resolve(SceneThemes.keys[theme],mode);
     host.className='scene theme-'+theme;host.dataset.pattern=id;host.dataset.mode=mode;
     Object.assign(host.style,{backgroundColor:t.bg,color:t.ink,fontFamily:t.fb});
-    let revealed;
+    let revealed,copySlots={};
     const draw=show=>{
       host.replaceChildren();
       const bg=document.createElement('div');bg.className='scene-backdrop';bg.style.backgroundImage=t.deco;host.append(bg);
@@ -93,8 +93,14 @@
         slot.replaceChildren(img);
       }
 
+      copySlots={};
       const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
-      while(walker.nextNode()){const text=walker.currentNode;const key=text.textContent.trim();if(Object.hasOwn(p.copy||{},key))text.textContent=text.textContent.replace(key,p.copy[key]);}
+      while(walker.nextNode()){
+        const text=walker.currentNode,key=text.textContent.trim();if(!key)continue;
+        const replacement=Object.hasOwn(p.copy||{},key)?p.copy[key]:key;
+        copySlots[key]=replacement;
+        text.textContent=text.textContent.replace(key,()=>replacement);
+      }
       const headline=root.querySelector('[data-headline]');
       if(headline){headline.dataset.headline='';if(p.title!==undefined)headline.textContent=p.title;}
       revealed=show;
@@ -110,7 +116,7 @@
       root.querySelectorAll('[data-pop]').forEach((el,k)=>{const q=phase(.5+k*.09,.5);el.style.opacity=q;el.style.scale=.4+.6*q;});
       root.querySelectorAll('[data-draw]').forEach(el=>{const length=el.getTotalLength?.()||0;if(length){el.style.strokeDasharray=length;el.style.strokeDashoffset=length*(1-phase(.4,1.4));}});
     };
-    setTime(options.time??4);return {setTime,record,props:p,theme,mode};
+    setTime(options.time??4);return {setTime,getCopySlots:()=>({...copySlots}),record,props:p,theme,mode};
   }
   window.ScenePatterns={render,revision:'3'};
 })();
