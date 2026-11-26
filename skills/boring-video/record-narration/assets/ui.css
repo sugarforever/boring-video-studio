@@ -168,3 +168,26 @@ video.audio-only { height: 40px; }
 .camera-toolbar .select-caret { right: 10px; width: 5px; height: 5px; }
 .camera-surface:focus-visible { outline: 2px solid var(--focus); outline-offset: -3px; }
 @media(forced-colors:active) { .camera-toolbar select { appearance: auto; -webkit-appearance: auto; } }
+
+/* The reading window stays near the lens; the original script remains scrollable. */
+body[data-reading-focus="true"] .script {
+  flex: 0 0 auto; margin: 64px auto 0; padding: 12px 24px 0;
+  width: min(calc(var(--reading-width, 14) * var(--reading-font, 34px) + 48px), calc(100% - 32px));
+  height: min(calc(var(--reading-font, 34px) * 1.9 * 3 + 24px), calc(100dvh - 200px));
+  border-radius: 12px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12px, #000 calc(100% - 32px), transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 12px, #000 calc(100% - 32px), transparent);
+}
+body[data-reading-focus="true"] .script-inner { max-width: none; padding-bottom: 30vh; }
+body[data-reading-focus="true"] .para::before { display: none; }
+body[data-reading-focus="true"] .notice-wrap { margin-top: auto; }
+body[data-camera-behind="true"] .camera-monitor { z-index: 1; }
+body[data-camera-behind="true"] .script { z-index: 2; }
+body[data-camera-behind="true"][data-reading-focus="true"] .script { background: rgba(241,237,229,.88); }
+body[data-camera-behind="true"][data-reading-focus="false"] .para { background: rgba(241,237,229,.88); border-radius: 4px; }
+.bar, .notice-wrap { z-index: 4; }
+#toggleCameraPreview[hidden] { display: none; }
+#toggleCameraPreview[aria-pressed="true"] .camera-hidden-mark { display: none; }
+@media (max-width: 640px) { body[data-reading-focus="true"] .script { margin-top: 64px; padding-left: 16px; padding-right: 16px; } }
+
+.field input[type="checkbox"] { justify-self: start; width: 16px; height: 16px; accent-color: var(--ink); }

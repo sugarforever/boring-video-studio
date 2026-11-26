@@ -10,6 +10,14 @@ One recorder owns both tracks, so pause/resume, chunk retries and interruption r
 
 **Capture submitted:** the selected take is complete and `handoff.json` contains existing `audio` and `video` paths for that take. Both paths intentionally name the same original AV container; `process_audio.py prepare --session ...` decodes its audio to the normal WAV workflow. Retain the original container and chunks. Audio-only sessions keep their existing handoff schema.
 
+## Reading near the camera
+
+The default “靠近镜头” layout keeps a three-line scrollable reading window at the top center. In the reading settings, adjust “栏宽” to limit horizontal eye movement or turn off “靠近镜头” to return to the full script. Existing font, speed, manual scrolling and recording-pause behavior apply to both views.
+
+“文字置顶” puts the camera below the reading layer, with a translucent theme-colored backing behind text. Use “摄像头居中” to align the preview under the laptop lens; centering follows viewport changes. Covered parts of the camera yield interaction to the script. To reposition or change its ratio when covered, temporarily turn off “文字置顶”, adjust the camera, then turn it back on.
+
+The camera icon in the recording bar hides or reveals only the preview. Camera and microphone recording continue on the same tracks while hidden. It is available during camera recording and disappears after capture ends. Preview visibility, centering, text layering, reading mode and width are local preferences; none are burned into the original footage or applied to final picture-in-picture placement. Hiding the preview does not release the camera; stopping recording does.
+
 ## Editing and export
 
 Complete audio review, normalization, retake cuts and subtitles through the main skill. Use `edit_audio.py`'s `edit-report.json` from the same original take to apply every retake cut to the picture. Supply the matching final reviewed WAV as the export's audio. Without cuts, omit `--edit-report`; normalization and optional background suppression preserve duration. Chain all cuts into one report against the original timeline; a report against an already edited intermediate is insufficient.
@@ -51,4 +59,4 @@ PLAYWRIGHT_MODULE=/absolute/path/node_modules/playwright \
   node tests/browser.cjs
 ```
 
-Omit `CAMERA_TEST` to run the audio-only regression. Simulated devices test recording, pause removal, waveform/video playback, save retry, reload recovery, handoff, permission-denial handling, device-disconnect handling and release. `RECORDER_ONLY=1` skips normalization of the constant-level fake input; Python tests separately cover normalization. It does not validate real hardware, Safari or human lip sync.
+Run `node tests/reading.cjs` with the same `PLAYWRIGHT_MODULE` to check the reading viewport, text/camera layering, preview track continuity, remembered preferences and mobile bounds. Omit `CAMERA_TEST` to run the audio-only regression. Simulated devices test recording, pause removal, waveform/video playback, save retry, reload recovery, handoff, permission-denial handling, device-disconnect handling and release. `RECORDER_ONLY=1` skips normalization of the constant-level fake input; Python tests separately cover normalization. It does not validate real hardware, Safari or human lip sync.

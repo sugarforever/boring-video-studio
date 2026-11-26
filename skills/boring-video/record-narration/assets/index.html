@@ -66,6 +66,9 @@
         <button id="record" class="btn btn-primary" type="button" disabled><span class="recdot" aria-hidden="true"></span><span class="lbl">开始录音</span></button>
       </div>
       <div class="aux">
+        <button id="toggleCameraPreview" class="icon-btn" type="button" aria-label="隐藏摄像头预览" aria-pressed="true" hidden>
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 6h11v9H2zM13 9l5-3v9l-5-3"/><path class="camera-hidden-mark" d="M2 2l16 16"/></svg>
+        </button>
         <button id="scroll" class="btn btn-quiet scroll-btn" type="button" aria-pressed="false">
           <svg class="ico-down" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.5v10M4 8.5l4 4 4-4"/></svg>
           <svg class="ico-pause" width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true"><rect x="2.5" y="2" width="3" height="10" rx="1"/><rect x="8.5" y="2" width="3" height="10" rx="1"/></svg>
@@ -88,6 +91,8 @@
     <p id="lock" class="lock" hidden>录音进行中：阅读设置可随时调整；麦克风、摄像头、试听和交接需要先停止并保存。</p>
     <div class="sec">
       <h3 class="sec-h">阅读</h3>
+      <label class="field"><span>靠近镜头</span><input id="readingFocus" type="checkbox" checked></label>
+      <label class="field"><span>栏宽</span><input id="readingWidth" class="range" type="range" min="10" max="24" step="1" value="14"><output id="readingWidthOut" class="field-v" for="readingWidth">14 字</output></label>
       <label class="field"><span>字号</span><input id="font" class="range" type="range" min="20" max="60" step="1" value="34"><output id="fontOut" class="field-v" for="font">34 px</output></label>
       <label class="field"><span>滚动速度</span><input id="speed" class="range" type="range" min="5" max="80" step="1" value="24"><output id="speedOut" class="field-v" for="speed">24 px/秒</output></label>
       <div class="row-btns"><button id="top" class="btn btn-sm" type="button">回到开头</button></div>
@@ -99,6 +104,8 @@
     </div>
     <div class="sec">
       <h3 class="sec-h">摄像头</h3>
+      <label class="field"><span>文字置顶</span><input id="cameraBehind" type="checkbox" checked></label>
+      <div class="row-btns"><button id="cameraCenter" class="btn btn-sm" type="button">摄像头居中</button></div>
       <label><input id="cameraEnabled" type="checkbox"> 同步录制摄像头</label>
       <div class="select-wrap"><select id="camera" class="select" aria-label="摄像头设备" disabled><option value="">系统默认摄像头</option></select></div>
       <p class="hint">开始录音时申请摄像头权限。摄像头与麦克风同步暂停、继续和保存；停止后释放设备。原始画面可用于后续画中画。</p>

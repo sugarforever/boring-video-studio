@@ -166,7 +166,7 @@ async function flushChunks() {
 function release() {
   stream?.getTracks().forEach(track => track.stop());
   $('cameraPreview').srcObject = null;
-  $('cameraMonitor').hidden = true;
+  window.CameraMonitor.stop();
   if (context) context.close().catch(() => {});
   analyser = null; context = null; UI.setLevel(0);
 }

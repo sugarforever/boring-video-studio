@@ -199,6 +199,7 @@
     try { await navigator.clipboard.writeText(PHRASE); $('copyPhrase').textContent = '已复制'; } catch { $('copyPhrase').textContent = `请手动输入：${PHRASE}`; }
   });
   $('font').addEventListener('input', () => {
+    document.documentElement.style.setProperty('--reading-font', `${$('font').value}px`);
     $('scriptInner').style.fontSize = `${$('font').value}px`;
     $('fontOut').textContent = `${$('font').value} px`;
   });
@@ -207,6 +208,22 @@
     setScrolling(scrollState.on, Number($('speed').value));
   });
   if (matchMedia('(max-width: 640px)').matches) { $('font').value = 24; $('font').dispatchEvent(new Event('input')); }
+
+  const readingKey = 'narration-reading-layout';
+  try {
+    const saved = JSON.parse(localStorage.getItem(readingKey));
+    if (typeof saved?.focus === 'boolean') $('readingFocus').checked = saved.focus;
+    if (Number.isInteger(saved?.width) && saved.width >= 10 && saved.width <= 24) $('readingWidth').value = saved.width;
+  } catch (_) {}
+  function readingLayout(save = false) {
+    document.body.dataset.readingFocus = String($('readingFocus').checked);
+    document.documentElement.style.setProperty('--reading-width', $('readingWidth').value);
+    $('readingWidthOut').textContent = `${$('readingWidth').value} 字`;
+    if (save) try { localStorage.setItem(readingKey, JSON.stringify({focus: $('readingFocus').checked, width: Number($('readingWidth').value)})); } catch (_) {}
+  }
+  $('readingFocus').addEventListener('change', () => readingLayout(true));
+  $('readingWidth').addEventListener('input', () => readingLayout(true));
+  readingLayout();
 
   window.RecorderUI = {setPhase, showNotice, clearNotice, renderScript, setLevel, setScrolling, renderTakes, setPreview, setFinish, openMenu, closeMenu, say, fmt, PHRASE, get phase() { return phase; }};
 })();
