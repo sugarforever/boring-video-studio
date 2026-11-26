@@ -1,6 +1,6 @@
 ---
 name: record-narration
-description: Record your own narration from a script using a local browser teleprompter, or resume a recording session through retake editing, audio normalization and script-assisted subtitle correction.
+description: Record your own narration from a script using a local browser teleprompter with optional synchronized webcam capture, or resume a recording session through retake editing, audio normalization and script-assisted subtitle correction.
 ---
 
 # Record Narration
@@ -14,6 +14,8 @@ Resolve the script and project directory from the request. For a new recording, 
 **Ready to proceed:** the script and session path are known, and a continuation uses the existing session rather than a replacement.
 
 ## 2. Open the recorder and let the user record
+
+For webcam recording, an existing handoff with `video`, or camera editing/export, read [camera.md](references/camera.md). It defines optional capture, synchronized cuts and picture-in-picture delivery.
 
 Start a long-running process and retain its process handle:
 

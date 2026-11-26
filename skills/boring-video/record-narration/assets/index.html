@@ -13,6 +13,10 @@
   <span id="menuBadge" class="badge" aria-hidden="true" hidden></span>
 </button>
 
+<aside id="cameraMonitor" class="camera-monitor" hidden aria-label="摄像头预览">
+  <video id="cameraPreview" autoplay muted playsinline></video>
+  <span>摄像头 · 预览镜像，保存原方向</span>
+</aside>
 <main class="app">
   <div id="script" class="script" tabindex="0" aria-label="口播稿">
     <div id="scriptInner" class="script-inner"><p class="para">正在读取口播稿…</p></div>
@@ -74,7 +78,7 @@
     </button>
   </div>
   <div class="db">
-    <p id="lock" class="lock" hidden>录音进行中：阅读设置可随时调整；麦克风、试听和交接需要先停止并保存。</p>
+    <p id="lock" class="lock" hidden>录音进行中：阅读设置可随时调整；麦克风、摄像头、试听和交接需要先停止并保存。</p>
     <div class="sec">
       <h3 class="sec-h">阅读</h3>
       <label class="field"><span>字号</span><input id="font" class="range" type="range" min="20" max="60" step="1" value="34"><output id="fontOut" class="field-v" for="font">34 px</output></label>
@@ -86,13 +90,19 @@
       <div class="select-wrap"><select id="mic" class="select"><option value="">系统默认麦克风</option></select><span class="select-caret" aria-hidden="true"></span></div>
       <p class="hint">录制时请求关闭回声消除、降噪和自动增益，实际设置由浏览器与麦克风决定。</p>
     </div>
+    <div class="sec">
+      <h3 class="sec-h">摄像头</h3>
+      <label><input id="cameraEnabled" type="checkbox"> 同步录制摄像头</label>
+      <div class="select-wrap"><select id="camera" class="select" aria-label="摄像头设备" disabled><option value="">系统默认摄像头</option></select></div>
+      <p class="hint">开始录音时申请摄像头权限。摄像头与麦克风同步暂停、继续和保存；停止后释放设备。原始画面可用于后续画中画。</p>
+    </div>
     <div class="sec" id="takesSec">
       <h3 class="sec-h">录音版本<small id="takeCount"></small></h3>
       <div id="takes" class="takes"><div class="empty">还没有录音版本。关闭菜单，点击「开始录音」。</div></div>
     </div>
     <div class="sec" id="previewSec" hidden>
       <h3 class="sec-h">试听<small id="previewTitle"></small></h3>
-      <audio id="player" class="audio" controls preload="metadata"></audio>
+      <video id="player" class="audio audio-only" controls playsinline preload="metadata"></video>
       <div id="waveform" class="wave" aria-label="录音波形，拖动选择试听范围"></div>
       <div class="sel-row">
         <span id="selection" class="sel-txt">在波形上拖动，选择要试听的片段</span>

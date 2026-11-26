@@ -151,3 +151,12 @@ svg{flex:none}
 @media(forced-colors:active){.select{appearance:auto;-webkit-appearance:auto;background-image:none}}
 
 .select-wrap{position:relative}.select-caret{position:absolute;right:17px;top:50%;width:8px;height:8px;border-right:1.5px solid var(--ink2);border-bottom:1.5px solid var(--ink2);transform:translateY(-70%) rotate(45deg);pointer-events:none}.select:disabled + .select-caret{opacity:.55}@media(forced-colors:active){.select-caret{display:none}}
+
+/* Capture monitor stays clear of the controls; only the live preview is mirrored. */
+.camera-monitor { position: fixed; right: 24px; top: 80px; width: min(240px, 32vw); z-index: 3; border-radius: 12px; overflow: hidden; background: #26251f; color: white; box-shadow: 0 4px 20px #0003; }
+.camera-monitor[hidden] { display: none; }
+.camera-monitor video { width: 100%; display: block; aspect-ratio: 16/9; object-fit: contain; transform: scaleX(-1); }
+.camera-monitor span { display: block; padding: 5px 8px; font-size: 11px; }
+video.audio { width: 100%; max-height: 260px; background: #26251f; }
+video.audio-only { height: 40px; }
+@media (max-width: 600px) { .camera-monitor { top: 70px; right: 12px; width: 120px; } }

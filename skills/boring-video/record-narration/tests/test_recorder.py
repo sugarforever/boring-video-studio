@@ -138,6 +138,26 @@ class RecorderTests(unittest.TestCase):
         resumed = r.Store(self.store.root, self.root / 'draft.txt')
         self.assertEqual(resumed.state()['status'], 'ready')
 
+    def test_camera_container_recovery_and_handoff(self):
+        for mime, suffix in [('video/webm;codecs=vp8,opus', '.webm'), ('video/mp4', '.mp4')]:
+            take = self.call('/api/takes', {'mime': mime, 'capture': {'width': 1280, 'height': 720, 'frameRate': 30, 'deviceId': 'private'}})
+            tid = take['id']
+            self.call(f'/api/takes/{tid}/chunks/0', b'camera-and-microphone')
+            self.call(f'/api/takes/{tid}/finalize', {'chunks': 1})
+            self.call('/api/ready', {'take': tid})
+            handoff = json.loads((self.store.root / 'handoff.json').read_text())
+            self.assertEqual(handoff['video'], handoff['audio'])
+            self.assertEqual(Path(handoff['video']).suffix, suffix)
+            self.assertEqual(Path(handoff['video']).read_bytes(), b'camera-and-microphone')
+            resumed = r.Store(self.store.root, self.root / 'draft.txt')
+            self.assertEqual(resumed.take(tid)['video'], resumed.take(tid)['audio'])
+            self.assertEqual(resumed.take(tid)['capture'], {'width': 1280, 'height': 720, 'frameRate': 30})
+            with urllib.request.urlopen(urllib.request.Request(self.url + f'/api/takes/{tid}/audio', headers={'X-Recorder-Token': self.server.token})) as response:
+                self.assertEqual(response.headers['Content-Type'], mime)
+                self.assertEqual(response.read(), b'camera-and-microphone')
+            with self.assertRaises(urllib.error.HTTPError):
+                self.call(f'/api/takes/{tid}/audio', token=False)
+
     def test_capture_settings_preserved(self):
         settings = {'sampleRate': 48000, 'autoGainControl': False, 'deviceId': 'not needed'}
         take = self.call('/api/takes', {'mime': 'audio/webm', 'capture': settings})

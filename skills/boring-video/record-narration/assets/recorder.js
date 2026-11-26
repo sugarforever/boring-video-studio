@@ -8,7 +8,7 @@ sessionStorage.setItem(key, token);
 history.replaceState(null, '', location.pathname);
 let recorder, stream, context, analyser, levelData, takeId, chunks = [], nextUpload = 0, uploadQueue = Promise.resolve();
 let busy = false, selected = null, started = 0, elapsed = 0, scrollOn = false, lastFrame = 0, scrollCarry = 0;
-let playerURL, backupURL, activeRegion;
+let playerURL, backupURL, activeRegion, captureWarning;
 const regions = WaveSurfer.Regions.create();
 const waveform = WaveSurfer.create({container: '#waveform', media: $('player'),
   height: 76, waveColor: '#ABA496', progressColor: '#57534A', cursorColor: '#26251F',
@@ -53,6 +53,8 @@ function controls() {
   $('pause').disabled = busy || !active;
   $('stop').disabled = busy || !active;
   $('mic').disabled = busy || active;
+  $('cameraEnabled').disabled = busy || active;
+  $('camera').disabled = busy || active || !$('cameraEnabled').checked;
   waveform.setOptions({interact: !busy && !active});
   $('playSelection').disabled = busy || active || !activeRegion;
   $('finish').disabled = busy || active || !selected;
@@ -69,6 +71,7 @@ async function preview(take) {
   $('selection').textContent = '拖动波形选择试听范围';
   $('waveform').dataset.ready = 'false';
   UI.setPreview(take);
+  $('player').classList.toggle('audio-only', !take.video);
   $('player').src = playerURL;
   try {
     await waveform.loadBlob(blob);
@@ -128,6 +131,12 @@ async function microphones() {
     $('mic').add(new Option(device.label || `麦克风 ${index + 1}`, device.deviceId));
   });
   $('mic').value = previous;
+  const camera = $('camera').value;
+  $('camera').replaceChildren(new Option('系统默认摄像头', ''));
+  devices.filter(device => device.kind === 'videoinput').forEach((device, index) => {
+    $('camera').add(new Option(device.label || `摄像头 ${index + 1}`, device.deviceId));
+  });
+  $('camera').value = camera;
 }
 async function upload(index) {
   const item = chunks[index];
@@ -156,16 +165,21 @@ async function flushChunks() {
 }
 function release() {
   stream?.getTracks().forEach(track => track.stop());
+  $('cameraPreview').srcObject = null;
+  $('cameraMonitor').hidden = true;
   if (context) context.close().catch(() => {});
   analyser = null; context = null; UI.setLevel(0);
 }
+$('cameraEnabled').addEventListener('change', controls);
 $('record').addEventListener('click', async () => {
-  busy = true; $('player').pause(); controls();
+  busy = true; captureWarning = null; $('player').pause(); controls();
   try {
     const mic = $('mic').value;
-    stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1, ...(mic ? {deviceId: {exact: mic}} : {})}});
+    const camera = $('cameraEnabled').checked;
+    const cameraId = $('camera').value;
+    stream = await navigator.mediaDevices.getUserMedia({video: camera ? {width: {ideal: 1280}, height: {ideal: 720}, frameRate: {ideal: 30}, ...(cameraId ? {deviceId: {exact: cameraId}} : {})} : false, audio: {echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1, ...(mic ? {deviceId: {exact: mic}} : {})}});
     await microphones();
-    const mime = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus'].find(type => MediaRecorder.isTypeSupported(type));
+    const mime = (camera ? ['video/webm;codecs=vp8,opus', 'video/webm;codecs=vp9,opus', 'video/mp4'] : ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus']).find(type => MediaRecorder.isTypeSupported(type));
     if (!mime) throw new Error('此浏览器不支持可保存的录音格式，请使用 Chrome 或 Safari。');
     recorder = new MediaRecorder(stream, {mimeType: mime});
     context = new AudioContext();
@@ -175,6 +189,7 @@ $('record').addEventListener('click', async () => {
     levelData = new Uint8Array(analyser.fftSize);
     const settings = stream.getAudioTracks()[0].getSettings();
     const capture = Object.fromEntries(['sampleRate', 'channelCount', 'echoCancellation', 'noiseSuppression', 'autoGainControl'].filter(key => key in settings).map(key => [key, settings[key]]));
+    if (camera) Object.assign(capture, Object.fromEntries(['width', 'height', 'frameRate'].map(key => [key, stream.getVideoTracks()[0].getSettings()[key]])));
     const take = await api('/api/takes', {mime, capture, script: $('scriptInner').dataset.source}); takeId = take.id;
     chunks = []; nextUpload = 0; elapsed = 0; started = performance.now(); uploadQueue = Promise.resolve();
     recorder.addEventListener('dataavailable', event => {
@@ -190,7 +205,19 @@ $('record').addEventListener('click', async () => {
       message(`录音发生错误：${event.error?.message || '设备不可用'}。请保存或恢复已有录音。`);
     });
     recorder.addEventListener('stop', saveRecording, {once: true});
+    stream.getTracks().forEach(track => track.addEventListener('ended', () => {
+      captureWarning = '录制设备已断开，已保存的部分需要试听确认。请检查设备并重新录制。';
+      if (recorder.state === 'inactive') return;
+      if (recorder.state === 'recording') elapsed += performance.now() - started;
+      busy = true; recorder.stop(); controls();
+      phase('saving');
+      message('录制设备已断开，正在保存已录部分。请检查设备并试听后重录。');
+    }, {once: true}));
     recorder.start(2000);
+    if (camera) {
+      $('cameraPreview').srcObject = stream;
+      $('cameraMonitor').hidden = false;
+    }
     $('fallback').hidden = true;
     phase('recording'); UI.clearNotice();
     await refresh();
@@ -225,12 +252,13 @@ async function saveRecording() {
     const blob = new Blob(chunks.map(item => item.blob), {type: recorder.mimeType});
     backupURL = URL.createObjectURL(blob);
     $('fallback').href = backupURL;
-    $('fallback').download = `narration-${takeId}.${recorder.mimeType.includes('mp4') ? 'm4a' : recorder.mimeType.includes('ogg') ? 'ogg' : 'webm'}`;
+    $('fallback').download = `narration-${takeId}.${recorder.mimeType.includes('mp4') ? (recorder.mimeType.startsWith('video/') ? 'mp4' : 'm4a') : recorder.mimeType.includes('ogg') ? 'ogg' : 'webm'}`;
     $('fallback').hidden = true;
     await uploadQueue;
     await flushChunks();
     await api(`/api/takes/${takeId}/finalize`, {chunks: chunks.length});
     await refresh(); savedPhase(); UI.clearNotice();
+    if (captureWarning) message(captureWarning);
   } catch (error) { phase('error', {error: 'save'}); UI.showNotice({kind: 'error', title: '自动保存失败', detail: `${error.message}。请先下载原始录音备份，保持页面开启后重试。`, fallback: true}); }
   finally { busy = false; controls(); }
 }
