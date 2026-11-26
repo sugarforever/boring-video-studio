@@ -53,7 +53,7 @@ const modulePath=process.argv[2]||'playwright',{chromium}=require(modulePath);
  await page.locator('#apply').click();assert.equal(await page.locator('#error').textContent(),'');assert.ok(await page.locator('#copy').isEnabled());assert.ok((await page.locator('#stage').textContent()).includes('节选'));
  assert.deepEqual(errors,[]);
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'scene-preflight-'));
- try{for(const [props,status]of [[result.props,2],[result.adjusted,0]]){
+ try{for(const [props,status]of [[result.props,2],[result.adjusted,0],[null,2],[false,2]]){
   const input=path.join(temp,'selection.json');fs.writeFileSync(input,JSON.stringify({id:'json-data',revision:'3',props}));
   const run=spawnSync(process.execPath,[path.join(__dirname,'validate_scene_selection.cjs'),input,modulePath],{encoding:'utf8'});
   assert.equal(run.status,status,run.stderr);assert.equal(JSON.parse(run.stdout).ok,status===0);

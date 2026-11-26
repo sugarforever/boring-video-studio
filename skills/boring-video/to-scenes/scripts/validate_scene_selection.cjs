@@ -11,7 +11,7 @@ if(!process.argv[2]||process.argv[2]==='--help'){
  try{
   const page=await browser.newPage();
   await page.goto(pathToFileURL(path.resolve(__dirname,'../assets/scene-patterns/gallery.html')).href+'?preflight=1');
-  const report=await page.evaluate(s=>ScenePatterns.validate(s.id,s.props||{},{theme:s.theme,mode:s.mode,revision:s.revision}),selection);
+  const report=await page.evaluate(s=>ScenePatterns.validate(s.id,s.props===undefined?{}:s.props,{theme:s.theme,mode:s.mode,revision:s.revision}),selection);
   console.log(JSON.stringify(report,null,2));process.exitCode=report.ok?0:2;
  }finally{await browser.close()}
 })().catch(error=>{console.error(error.message);process.exitCode=1});
