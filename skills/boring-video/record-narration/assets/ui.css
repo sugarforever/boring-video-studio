@@ -162,18 +162,13 @@ video.audio-only { height: 40px; }
 
 .camera-monitor { touch-action: none; user-select: none; cursor: grab; }
 .camera-monitor.is-dragging { cursor: grabbing; }
-.camera-toolbar { position: absolute; top: 8px; right: 8px; }
-.camera-toolbar select { appearance: none; -webkit-appearance: none; min-height: 32px; width: 72px; padding: 0 24px 0 10px; border: 1px solid var(--rule2); border-radius: 8px; background: var(--paper); color: var(--ink); font-size: 12px; font-variant-numeric: tabular-nums; cursor: pointer; touch-action: auto; }
-.camera-toolbar select:hover { background: var(--raised); }
-.camera-toolbar .select-caret { right: 10px; width: 5px; height: 5px; }
 .camera-surface:focus-visible { outline: 2px solid var(--focus); outline-offset: -3px; }
-@media(forced-colors:active) { .camera-toolbar select { appearance: auto; -webkit-appearance: auto; } }
 
 /* The reading window stays near the lens; the original script remains scrollable. */
 body[data-reading-focus="true"] .script {
   flex: 0 0 auto; margin: 64px auto 0; padding: 12px 24px 0;
   width: min(calc(var(--reading-width, 14) * var(--reading-font, 34px) + 48px), calc(100% - 32px));
-  height: min(calc(var(--reading-font, 34px) * 1.9 * 3 + 24px), calc(100dvh - 200px));
+  height: min(calc(var(--reading-font, 34px) * 1.9 * 3 + 24px), max(60px, calc(100dvh - var(--recorder-bar-height, 100px) - 80px)));
   border-radius: 12px;
   -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12px, #000 calc(100% - 32px), transparent);
   mask-image: linear-gradient(to bottom, transparent, #000 12px, #000 calc(100% - 32px), transparent);
@@ -191,3 +186,14 @@ body[data-camera-behind="true"][data-reading-focus="false"] .para { background: 
 @media (max-width: 640px) { body[data-reading-focus="true"] .script { margin-top: 64px; padding-left: 16px; padding-right: 16px; } }
 
 .field input[type="checkbox"] { justify-self: start; width: 16px; height: 16px; accent-color: var(--ink); }
+
+.capture-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--rule); color: var(--ink2); font-size: 13px; }
+.capture-tools .select { min-height: 36px; font-size: 13px; padding-left: 10px; padding-right: 30px; border-radius: 8px; }
+.capture-tools .select-caret { right: 12px; width: 6px; height: 6px; }
+.device-pair { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.device-select { width: clamp(140px, 15vw, 210px); }
+.capture-aspect { width: 78px; }
+.camera-enable, .camera-layer { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; cursor: pointer; }
+.capture-tools input[type="checkbox"] { accent-color: var(--ink); }
+.capture-tools .icon-btn { width: 36px; height: 36px; border-radius: 8px; }
+@media (max-width: 640px) { .capture-tools { gap: 8px; } .device-pair { flex: 1 1 100%; } .device-select { flex: 1; width: auto; min-width: 0; } }

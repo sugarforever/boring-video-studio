@@ -2,11 +2,11 @@
 
 ## Capture and reading
 
-Enable “同步录制摄像头” in the recorder menu and select a device. The user starts capture and grants microphone/camera permission. Device labels may appear only after the first grant; stop and choose the labeled device if needed. One recorder captures both tracks, so pause, resume, saving and recovery share a timeline. Stop releases both devices. For interrupted takes, inspect the recovered picture and sound, especially the tail.
+Use the bottom toolbar to enable “摄像头” and select a device. Enabling requests video-only permission and immediately shows preview; it creates no recording or audio capture. The user clicks “开始录音” to grant microphone access and begin one synchronized AV recorder. Pause, resume, saving and recovery share a timeline. Stopping recording releases its microphone/video tracks while preview continues; turning off “摄像头” releases the remaining camera stream. Device selection is available while idle. For interrupted takes, inspect the recovered picture and sound, especially the tail.
 
 The default “靠近镜头” view keeps roughly three lines near the top-center lens position. Adjust “栏宽” to reduce horizontal eye movement, or turn this view off for the full script. Font, manual scrolling, auto-scroll and pause behavior apply to both views.
 
-The preview supports dragging, keyboard arrows when focused, and a ratio selector. “摄像头居中” aligns it beneath the laptop lens. “文字置顶” places it under readable, translucent text; turn that option off temporarily to reposition the preview or reach controls covered by text. The recording-bar camera icon hides/reveals the preview while capture continues on the same tracks.
+The preview supports dragging and keyboard arrows when focused. Its ratio, centering, layering and visibility controls are in the bottom toolbar. “摄像头居中” aligns it beneath the laptop lens. “文字置顶” places it under readable, translucent text; turn that option off temporarily to drag a covered preview. The recording-bar camera icon hides/reveals the preview while capture continues on the same tracks.
 
 These reading and preview preferences are saved locally. They change neither the original footage nor the exported composition. Only the live preview is mirrored; the original keeps its camera orientation and dimensions.
 
