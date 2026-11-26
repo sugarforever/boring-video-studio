@@ -10,3 +10,5 @@ These fonts let the standalone gallery render offline. Each family is covered by
 - JetBrains Mono 400: existing HyperFrames code-editorial preset font asset, Google Fonts family.
 
 Upstream sources and licenses: [Google Fonts repository](https://github.com/google/fonts/tree/main/ofl).
+
+Revision 3 adds Archivo (BlockFrame), Instrument Sans (Swiss), Geist (Raycast), Geist Mono, and Space Mono from their Google Fonts `ofl` directories. Their upstream TTF files and OFL licenses are bundled alongside the existing Newsreader and Noto Sans SC assets.

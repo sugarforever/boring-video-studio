@@ -1,0 +1,31 @@
+<div data-scene="1" style="position:absolute; inset:0; padding:96px 128px 176px; display:flex; flex-direction:column">
+<div style="display:flex; justify-content:space-between; align-items:flex-end; gap:64px">
+<div style="display:flex; flex-direction:column">
+<div style="display:flex; align-items:center; gap:14px; align-self:flex-start; padding:{{t.kPad}}; background:{{t.kBg}}; border:{{t.kBd}}; border-radius:{{t.kR}}; color:{{t.kInk}}; font-family:{{t.kF}}; font-style:{{t.kSt}}; font-weight:{{t.kW}}; font-size:26px; line-height:1.2"><div style="flex:none; width:{{t.kMW}}; height:{{t.kMH}}; border-radius:{{t.kMR}}; background:{{t.kMark}}"></div>社区杂志 · 制作周期</div>
+<div data-headline="" style="margin-top:28px; font-family:{{t.fd}}; font-weight:{{t.dw}}; letter-spacing:{{t.tls}}; font-size:84px; line-height:1.12">从选题到发行</div>
+<div style="margin-top:16px; font-size:32px; color:{{t.mu}}">两个阶段，各 14 天</div>
+</div>
+<div style="display:flex; align-items:baseline; gap:12px; color:{{t.ac}}">
+<span style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:240px; line-height:0.8; letter-spacing:-0.04em">28</span>
+<span style="font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:64px">天</span>
+</div>
+</div>
+<div style="margin-top:auto; position:relative; height:440px">
+<div style="position:absolute; left:0; top:0; display:flex; flex-direction:column; gap:6px"><div style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:64px; line-height:1">4月1日</div><div style="font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">第 0 天</div></div>
+<div style="position:absolute; left:50%; top:0; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:6px"><div style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:64px; line-height:1">4月15日</div><div style="font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">第 14 天</div></div>
+<div style="position:absolute; right:0; top:0; display:flex; flex-direction:column; align-items:flex-end; gap:6px"><div style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:64px; line-height:1; color:{{t.ac}}">4月29日</div><div style="font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">第 28 天</div></div>
+<div style="position:absolute; left:25%; top:128px; transform:translateX(-50%); font-size:30px; font-weight:700; white-space:nowrap">编辑与采写 <span style="color:{{t.mu}}; font-weight:400">· 14 天</span></div>
+<div style="position:absolute; left:75%; top:128px; transform:translateX(-50%); font-size:30px; font-weight:700; white-space:nowrap">校对与印制 <span style="color:{{t.mu}}; font-weight:400">· 14 天</span></div>
+<div style="position:absolute; left:0; right:0; top:184px; height:22px">
+<sc-for list="{{ d.days }}" as="x" hint-placeholder-count="29"><div style="position:absolute; bottom:0; left:{{x.l}}; width:2px; height:{{x.h}}; background:{{t.mu}}; opacity:0.55"></div></sc-for>
+</div>
+<div data-grow="1" style="position:absolute; left:0; width:calc(50% - 4px); top:214px; height:32px; background:{{t.hi}}; border:{{t.barBd}}; border-radius:{{t.rS}}"></div>
+<div data-grow="1" style="position:absolute; left:calc(50% + 4px); right:0; top:214px; height:32px; background:{{t.ac2}}; border:{{t.barBd}}; border-radius:{{t.rS}}"></div>
+<div style="position:absolute; left:0; top:230px; width:52px; height:52px; transform:translate(-50%,-50%); background:{{t.bg}}; border:6px solid {{t.ink}}; border-radius:{{t.dotR}}"></div>
+<div style="position:absolute; left:50%; top:230px; width:52px; height:52px; transform:translate(-50%,-50%); background:{{t.bg}}; border:6px solid {{t.ink}}; border-radius:{{t.dotR}}"></div>
+<div style="position:absolute; left:100%; top:230px; width:52px; height:52px; transform:translate(-50%,-50%); background:{{t.ac}}; border:6px solid {{t.ink}}; border-radius:{{t.dotR}}"></div>
+<div style="position:absolute; left:0; top:292px; width:480px; display:flex; flex-direction:column; gap:8px"><div style="font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:44px">选题会</div><div style="font-size:28px; line-height:1.45; color:{{t.mu}}">确定本期主题与采访名单</div></div>
+<div style="position:absolute; left:50%; top:292px; width:480px; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px"><div style="font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:44px">样刊</div><div style="font-size:28px; line-height:1.45; color:{{t.mu}}">排版完成，交付校对</div></div>
+<div style="position:absolute; right:0; top:292px; width:480px; display:flex; flex-direction:column; align-items:flex-end; text-align:right; gap:8px"><div style="font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:44px">发行</div><div style="font-size:28px; line-height:1.45; color:{{t.mu}}">服务站与线上同步上架</div></div>
+</div>
+</div>

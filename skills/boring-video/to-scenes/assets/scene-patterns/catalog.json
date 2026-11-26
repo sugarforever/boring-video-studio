@@ -1,35 +1,18 @@
 {
-  "version": 2,
+  "version": 3,
   "patterns": [
     {
       "id": "release-timeline",
       "title": "发布时间线",
       "category": "chronology",
       "question": "事件在多短时间内集中发生？",
-      "inputs": "events[{label,date,position}]，rangeLabel",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "日期按同一时间尺度；缺失日期使用等距序列并明确标注。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "一本社区杂志的诞生",
-        "events": [
-          {
-            "label": "选题确认",
-            "date": "04.01",
-            "position": 0
-          },
-          {
-            "label": "样刊完成",
-            "date": "04.15",
-            "position": 0.5
-          },
-          {
-            "label": "正式发行",
-            "date": "04.29",
-            "position": 1
-          }
-        ],
-        "rangeLabel": "从选题到发行，共 28 天",
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {}
       },
       "direction": "先轴与范围，再按真实日期落点，最后强调区间。"
     },
@@ -38,21 +21,13 @@
       "title": "双卡命题对照",
       "category": "comparison",
       "question": "两个对象的关系是什么？",
-      "inputs": "left/right{label,detail}，relation",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "比较符须来自论据；不同维度不合并成单一胜负。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "两种出行方式，各有所长",
-        "left": {
-          "label": "骑行",
-          "detail": "短途灵活 · 需要体力"
-        },
-        "right": {
-          "label": "公共交通",
-          "detail": "距离更远 · 依赖班次"
-        },
-        "relation": "↔",
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {}
       },
       "direction": "先对象，再关系符，最后一句判断。"
     },
@@ -61,26 +36,13 @@
       "title": "章节路线图",
       "category": "orientation",
       "question": "接下来如何回答这个问题？",
-      "inputs": "items[{label,detail}]",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "最多四章；按问题组织导航。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "把阳台变成小菜园",
-        "items": [
-          {
-            "label": "观察光照",
-            "detail": "记录一天的日照"
-          },
-          {
-            "label": "选择作物",
-            "detail": "按季节与空间挑选"
-          },
-          {
-            "label": "安排浇水",
-            "detail": "让维护变得简单"
-          }
-        ],
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {}
       },
       "direction": "逐条出现，再把焦点移到当前章节。"
     },
@@ -89,42 +51,28 @@
       "title": "对象与层级映射",
       "category": "taxonomy",
       "question": "多个名字分别对应哪一层？",
-      "inputs": "items[{label,detail}]",
-      "constraints": "每行一对映射；注明对应关系。",
-      "revision": "2",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
+      "constraints": "每阶段对应一个对象；阶梯高度仅示意层级。",
+      "revision": "3",
       "example": {
-        "title": "三类读者，三种阅读入口",
-        "items": [
-          {
-            "label": "初次接触",
-            "detail": "概念导读"
-          },
-          {
-            "label": "动手实践",
-            "detail": "步骤手册"
-          },
-          {
-            "label": "深入研究",
-            "detail": "原始资料"
-          }
-        ],
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {}
       },
-      "direction": "先同侧对象，再逐行建立对应关系。"
+      "direction": "按阶段依次呈现对象及适用场景。"
     },
     {
       "id": "quote-evidence",
       "title": "引语证据条",
       "category": "evidence",
       "question": "这句话是谁在什么语境下说的？",
-      "inputs": "quote，attribution，source",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "真实引语逐字核对；注明作者、日期和出处。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "让访谈保留具体语境",
-        "quote": "如果每一步都容易找到，我就愿意自己试一次。",
-        "attribution": "虚构访谈角色：林女士 · 社区工具借用案例",
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {}
       },
       "direction": "保留来源，展示原话，再点亮相关短语。"
     },
@@ -133,25 +81,33 @@
       "title": "双项报价卡",
       "category": "comparison",
       "question": "两个报价是否同口径？",
-      "inputs": "items[{label,value,detail}]，unit",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "注明币种、计费项、周期与日期；差价不等于折扣。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "社区工作室的两种使用方案",
-        "items": [
-          {
-            "label": "按次使用",
-            "value": "¥45",
-            "detail": "每次 2 小时 · 含工具"
-          },
-          {
-            "label": "月度通行",
-            "value": "¥180",
-            "detail": "每月 12 小时 · 含工具"
-          }
-        ],
-        "unit": "人民币 · 虚构报价 · 不含材料费",
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {
+          "plans": [
+            {
+              "name": "按次",
+              "scope": "单次连续使用",
+              "price": 45,
+              "per": "次",
+              "hours": 2,
+              "note": "口径：单次 2 小时内连续使用，超时另计"
+            },
+            {
+              "name": "月度",
+              "scope": "当月累计使用",
+              "price": 180,
+              "per": "月",
+              "hours": 12,
+              "note": "口径：当月累计 12 小时，不结转次月"
+            }
+          ],
+          "hourlyMax": 25
+        }
       },
       "direction": "先计价单位，再报价，最后解释差异。"
     },
@@ -160,17 +116,33 @@
       "title": "原始表格与聚焦",
       "category": "evidence",
       "question": "结论对应原始证据的哪一行？",
-      "inputs": "media{src,alt}，caption，source",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "保留列头、单位和脚注；注明截图或示意。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "配送表现，从原始记录看起",
-        "media": {
-          "src": "media/delivery-table.svg",
-          "alt": "原创配送审计表，展示三个区域的订单与准时率"
-        },
-        "caption": "北区：80 单，准时率 96%",
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {
+          "rows": [
+            [
+              "北区",
+              80,
+              96
+            ],
+            [
+              "中区",
+              90,
+              92
+            ],
+            [
+              "南区",
+              70,
+              89
+            ]
+          ],
+          "highlight": "中区",
+          "ordersMax": 100
+        }
       },
       "direction": "先完整来源，再聚焦目标行，最后恢复上下文。"
     },
@@ -179,32 +151,33 @@
       "title": "排名横条",
       "category": "data",
       "question": "按一个指标排序，谁在前？",
-      "inputs": "items[{label,value}]，unit，max，source",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "零基线、共享尺度；标签显示原值；分数差不等于能力百分比。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "哪些社区活动更受欢迎？",
-        "items": [
-          {
-            "label": "旧物交换",
-            "value": 86
-          },
-          {
-            "label": "露天电影",
-            "value": 74
-          },
-          {
-            "label": "园艺课堂",
-            "value": 61
-          },
-          {
-            "label": "步行导览",
-            "value": 48
-          }
-        ],
-        "unit": "报名人数 · 虚构样本",
-        "max": 100,
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {
+          "items": [
+            [
+              "旧物交换",
+              86
+            ],
+            [
+              "露天电影",
+              74
+            ],
+            [
+              "园艺课堂",
+              61
+            ],
+            [
+              "步行导览",
+              48
+            ]
+          ],
+          "max": 100
+        }
       },
       "direction": "先共同尺度，再依次展开横条，最后突出目标。"
     },
@@ -213,38 +186,38 @@
       "title": "成本与耗时二维分布",
       "category": "data",
       "question": "便宜与快速能否同时成立？",
-      "inputs": "points[{label,x,y}]，xMax，yMax，xLabel，yLabel",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "预览仅支持线性坐标；注明两轴单位。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "四条配送路线的取舍",
-        "points": [
-          {
-            "label": "步行",
-            "x": 8,
-            "y": 55
-          },
-          {
-            "label": "骑行",
-            "x": 18,
-            "y": 30
-          },
-          {
-            "label": "电动车",
-            "x": 35,
-            "y": 18
-          },
-          {
-            "label": "货车",
-            "x": 70,
-            "y": 25
-          }
-        ],
-        "xMax": 100,
-        "yMax": 80,
-        "xLabel": "单次成本 / 元 →",
-        "yLabel": "耗时 / 分钟 ↑",
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {
+          "points": [
+            [
+              "步行",
+              8,
+              55
+            ],
+            [
+              "骑行",
+              18,
+              30
+            ],
+            [
+              "电动车",
+              35,
+              18
+            ],
+            [
+              "货车",
+              70,
+              25
+            ]
+          ],
+          "xMax": 80,
+          "yMax": 60
+        }
       },
       "direction": "先坐标与单位，再点位，最后标出比较区。"
     },
@@ -253,27 +226,52 @@
       "title": "测试项目矩阵",
       "category": "orientation",
       "question": "比较覆盖哪些任务、有哪些条件？",
-      "inputs": "items[{label,detail}]，protocol",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "项目缩略图不承担结论；保留相同输入、环境和次数。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "水杯出门前的三项检查",
-        "items": [
-          {
-            "label": "密封",
-            "detail": "倒置静置 10 分钟"
-          },
-          {
-            "label": "保温",
-            "detail": "同温热水静置 4 小时"
-          },
-          {
-            "label": "便携",
-            "detail": "装入同一规格侧袋"
-          }
-        ],
-        "protocol": "独立测试案例 · 相同容量与环境温度",
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {
+          "tests": [
+            {
+              "name": "密封",
+              "m": "倒置 10 分钟渗漏 · 越少越好",
+              "u": "ml",
+              "max": 5,
+              "vals": [
+                0,
+                0,
+                3
+              ],
+              "best": "min"
+            },
+            {
+              "name": "保温",
+              "m": "6 小时后水温 · 越高越好",
+              "u": "℃",
+              "max": 90,
+              "vals": [
+                68,
+                61,
+                52
+              ],
+              "best": "max"
+            },
+            {
+              "name": "便携",
+              "m": "空杯重量 · 越轻越好",
+              "u": "g",
+              "max": 400,
+              "vals": [
+                380,
+                290,
+                210
+              ],
+              "best": "min"
+            }
+          ]
+        }
       },
       "direction": "先测试条件，再项目矩阵，最后提示评判规则。"
     },
@@ -282,15 +280,13 @@
       "title": "任务简报与重点",
       "category": "instruction",
       "question": "这次任务到底要求什么？",
-      "inputs": "prompt，highlight，protocol",
-      "constraints": "highlight 必须是原文子串；长提示词拆页，保持原文可追溯。",
-      "revision": "2",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
+      "constraints": "重点保留原始要求的原文；长要求拆页，保持来源可追溯。",
+      "revision": "3",
       "example": {
-        "title": "为社区书屋设计一张海报",
-        "prompt": "为周六开放的社区书屋制作一张海报。突出免费入场，写明开放时间，保留清晰的地址区域。",
-        "highlight": "免费入场",
-        "protocol": "交付：一张海报 / 必含时间与地点",
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {}
       },
       "direction": "先任务名，再原始要求，最后强调约束。"
     },
@@ -299,17 +295,30 @@
       "title": "作品演示舞台",
       "category": "demonstration",
       "question": "实际产物如何工作？",
-      "inputs": "media{src,alt}，caption，source",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "预览为静态插图；生产需展示可辨识的真实操作。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "温室数据，一眼看懂",
-        "media": {
-          "src": "media/garden-dashboard.svg",
-          "alt": "原创温室传感器界面，展示温度、湿度与折线图"
-        },
-        "caption": "温度、湿度与土壤水分，共享一个观察界面",
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {
+          "temperatures": [
+            18.6,
+            18.1,
+            17.8,
+            18,
+            19.4,
+            21.2,
+            22.8,
+            23.9,
+            24.6,
+            25.1,
+            24.5,
+            24
+          ],
+          "min": 16,
+          "max": 28
+        }
       },
       "direction": "先产物全貌，再录屏中的真实操作，最后结果停留。"
     },
@@ -318,31 +327,19 @@
       "title": "盲测双画面与揭晓",
       "category": "comparison",
       "question": "隐去身份后你会选择谁？",
-      "inputs": "items[{label,detail,media?}]，revealAt",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "揭晓前隐藏名称、角标和文件名；保留相同视口与操作。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "哪张社区活动海报更清晰？",
-        "items": [
-          {
-            "label": "安静城市",
-            "detail": "方案一 · 树形剪影",
-            "media": {
-              "src": "media/poster-a.svg",
-              "alt": "匿名海报 A"
-            }
-          },
-          {
-            "label": "为树留白",
-            "detail": "方案二 · 暖色构图",
-            "media": {
-              "src": "media/poster-b.svg",
-              "alt": "匿名海报 B"
-            }
-          }
-        ],
-        "revealAt": 5,
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {
+          "votes": [
+            32,
+            18
+          ],
+          "revealAt": 5
+        }
       },
       "direction": "先 A/B 同条件画面，给观察时间，再揭晓身份。"
     },
@@ -351,36 +348,34 @@
       "title": "多指标结果计分",
       "category": "comparison",
       "question": "一次测试在时间、成本等方面结果如何？",
-      "inputs": "columns[2]，metrics[{label,a,b,unit}]",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "不跨单位合并得分；时间与费用是否包含等待需一致说明。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "两种仓库拣货流程的结果",
-        "columns": [
-          "逐单拣货",
-          "分区合单"
-        ],
-        "metrics": [
-          {
-            "label": "处理时长",
-            "a": "42",
-            "b": "31",
-            "unit": "分钟 / 100 单"
-          },
-          {
-            "label": "行走距离",
-            "a": "1.8",
-            "b": "1.1",
-            "unit": "公里 / 100 单"
-          },
-          {
-            "label": "错件数",
-            "a": "2",
-            "b": "1",
-            "unit": "件 / 100 单"
-          }
-        ],
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {
+          "metrics": [
+            [
+              "总耗时",
+              "分钟",
+              42,
+              31
+            ],
+            [
+              "行走距离",
+              "公里",
+              1.8,
+              1.1
+            ],
+            [
+              "错件",
+              "件",
+              2,
+              1
+            ]
+          ]
+        }
       },
       "direction": "固定列头，逐行给数值，最后给限定结论。"
     },
@@ -389,27 +384,28 @@
       "title": "有效工作与等待拆解",
       "category": "causality",
       "question": "总耗时为何和实际工作不同？",
-      "inputs": "segments[{label,value}]，unit",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "段长按真实时长；等待原因需日志支持；重叠区间不重复相加。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "一批陶器的时间去了哪里？",
-        "segments": [
-          {
-            "label": "整形",
-            "value": 30
-          },
-          {
-            "label": "干燥",
-            "value": 90
-          },
-          {
-            "label": "修坯",
-            "value": 20
-          }
-        ],
-        "unit": "分钟 · 工序示意",
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {
+          "segments": [
+            [
+              "整形",
+              30
+            ],
+            [
+              "干燥",
+              90
+            ],
+            [
+              "修坯",
+              20
+            ]
+          ]
+        }
       },
       "direction": "先总长度，再划分工作与等待，最后解释原因。"
     },
@@ -418,15 +414,13 @@
       "title": "终端证据摘录",
       "category": "evidence",
       "question": "哪个输出支撑了这个解释？",
-      "inputs": "command，output，source，truthMode",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "真实日志提供来源；重排标为摘录，示意标为示意；遵循 record-terminal。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "静态站点构建记录",
-        "command": "site-build --offline",
-        "output": "Pages rendered: 24\nAssets copied: 18\nBroken links: 0\nBuild complete in 2.4s",
-        "truthMode": "虚构构建日志",
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {}
       },
       "direction": "先说明证据用途，再命令和结果，最后指向关键输出。"
     },
@@ -435,31 +429,13 @@
       "title": "多项测试结果账本",
       "category": "synthesis",
       "question": "逐项结果如何汇成整体判断？",
-      "inputs": "items[{label,detail}]，summary",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "分别记录通过、失败、待办等状态；总计与项目一致。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "社区开放日前的检查清单",
-        "items": [
-          {
-            "label": "入口导视",
-            "detail": "通过"
-          },
-          {
-            "label": "无障碍通道",
-            "detail": "通过"
-          },
-          {
-            "label": "饮水设施",
-            "detail": "待补充"
-          },
-          {
-            "label": "照明",
-            "detail": "通过"
-          }
-        ],
-        "summary": "3 项通过，1 项待补充",
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {}
       },
       "direction": "逐项填入结果，再给总计，最后保留例外。"
     },
@@ -468,17 +444,13 @@
       "title": "人物主讲与证据让位",
       "category": "presentation",
       "question": "此刻为何需要把注意力还给讲述者？",
-      "inputs": "media{src,alt}，caption",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "使用获授权的人物素材或注明虚构插画。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "把注意力还给讲述者",
-        "media": {
-          "src": "media/host-illustration.svg",
-          "alt": "原创虚构主持人插画"
-        },
-        "caption": "先停一下：你最想改善社区里的哪件小事？",
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {}
       },
       "direction": "证据退出，主讲画面扩大，关键判断后再回证据。"
     },
@@ -487,14 +459,13 @@
       "title": "证据后的决策句",
       "category": "synthesis",
       "question": "看过证据之后，接下来怎么判断？",
-      "inputs": "statement，qualifier，source",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "保留判断依据与适用条件；区分结果和偏好。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "给小空间一个明确的选择",
-        "statement": "先种两盆，再扩大菜园",
-        "qualifier": "案例设定：每天可投入 10 分钟，日照约 4 小时",
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {}
       },
       "direction": "先保留结论依赖的证据，再突出决策句，最后限定条件。"
     },
@@ -503,15 +474,13 @@
       "title": "行动收束",
       "category": "closing",
       "question": "观众现在可以做什么？",
-      "inputs": "statement，destination，qualifier",
+      "inputs": "title?，copy{原文:替换文}，data（见案例字段）",
       "constraints": "一个主动作；入口真实可用；推广内容注明性质。",
-      "revision": "2",
+      "revision": "3",
       "example": {
-        "title": "把一个小想法变成行动",
-        "statement": "从记录第一天的光照开始",
-        "destination": "打开你的阳台观察笔记",
-        "qualifier": "记录时间、位置与日照时长",
-        "source": "独立案例集 · 虚构演示数据"
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {}
       },
       "direction": "判断结束后展示一个动作，保留目标入口。"
     }
@@ -519,6 +488,10 @@
   "preview": {
     "duration": 8,
     "ratio": "16:9",
-    "background": "opaque"
+    "background": "opaque",
+    "modes": [
+      "light",
+      "dark"
+    ]
   }
 }

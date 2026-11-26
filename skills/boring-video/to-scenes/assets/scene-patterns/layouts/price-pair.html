@@ -1,0 +1,19 @@
+<div data-scene="1" style="position:absolute; inset:0; padding:96px 128px 176px; display:flex; flex-direction:column">
+<div style="display:flex; align-items:center; gap:14px; align-self:flex-start; padding:{{t.kPad}}; background:{{t.kBg}}; border:{{t.kBd}}; border-radius:{{t.kR}}; color:{{t.kInk}}; font-family:{{t.kF}}; font-style:{{t.kSt}}; font-weight:{{t.kW}}; font-size:26px; line-height:1.2"><div style="flex:none; width:{{t.kMW}}; height:{{t.kMH}}; border-radius:{{t.kMR}}; background:{{t.kMark}}"></div>社区工作室 · 两种计费</div>
+<div data-headline="" style="margin-top:28px; font-family:{{t.fd}}; font-weight:{{t.dw}}; letter-spacing:{{t.tls}}; font-size:80px; line-height:1.12">按次还是月度？先看每月用多久</div>
+<div style="margin-top:44px; display:grid; grid-template-columns:1fr 1fr; gap:48px">
+<sc-for list="{{ d.price }}" as="p" hint-placeholder-count="2">
+<div style="display:flex; flex-direction:column; padding:26px 44px; background:{{t.sf}}; border:{{t.bd}}; border-radius:{{t.r}}; box-shadow:{{t.sh}}">
+<div style="display:flex; justify-content:space-between; align-items:center"><div style="padding:6px 18px; background:{{t.ink}}; color:{{t.bg}}; border-radius:{{t.rS}}; font-size:28px; font-weight:700">{{ p.name }}</div><div style="font-size:26px; color:{{t.mu}}">{{ p.scope }}</div></div>
+<div style="margin-top:18px; display:flex; align-items:baseline; gap:8px; color:{{ p.col }}"><span style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:72px">¥</span><span style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:150px; line-height:1; letter-spacing:-0.03em">{{ p.price }}</span><span style="font-size:36px; color:{{t.mu}}">/ {{ p.per }}</span></div>
+<div style="margin-top:22px; padding-top:22px; border-top:1px solid {{t.hair}}; display:grid; grid-template-columns:1fr 1fr; gap:24px">
+<div style="display:flex; flex-direction:column; gap:6px"><div style="font-size:24px; color:{{t.mu}}">包含时长</div><div style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:44px">{{ p.hours }} <span style="font-size:28px">小时</span></div></div>
+<div style="display:flex; flex-direction:column; gap:6px"><div style="font-size:24px; color:{{t.mu}}">折合每小时</div><div style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:44px; color:{{ p.col }}">¥{{ p.ph }}</div></div>
+</div>
+<div style="margin-top:18px; height:14px; background:{{t.track}}; border-radius:{{t.rS}}; overflow:hidden"><div data-grow="1" style="height:100%; width:{{ p.w }}; background:{{ p.bar }}; border-radius:{{t.rS}}"></div></div>
+<div style="margin-top:20px; font-size:26px; line-height:1.5; color:{{t.mu}}">{{ p.note }}</div>
+</div>
+</sc-for>
+</div>
+<div style="margin-top:16px; font-size:32px">按次等效单价计算，月费相当于 <span style="font-family:{{t.fn}}; font-weight:{{t.nw}}; color:{{t.ac}}; font-size:40px">{{ d.breakEven }} 小时</span>（月度额度内）</div>
+</div>

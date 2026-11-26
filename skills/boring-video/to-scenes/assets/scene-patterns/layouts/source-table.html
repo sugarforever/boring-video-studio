@@ -1,0 +1,15 @@
+<div data-scene="1" style="position:absolute; inset:0; padding:96px 128px 176px; display:flex; flex-direction:column">
+<div style="display:flex; align-items:center; gap:14px; align-self:flex-start; padding:{{t.kPad}}; background:{{t.kBg}}; border:{{t.kBd}}; border-radius:{{t.kR}}; color:{{t.kInk}}; font-family:{{t.kF}}; font-style:{{t.kSt}}; font-weight:{{t.kW}}; font-size:26px; line-height:1.2"><div style="flex:none; width:{{t.kMW}}; height:{{t.kMH}}; border-radius:{{t.kMR}}; background:{{t.kMark}}"></div>配送记录 · 本周</div>
+<div data-headline="" style="margin-top:28px; font-family:{{t.fd}}; font-weight:{{t.dw}}; letter-spacing:{{t.tls}}; font-size:80px; line-height:1.12">中区单量最多，准时率排第二</div>
+<div data-media="primary" style="margin-top:52px; display:flex; flex-direction:column">
+<div style="display:grid; grid-template-columns:240px 1fr 1fr; gap:72px; padding-bottom:18px; border-bottom:{{t.rule}}; font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}"><div>区域</div><div>订单数（单）</div><div>准时率（%）</div></div>
+<sc-for list="{{ d.table }}" as="r" hint-placeholder-count="3">
+<div style="display:grid; grid-template-columns:240px 1fr 1fr; gap:72px; align-items:center; padding:34px 0; border-bottom:1px solid {{t.hair}}">
+<div style="font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:52px; color:{{ r.vc }}">{{ r.n }}</div>
+<div style="display:flex; align-items:center; gap:28px"><div style="flex:1; height:30px; background:{{t.track}}; border-radius:{{t.rS}}"><div data-grow="1" style="height:100%; width:{{ r.ow }}; background:{{ r.c }}; border:{{t.barBd}}; border-radius:{{t.rS}}"></div></div><div style="width:110px; text-align:right; font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:56px; color:{{ r.vc }}">{{ r.o }}</div></div>
+<div style="display:flex; align-items:center; gap:28px"><div style="flex:1; height:30px; background:{{t.track}}; border-radius:{{t.rS}}"><div data-grow="1" style="height:100%; width:{{ r.pw }}; background:{{ r.c }}; border:{{t.barBd}}; border-radius:{{t.rS}}"></div></div><div style="width:150px; text-align:right; font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:56px; color:{{ r.vc }}">{{ r.p }}<span style="font-size:32px">%</span></div></div>
+</div>
+</sc-for>
+</div>
+<div style="margin-top:auto; display:flex; justify-content:space-between; font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}"><div>条形满格：订单 {{ d.ordersMax }} 单 / 准时率 100%</div><div>来源：社区配送站原创记录表 · 虚构演示数据</div></div>
+</div>

@@ -1,36 +1,38 @@
 # Scene patterns
 
-Select a pattern by viewer question in the [gallery](../assets/scene-patterns/gallery.html). Patterns define content and spatial structure; project `FRAME.md` controls appearance. Existing [scene presets](scene-presets.md) remain authoritative for comparison, diagram, and card bounds and timing.
+Choose a pattern by viewer question in the [gallery](../assets/scene-patterns/gallery.html), then select a style and light/dark mode. Cases use fictional data and original artwork. Replace their content and conclusions with project evidence; `FRAME.md` controls production appearance. Existing [scene presets](scene-presets.md) retain their bounds and timing rules.
 
 ## Use
 
-1. Choose a pattern and theme, edit its case props, and inspect relevant times. Cases use fictional data and original SVGs; replace them with project content and evidence.
-2. Copy the selection into the project's scene record: ID, revision, props, theme, duration, ratio, and background. Preserve its implementation and media files so the selection remains reproducible.
-3. Implement the event in the shared HyperFrames project. Align reveals and holds with narration; complete [scene review](../../boring-video/references/hyperframes-review-project.md) using the actual content.
+1. Edit `data` for chart values. Use **读取当前文字槽** to edit visible copy; keys remain the template’s original text. Inspect both the hidden and revealed states of blind comparisons.
+2. Copy the selection into the scene record: ID, revision, props, theme, mode, duration, ratio, and background. Preserve the renderer, layouts, themes, catalog, CSS, and fonts with the project. Revision 2 selections require their original implementation; revision 3 changes props and example content.
+3. Implement the event in HyperFrames, align reveals and holds with narration, and pass [scene review](../../boring-video/references/hyperframes-review-project.md) with actual content.
 
-The gallery renders opaque 16:9 still images and staged reveals. It is not a HyperFrames composition. Catalog `direction` is production guidance, not a list of implemented effects. Video, audio, camera moves, exits, and other ratios require project implementation and review. The eight-second preview does not set production duration.
+All 20 patterns support all four styles in both modes. The gallery provides opaque 1920×1080 scenes with deterministic staged reveals. Its eight-second preview is a design reference; production timing, voice, camera moves, exits, and other ratios require project implementation and review.
 
 ## Renderer
 
-Load `patterns.css`, `catalog.js`, and `patterns.js`. Props shallowly override the selected case; replacing an array replaces all its items. Media paths resolve from the hosting page.
+Load `patterns.css`, then `catalog.js`, `themes.js`, `layouts.js`, and `patterns.js` in order.
 
 ```js
 const scene = ScenePatterns.render(element, 'metric-scorecard', {
-  title: '本次测试结果', source: '项目证据 / 版本',
-  columns: ['方案 A', '方案 B'],
-  metrics: [{label: '耗时', a: '12', b: '24', unit: '分钟'}]
-}, {theme: 'blockframe', time: 4});
+  title: '本次测试结果',
+  copy: {'同为 100 单': '同为 50 单'},
+  data: {metrics: [['总耗时', '分钟', 40, 30]]}
+}, {theme: 'blockframe', mode: 'dark', time: 4});
 scene.setTime(1.5); // local seconds; direct and backward seeking
 ```
 
-## Reference analysis
+`title` replaces the marked heading; `copy` replaces exact trimmed text nodes literally, preserving adjacent styled spans. `data` shallowly overrides the selected case; arrays replace all items. Keep chart labels, units, and narrative conclusions consistent with new values. `source` is selection metadata, not a visible citation; add citations through copy or the project layout.
 
-Sample the full video, then inspect adjacent states around distinct layouts or changes. Separate packaging from embedded demos and overlays. Record timestamps, frames, observations, and source attribution outside the distributable library. Static frames establish composition; motion claims require adjacent states. Build library examples with independent content and assets.
+Use the case's fields and item counts as the layout budget. Price pairs require two plans; blind pairs require two nonnegative vote counts with a positive total; test matrices require three values per row and `best: 'min' | 'max'`; temperature charts require twelve two-hour samples within `min`/`max`. Scale maxima are positive, and values stay within their declared scales. Longer copy or extra rows require layout review.
+
+For source tables, demo stages, and presenters, `media.primary: {src, alt}` replaces the illustration with a contained image. Blind comparisons use `media.a` and `media.b`. Paths resolve from the hosting page.
 
 ## Maintain
 
-[catalog.json](../assets/scene-patterns/catalog.json) owns pattern fields, case props, and shared preview settings. After editing it, run `python3 scripts/build_scene_catalog.py` from `to-scenes`; `--check` detects a stale generated `catalog.js`.
+Edit `catalog.json`, `themes.js`, and `layouts/*.html`; run `python3 scripts/build_scene_catalog.py` from `to-scenes`. `--check` detects stale generated catalog and layout bundles.
 
-Run `node scripts/verify_scene_gallery.cjs` with Playwright installed, or pass its absolute module path. It checks default-case image loading, layout bounds, seeking, and gallery interactions across all themes.
+Run `node scripts/verify_scene_gallery.cjs` with Playwright installed, or pass its absolute module path. It checks all 160 combinations for text bounds, resolved bindings, and deterministic seeking, plus data/reveal/edit interactions. Visually inspect every combination and record findings separately from catalog metadata before accepting a redesign.
 
-A new pattern is ready when its viewer question, slots, constraints, independent case, theme variants, and gallery entry are present and inspected. Record findings separately from catalog metadata. Production scenes still pass the shared scene-review gate.
+For reference analysis, sample the full video and adjacent states around distinct layouts. Keep source timestamps, frames, and attribution outside the distributable library; build independent cases and assets.

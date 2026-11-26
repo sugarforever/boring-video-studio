@@ -1,0 +1,40 @@
+<div data-scene="1" style="position:absolute; inset:0; padding:96px 128px 176px; display:grid; grid-template-columns:520px 1fr; gap:72px">
+<div style="display:flex; flex-direction:column">
+<div style="display:flex; align-items:center; gap:14px; align-self:flex-start; padding:{{t.kPad}}; background:{{t.kBg}}; border:{{t.kBd}}; border-radius:{{t.kR}}; color:{{t.kInk}}; font-family:{{t.kF}}; font-style:{{t.kSt}}; font-weight:{{t.kW}}; font-size:26px; line-height:1.2"><div style="flex:none; width:{{t.kMW}}; height:{{t.kMH}}; border-radius:{{t.kMR}}; background:{{t.kMark}}"></div>匿名比较 · A / B</div>
+<div data-headline="" style="margin-top:28px; font-family:{{t.fd}}; font-weight:{{t.dw}}; letter-spacing:{{t.tls}}; font-size:76px; line-height:1.15">哪一张让你更想去植树？</div>
+<div style="margin-top:28px; font-size:30px; line-height:1.55; color:{{t.mu}}">两张海报宣传同一场社区植树活动，作者信息已隐藏。</div>
+<div style="margin-top:auto; display:flex; align-items:baseline; gap:14px"><span style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:96px; line-height:1">{{ d.blind.total }}</span><span style="font-size:30px; color:{{t.mu}}">位居民参与投票</span></div>
+</div>
+<div style="display:flex; justify-content:center; gap:64px">
+<div style="width:450px; display:flex; flex-direction:column; gap:22px">
+<div data-media="a" style="position:relative; width:450px; height:600px; overflow:hidden; background:#F3E7CF; border:{{t.bd}}; border-radius:{{t.rS}}; box-shadow:{{t.sh}}; font-family:'Noto Sans SC',sans-serif">
+<div style="position:absolute; left:56px; top:96px; width:300px; height:300px; border-radius:50%; background:#2F8F4E"></div>
+<div style="position:absolute; left:230px; top:64px; width:170px; height:170px; border-radius:50%; background:#57B868"></div>
+<div style="position:absolute; left:196px; top:360px; width:34px; height:110px; background:#7A4B2A"></div>
+<div style="position:absolute; left:0; right:0; top:460px; bottom:0; background:#1F4D33"></div>
+<div style="position:absolute; left:36px; top:34px; font-size:24px; font-weight:700; color:#1F4D33; letter-spacing:0.1em">社区植树日</div>
+<div style="position:absolute; left:36px; top:478px; font-size:52px; font-weight:900; color:#F3E7CF">一起种棵树</div>
+<div style="position:absolute; left:36px; top:548px; font-size:24px; color:#CFE6C9">3月12日 周六 09:00 · 河畔公园</div>
+</div>
+<div style="display:flex; align-items:center; gap:18px">
+<div style="flex:none; width:64px; height:64px; display:grid; place-items:center; background:{{t.ink}}; color:{{t.bg}}; border-radius:{{t.rS}}; font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:40px">A</div>
+<sc-if value="{{ d.blind.hide }}" hint-placeholder-val="{{ true }}"><div style="font-size:28px; color:{{t.mu}}">作者已隐藏</div></sc-if>
+<sc-if value="{{ d.blind.rev }}" hint-placeholder-val="{{ false }}"><div style="flex:1; display:flex; flex-direction:column; gap:8px"><div style="display:flex; justify-content:space-between; align-items:baseline"><span style="font-size:28px; font-weight:600">社区设计组</span><span style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:40px; color:{{t.ac}}">{{ d.blind.a.pct }}</span></div><div style="height:12px; background:{{t.track}}; border-radius:{{t.rS}}"><div data-grow="1" style="height:100%; width:{{ d.blind.a.w }}; background:{{t.b1}}; border-radius:{{t.rS}}"></div></div><div style="font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">{{ d.blind.a.v }} 票</div></div></sc-if>
+</div>
+</div>
+<div style="width:450px; display:flex; flex-direction:column; gap:22px">
+<div data-media="b" style="position:relative; width:450px; height:600px; overflow:hidden; background:#183F30; border:{{t.bd}}; border-radius:{{t.rS}}; box-shadow:{{t.sh}}; font-family:'Noto Sans SC',sans-serif">
+<div style="position:absolute; left:36px; top:40px; font-size:56px; font-weight:900; color:#F4F1E6; line-height:1.1">植树日</div>
+<div style="position:absolute; right:-30px; top:110px; font-size:380px; font-weight:900; line-height:1; color:#C6F05A">种</div>
+<div style="position:absolute; left:36px; right:36px; top:470px; height:2px; background:#C6F05A"></div>
+<div style="position:absolute; left:36px; top:490px; font-size:30px; font-weight:700; color:#F4F1E6">社区志愿活动</div>
+<div style="position:absolute; left:36px; top:536px; font-family:'Space Mono',monospace; font-size:24px; color:#C6F05A">3.12 SAT 09:00 · 河畔公园</div>
+</div>
+<div style="display:flex; align-items:center; gap:18px">
+<div style="flex:none; width:64px; height:64px; display:grid; place-items:center; background:{{t.ink}}; color:{{t.bg}}; border-radius:{{t.rS}}; font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:40px">B</div>
+<sc-if value="{{ d.blind.hide }}" hint-placeholder-val="{{ true }}"><div style="font-size:28px; color:{{t.mu}}">作者已隐藏</div></sc-if>
+<sc-if value="{{ d.blind.rev }}" hint-placeholder-val="{{ false }}"><div style="flex:1; display:flex; flex-direction:column; gap:8px"><div style="display:flex; justify-content:space-between; align-items:baseline"><span style="font-size:28px; font-weight:600">志愿者小组</span><span style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:40px">{{ d.blind.b.pct }}</span></div><div style="height:12px; background:{{t.track}}; border-radius:{{t.rS}}"><div data-grow="1" style="height:100%; width:{{ d.blind.b.w }}; background:{{t.bN}}; border-radius:{{t.rS}}"></div></div><div style="font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">{{ d.blind.b.v }} 票</div></div></sc-if>
+</div>
+</div>
+</div>
+</div>

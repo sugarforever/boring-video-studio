@@ -1,0 +1,19 @@
+<div data-scene="1" style="position:absolute; inset:0; padding:96px 128px 176px; display:grid; grid-template-columns:500px 1fr; gap:64px">
+<div style="display:flex; flex-direction:column">
+<div style="display:flex; align-items:center; gap:14px; align-self:flex-start; padding:{{t.kPad}}; background:{{t.kBg}}; border:{{t.kBd}}; border-radius:{{t.kR}}; color:{{t.kInk}}; font-family:{{t.kF}}; font-style:{{t.kSt}}; font-weight:{{t.kW}}; font-size:26px; line-height:1.2"><div style="flex:none; width:{{t.kMW}}; height:{{t.kMH}}; border-radius:{{t.kMR}}; background:{{t.kMark}}"></div>配送方式 · 成本与耗时</div>
+<div data-headline="" style="margin-top:28px; font-family:{{t.fd}}; font-weight:{{t.dw}}; letter-spacing:{{t.tls}}; font-size:76px; line-height:1.15">电动车最快，<br>货车最贵<br>却不是最快</div>
+<div style="margin-top:32px; font-size:30px; line-height:1.55; color:{{t.mu}}">横轴是单次成本，纵轴是送达耗时。越靠左下，越省钱也越省时。</div>
+</div>
+<div style="position:relative">
+<div style="position:absolute; left:100px; top:0; font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">耗时（分钟）</div>
+<div style="position:absolute; left:100px; top:56px; width:960px; height:500px; border-left:{{t.rule}}; border-bottom:{{t.rule}}">
+<sc-for list="{{ d.yt }}" as="y" hint-placeholder-count="5"><div style="position:absolute; left:0; right:0; top:{{ y.tp }}; height:1px; background:{{t.hair}}"></div><div style="position:absolute; right:calc(100% + 18px); top:{{ y.tp }}; transform:translateY(-50%); font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">{{ y.v }}</div></sc-for>
+<sc-for list="{{ d.xt }}" as="x" hint-placeholder-count="5"><div style="position:absolute; top:0; bottom:0; left:{{ x.l }}; width:1px; background:{{t.hair}}"></div><div style="position:absolute; top:calc(100% + 14px); left:{{ x.l }}; transform:translateX(-50%); font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">{{ x.v }}</div></sc-for>
+<sc-for list="{{ d.pts }}" as="p" hint-placeholder-count="4">
+<div data-pop="1" style="position:absolute; left:{{ p.x }}; top:{{ p.y }}; width:40px; height:40px; margin:-20px 0 0 -20px; border-radius:50%; background:{{ p.c }}; border:{{t.ptBd}}"></div>
+<div style="position:absolute; left:{{ p.lx }}; top:{{ p.y }}; transform:{{ p.tx }}; text-align:{{ p.ta }}; display:flex; flex-direction:column; gap:2px; white-space:nowrap"><div style="font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:36px">{{ p.n }}</div><div style="font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">{{ p.meta }}</div></div>
+</sc-for>
+</div>
+<div style="position:absolute; left:1060px; top:620px; transform:translateX(-100%); font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}; white-space:nowrap">成本（元）</div>
+</div>
+</div>

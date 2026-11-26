@@ -1,0 +1,25 @@
+<div data-scene="1" style="position:absolute; inset:0; padding:96px 128px 176px; display:flex; flex-direction:column">
+<div style="display:flex; align-items:center; gap:14px; align-self:flex-start; padding:{{t.kPad}}; background:{{t.kBg}}; border:{{t.kBd}}; border-radius:{{t.kR}}; color:{{t.kInk}}; font-family:{{t.kF}}; font-style:{{t.kSt}}; font-weight:{{t.kW}}; font-size:26px; line-height:1.2"><div style="flex:none; width:{{t.kMW}}; height:{{t.kMH}}; border-radius:{{t.kMR}}; background:{{t.kMark}}"></div>水杯三项测试</div>
+<div style="margin-top:28px; display:flex; justify-content:space-between; align-items:flex-end; gap:48px">
+<div data-headline="" style="font-family:{{t.fd}}; font-weight:{{t.dw}}; letter-spacing:{{t.tls}}; font-size:80px; line-height:1.12">保温选 A，轻便选 C</div>
+<div style="font-family:{{t.fm}}; font-size:24px; line-height:1.6; color:{{t.mu}}; text-align:right">同条件：室温 22 ℃<br>注入 90 ℃ 热水 400 ml</div>
+</div>
+<div style="margin-top:44px; display:grid; grid-template-columns:400px repeat(3, 1fr); column-gap:48px; padding-bottom:16px; border-bottom:{{t.rule}}">
+<div></div>
+<div style="font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:44px">杯 A</div>
+<div style="font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:44px">杯 B</div>
+<div style="font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:44px">杯 C</div>
+</div>
+<sc-for list="{{ d.matrix }}" as="row" hint-placeholder-count="3">
+<div style="display:grid; grid-template-columns:400px repeat(3, 1fr); column-gap:48px; align-items:center; padding:30px 0; border-bottom:1px solid {{t.hair}}">
+<div style="display:flex; flex-direction:column; gap:8px"><div style="font-family:{{t.fd}}; font-weight:{{t.dw}}; font-size:48px; line-height:1">{{ row.name }}</div><div style="font-size:26px; color:{{t.mu}}">{{ row.m }}</div></div>
+<sc-for list="{{ row.cells }}" as="c" hint-placeholder-count="3">
+<div style="display:flex; flex-direction:column; gap:14px">
+<div style="display:flex; align-items:baseline; gap:8px"><span style="font-family:{{t.fn}}; font-weight:{{t.nw}}; font-size:64px; line-height:1; color:{{ c.vc }}">{{ c.v }}</span><span style="font-size:28px; color:{{t.mu}}">{{ c.u }}</span><sc-if value="{{ c.best }}" hint-placeholder-val="{{ false }}"><span style="margin-left:12px; padding:4px 12px; background:{{t.hi}}; color:{{t.onHi}}; border:{{t.bdT}}; border-radius:{{t.rS}}; font-size:24px; font-weight:700; align-self:center">最佳</span></sc-if></div>
+<div style="height:12px; background:{{t.track}}; border-radius:{{t.rS}}"><div data-grow="1" style="height:100%; width:{{ c.w }}; background:{{ c.bc }}; border-radius:{{t.rS}}"></div></div>
+</div>
+</sc-for>
+</div>
+</sc-for>
+<div style="margin-top:auto; font-family:{{t.fm}}; font-size:24px; color:{{t.mu}}">条形满格：{{ d.scales }} · 虚构演示数据</div>
+</div>
