@@ -87,6 +87,14 @@ class CameraExportTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse((self.root/'out.mp4').exists())
 
+    def test_selected_aspect_crops_export_without_changing_duration(self):
+        result = self.export('--aspect', '1:1')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        probe = json.loads(subprocess.check_output(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_streams', '-of', 'json', str(self.root/'out.mp4')]))
+        video = probe['streams'][0]
+        self.assertEqual(video['width'], video['height'])
+        self.assertAlmostEqual(float(video['duration']), 2, delta=.05)
+
     def test_mismatch_or_invalid_ranges_never_publish(self):
         for report in [
             {'duration_before': 4, 'duration_after': 3, 'cuts': []},

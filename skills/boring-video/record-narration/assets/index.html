@@ -14,8 +14,14 @@
 </button>
 
 <aside id="cameraMonitor" class="camera-monitor" hidden aria-label="摄像头预览">
+  <div class="camera-toolbar">
+    <button id="cameraDrag" type="button" aria-label="拖动摄像头预览，或用方向键移动">⠿ 拖动</button>
+    <select id="cameraAspect" aria-label="摄像头预览比例">
+      <option value="16:9">16:9</option><option value="4:3">4:3</option><option value="1:1">1:1</option><option value="9:16">9:16</option>
+    </select>
+  </div>
   <video id="cameraPreview" autoplay muted playsinline></video>
-  <span>摄像头 · 预览镜像，保存原方向</span>
+  <span>预览裁切 · 原始视频完整保留</span>
 </aside>
 <main class="app">
   <div id="script" class="script" tabindex="0" aria-label="口播稿">
@@ -126,6 +132,7 @@
 <script src="/vendor/wavesurfer.min.js"></script>
 <script src="/vendor/regions.min.js"></script>
 <script src="/ui.js"></script>
+<script src="/camera-monitor.js"></script>
 <script src="/recorder.js"></script>
 </body>
 </html>

@@ -61,6 +61,29 @@ const assert = require('node:assert/strict');
     if (process.env.CAMERA_TEST) {
       await page.waitForFunction(() => document.querySelector('#cameraPreview').videoWidth > 0);
       assert.equal(await page.locator('#cameraEnabled').isDisabled(), true);
+      await page.locator('#cameraAspect').selectOption('1:1');
+      const square = await page.locator('#cameraPreview').boundingBox();
+      assert.ok(Math.abs(square.width - square.height) < 2);
+      const monitor = page.locator('#cameraMonitor');
+      const beforeMove = await monitor.boundingBox();
+      const handle = await page.locator('#cameraDrag').boundingBox();
+      await page.mouse.move(handle.x + 20, handle.y + 10);
+      await page.mouse.down();
+      await page.mouse.move(400, 400, {steps: 10});
+      await page.mouse.up();
+      const moved = await monitor.boundingBox();
+      assert.ok(Math.abs(moved.x - beforeMove.x) > 100);
+      await page.setViewportSize({width: 390, height: 844});
+      await page.waitForTimeout(100);
+      const bounded = await monitor.boundingBox();
+      assert.ok(bounded.x >= 0 && bounded.x + bounded.width <= 391);
+      assert.ok(bounded.y >= 0 && bounded.y + bounded.height <= 845);
+      await page.setViewportSize({width: 1400, height: 1000});
+      await page.locator('#cameraAspect').selectOption('9:16');
+      const portrait = await page.locator('#cameraPreview').boundingBox();
+      assert.ok(Math.abs(portrait.width / portrait.height - 9/16) < .01);
+      await page.locator('#cameraAspect').selectOption('4:3');
+
     }
     await page.waitForFunction(() => document.querySelector('#timer').textContent === '00:03');
     await page.locator('#pause').click();
@@ -132,6 +155,7 @@ const assert = require('node:assert/strict');
     assert.deepEqual(readdirSync(path.join(root, 'session/takes', interrupted.id)).filter(name => name.endsWith('.chunk')), ['000000.chunk']);
     await page.reload();
     await page.waitForFunction(() => document.querySelectorAll('#takes .take').length === 2);
+    if (process.env.CAMERA_TEST) assert.equal(await page.locator('#cameraAspect').inputValue(), '4:3');
     await page.locator('#menu').click();
     const recovery = page.locator('#takes button').filter({hasText: '恢复'});
     await recovery.click();
@@ -201,6 +225,8 @@ const assert = require('node:assert/strict');
       await page.locator('#record').click();
       await page.waitForFunction(() => document.querySelector('#cameraPreview').videoWidth > 0);
       await page.waitForFunction(() => document.querySelector('#timer').textContent === '00:02');
+      const restored = await page.locator('#cameraMonitor').boundingBox();
+      assert.ok(restored.x < 600, 'dragged camera position survives reload');
       if (process.env.CAMERA_SCREENSHOT) await page.screenshot({path: process.env.CAMERA_SCREENSHOT});
       await page.evaluate(() => {
         window.interruptedTracks = document.querySelector('#cameraPreview').srcObject.getTracks();

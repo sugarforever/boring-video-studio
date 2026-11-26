@@ -4,7 +4,7 @@ Read this branch when the user requests webcam capture, when `handoff.json` has 
 
 ## Capture
 
-In the recorder menu, enable “同步录制摄像头” and select the camera. Recording starts only when the user clicks “开始录音” and grants microphone/camera permissions. The live monitor is mirrored for framing; the saved video retains the camera's original orientation. Default capture requests 1280×720 at 30 fps; `capture` records the actual dimensions/rate. Camera device labels may appear only after the first permission grant; stop, choose the newly labeled camera, and record another take if necessary.
+In the recorder menu, enable “同步录制摄像头” and select the camera. Recording starts only when the user clicks “开始录音” and grants microphone/camera permissions. Drag the live monitor by its picture or “拖动” handle to reposition it; the focused handle also supports arrow keys. The ratio selector offers 16:9, 4:3, 1:1 and 9:16 with centered preview cropping. Position and preview ratio are remembered in this browser and clamped within the visible area above recording controls when resized. The live monitor is mirrored for framing; original recording dimensions and orientation remain intact. Default capture requests 1280×720 at 30 fps; `capture` records the actual dimensions/rate. Camera device labels may appear only after the first permission grant; stop, choose the newly labeled camera, and record another take if necessary.
 
 One recorder owns both tracks, so pause/resume, chunk retries and interruption recovery share a timeline. Stop releases both devices. If permission is denied, resolve the browser permission or disable camera to record audio only. A disconnected device stops capture and warns that the saved portion needs review. Recovery preserves only the contiguous chunks saved before interruption; inspect both picture and sound, especially the tail.
 
@@ -23,6 +23,8 @@ python3 scripts/export_camera.py \
   --edit-report /absolute/edited/edit-report.json \
   --output /absolute/delivery/author.mp4
 ```
+
+Use `--aspect 1:1` (or `16:9`, `4:3`, `9:16`) to center-crop the exported camera to the chosen ratio. The default `--aspect source` retains original framing. Preview position/ratio are local viewing preferences, independent of the exported composition: explicitly choose the export ratio and corner.
 
 For picture-in-picture, add `--background /absolute/content.mp4 --corner bottom-left`. The content video must already follow the final narration timeline and cover its duration. The exporter uses only the reviewed WAV as sound and trims delivery to its duration. Choose `top-left`, `top-right`, `bottom-left` or `bottom-right`; `--width .25` sets the window width relative to the content frame and `--margin 24` sets the inset. Inspect the result for obscured text/subtitles and agree the placement with the user's intended composition. Outputs are H.264/AAC MP4 and require FFmpeg/ffprobe. Use a fresh output path. If the window exceeds either content dimension (especially with portrait footage), reduce `--width` or `--margin`.
 

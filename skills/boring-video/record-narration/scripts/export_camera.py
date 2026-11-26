@@ -11,6 +11,8 @@ import tempfile
 
 from edit_audio import keep_ranges
 
+ASPECTS = {'16:9': 16/9, '4:3': 4/3, '1:1': 1., '9:16': 9/16}
+
 CORNERS = {
     'top-left': ('M', 'M'), 'top-right': ('W-w-M', 'M'),
     'bottom-left': ('M', 'H-h-M'), 'bottom-right': ('W-w-M', 'H-h-M'),
@@ -40,7 +42,7 @@ def probe(path, kind):
     return duration, stream
 
 
-def export(video, audio, output, edit_report=None, background=None, corner='bottom-right', width=.25, margin=24):
+def export(video, audio, output, edit_report=None, background=None, corner='bottom-right', width=.25, margin=24, aspect='source'):
     video, audio, output = (Path(p).resolve() for p in (video, audio, output))
     if output.exists():
         raise FileExistsError(f'Use a new output path: {output}')
@@ -73,19 +75,23 @@ def export(video, audio, output, edit_report=None, background=None, corner='bott
         raise ValueError('Edit report duration does not match its cuts')
     if abs(expected - final_duration) > .2:
         raise ValueError('Reviewed audio duration differs from camera edit; supply the matching edit report')
+    ratio = ASPECTS.get(aspect)
+    if aspect != 'source' and ratio is None:
+        raise ValueError('Unsupported camera aspect ratio')
+    crop = f"crop=w='trunc(min(iw,ih*{ratio})/2)*2':h='trunc(min(ih,iw/{ratio})/2)*2'," if ratio else ''
     inputs = ['-i', str(video), '-i', str(audio)]
     # Keep source timestamps through every cut. Per-segment PTS resets/concat
     # accumulate rounding at each cut and drift from sample-accurate audio.
     selected = '+'.join(f"gte(t,{item['source_start']:.9f})*lt(t,{item['source_end']:.9f})" for item in kept)
     removed = '+'.join(f"{float(cut['end'])-float(cut['start']):.9f}*gte(T,{float(cut['end']):.9f})" for cut in cuts) or '0'
-    filters = [f"[0:v]setpts=PTS-STARTPTS+({offset:.9f})/TB,select='{selected}',setpts='PTS-({removed})/TB',fps=30:start_time=0[camera]"]
+    filters = [f"[0:v]{crop}setpts=PTS-STARTPTS+({offset:.9f})/TB,select='{selected}',setpts='PTS-({removed})/TB',fps=30:start_time=0[camera]"]
     if background:
         background = Path(background).resolve()
         bg_duration, bg = probe(background, 'v')
         if bg_duration + .05 < final_duration:
             raise ValueError('Content video is shorter than reviewed narration')
         w = max(2, int(bg['width'] * width) // 2 * 2)
-        height = w * camera_stream['height'] / camera_stream['width']
+        height = w / (ratio or (camera_stream['width'] / camera_stream['height']))
         if height + margin * 2 > bg['height']:
             raise ValueError('Camera window and margins exceed content height; reduce --width or --margin')
         if margin * 2 + w >= bg['width']:
@@ -121,11 +127,12 @@ def main():
     parser.add_argument('--background', type=Path, help='Finished content video already aligned to the reviewed audio')
     parser.add_argument('--corner', choices=CORNERS, default='bottom-right')
     parser.add_argument('--width', type=float, default=.25, help='Camera width as fraction of content width (0.1–0.5)')
+    parser.add_argument('--aspect', choices=['source', *ASPECTS], default='source', help='Centered camera crop; original source is preserved')
     parser.add_argument('--margin', type=int, default=24, help='Corner inset in pixels')
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     try:
-        print(export(args.video, args.audio, args.output, args.edit_report, args.background, args.corner, args.width, args.margin))
+        print(export(args.video, args.audio, args.output, args.edit_report, args.background, args.corner, args.width, args.margin, args.aspect))
     except (OSError, ValueError, KeyError, TypeError, subprocess.CalledProcessError) as error:
         detail = error.stderr.decode(errors='replace') if isinstance(error, subprocess.CalledProcessError) and isinstance(error.stderr, bytes) else str(error)
         print(f'Error: {detail}', file=sys.stderr)

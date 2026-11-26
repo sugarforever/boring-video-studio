@@ -217,6 +217,7 @@ $('record').addEventListener('click', async () => {
     if (camera) {
       $('cameraPreview').srcObject = stream;
       $('cameraMonitor').hidden = false;
+      window.CameraMonitor.show();
     }
     $('fallback').hidden = true;
     phase('recording'); UI.clearNotice();
