@@ -156,15 +156,15 @@ svg{flex:none}
 .camera-monitor { position: fixed; right: 24px; top: 80px; width: min(240px, 32vw); z-index: 3; border-radius: 12px; overflow: hidden; background: #26251f; color: white; box-shadow: 0 4px 20px #0003; }
 .camera-monitor[hidden] { display: none; }
 .camera-monitor video { width: 100%; display: block; aspect-ratio: 16/9; object-fit: cover; transform: scaleX(-1); }
-.camera-monitor span { display: block; padding: 5px 8px; font-size: 11px; }
 video.audio { width: 100%; max-height: 260px; background: #26251f; }
 video.audio-only { height: 40px; }
 @media (max-width: 600px) { .camera-monitor { top: 70px; right: 12px; width: 120px; } }
 
 .camera-monitor { touch-action: none; user-select: none; cursor: grab; }
 .camera-monitor.is-dragging { cursor: grabbing; }
-.camera-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 4px 6px; }
-.camera-toolbar button, .camera-toolbar select { color: white; background: #36352f; border: 1px solid #777; border-radius: 5px; padding: 5px; font: inherit; font-size: 12px; }
-.camera-toolbar button { cursor: grab; }
-.camera-toolbar select { cursor: pointer; touch-action: auto; }
-.camera-toolbar :focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+.camera-toolbar { position: absolute; top: 8px; right: 8px; }
+.camera-toolbar select { appearance: none; -webkit-appearance: none; min-height: 32px; width: 72px; padding: 0 24px 0 10px; border: 1px solid var(--rule2); border-radius: 8px; background: var(--paper); color: var(--ink); font-size: 12px; font-variant-numeric: tabular-nums; cursor: pointer; touch-action: auto; }
+.camera-toolbar select:hover { background: var(--raised); }
+.camera-toolbar .select-caret { right: 10px; width: 5px; height: 5px; }
+.camera-surface:focus-visible { outline: 2px solid var(--focus); outline-offset: -3px; }
+@media(forced-colors:active) { .camera-toolbar select { appearance: auto; -webkit-appearance: auto; } }

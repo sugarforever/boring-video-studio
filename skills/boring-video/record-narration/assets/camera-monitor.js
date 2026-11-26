@@ -37,7 +37,7 @@
     place(position?.x ?? bounds.x, position?.y ?? bounds.y);
   }
   monitor.addEventListener('pointerdown', event => {
-    if (event.button !== 0 || event.target.closest('select')) return;
+    if (event.button !== 0 || event.target.closest('.camera-toolbar')) return;
     const bounds = monitor.getBoundingClientRect();
     drag = {id: event.pointerId, x: event.clientX - bounds.x, y: event.clientY - bounds.y};
     monitor.setPointerCapture(event.pointerId);

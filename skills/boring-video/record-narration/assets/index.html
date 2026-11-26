@@ -14,14 +14,15 @@
 </button>
 
 <aside id="cameraMonitor" class="camera-monitor" hidden aria-label="摄像头预览">
-  <div class="camera-toolbar">
-    <button id="cameraDrag" type="button" aria-label="拖动摄像头预览，或用方向键移动">⠿ 拖动</button>
+  <div id="cameraDrag" class="camera-surface" tabindex="0" aria-label="摄像头预览，可用方向键移动">
+    <video id="cameraPreview" autoplay muted playsinline></video>
+  </div>
+  <div class="camera-toolbar select-wrap">
     <select id="cameraAspect" aria-label="摄像头预览比例">
       <option value="16:9">16:9</option><option value="4:3">4:3</option><option value="1:1">1:1</option><option value="9:16">9:16</option>
     </select>
+    <span class="select-caret" aria-hidden="true"></span>
   </div>
-  <video id="cameraPreview" autoplay muted playsinline></video>
-  <span>预览裁切 · 原始视频完整保留</span>
 </aside>
 <main class="app">
   <div id="script" class="script" tabindex="0" aria-label="口播稿">
