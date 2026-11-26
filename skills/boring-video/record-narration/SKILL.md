@@ -1,11 +1,13 @@
 ---
 name: record-narration
-description: Use for script-based narration recording with optional webcam capture, or for reviewing takes and preparing narration audio, subtitles and synchronized camera exports.
+description: Use for webcam framing, script-based narration recording with optional video, or reviewing takes into narration audio, subtitles and synchronized camera exports.
 ---
 
 # Record Narration
 
 Produce human-recorded narration and reviewed, timed subtitles from an existing UTF-8 script. Resolve bundled paths relative to this skill's directory; run the commands below there with absolute project paths. Treat recorded speech as the content authority and the script as context for recognition and progression. Preserve original takes, coherent improvisation and speaking speed. Remove abandoned retries when a complete replacement is identifiable. General pause compression and TTS are outside this workflow; optional low-level background suppression is defined in step 3.
+
+For webcam preview or capture, a handoff containing `video`, or camera export, read [camera.md](references/camera.md) before session setup or processing.
 
 ## 1. Establish the session
 
@@ -14,8 +16,6 @@ Resolve the script and project directory from the request. For a new recording, 
 **Ready to proceed:** the script and session path are known, and a continuation uses the existing session rather than a replacement.
 
 ## 2. Open the recorder and let the user record
-
-For webcam capture, a handoff containing `video`, or camera export, read [camera.md](references/camera.md) before recording or processing.
 
 Start a long-running process and retain its process handle:
 
@@ -28,7 +28,9 @@ Rerunning this command for the same session reuses its running service and URL w
 
 **Recorder ready:** the service is reachable for the intended session. After a draft update, verify that the existing page displays the requested text and previous takes retain their script snapshots. If the page cannot be inspected, report the display check as pending rather than claiming the new draft is visible.
 
-Give the user the printed browser URL, including its token fragment, and the session path. Ask them to choose a microphone, start recording, stop and listen, then select a take and click “使用选中版本，交给 Codex”. They can pause/resume or record another whole take. After saving, they can drag across the waveform and play that selection to inspect short retries. Microphone permission and recording controls belong to the user.
+Give the user the printed browser URL, including its token fragment, and the session path. For preview-only requests, finish at the camera reference’s **Preview ready** gate; the recording and submission steps below apply when recording is requested.
+
+Ask them to choose a microphone, start recording, stop and listen, then select a take and click “使用选中版本，交给 Codex”. They can pause/resume or record another whole take. After saving, they can drag across the waveform and play that selection to inspect short retries. Microphone permission and recording controls belong to the user.
 
 Leave the service running and yield the chat while they record. Explain that they must return and say “录好了，继续处理”; the page saves a handoff file but does not send a chat message. If opening, saving or recording fails, read [recovery.md](references/recovery.md).
 

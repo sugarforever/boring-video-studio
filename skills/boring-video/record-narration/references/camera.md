@@ -1,14 +1,22 @@
 # Webcam narration
 
-## Capture and reading
+## Preview and framing
 
-Use the bottom toolbar to enable “摄像头” and select a device. Enabling requests video-only permission and immediately shows preview; it creates no recording or audio capture. The user clicks “开始录音” to grant microphone access and begin one synchronized AV recorder. Pause, resume, saving and recovery share a timeline. Stopping recording releases its microphone/video tracks while preview continues; turning off “摄像头” releases the remaining camera stream. Device selection is available while idle. For interrupted takes, inspect the recovered picture and sound, especially the tail.
+For preview-only requests, reuse the known session and script. If a new session has no supplied script, create a short UTF-8 framing placeholder rather than requesting narration content; replace it with the intended draft before recording.
 
-The default “靠近镜头” view keeps roughly three lines near the top-center lens position. Adjust “栏宽” to reduce horizontal eye movement, or turn this view off for the full script. Font, manual scrolling, auto-scroll and pause behavior apply to both views.
+Have the user enable “摄像头” and select a device in the bottom toolbar. After camera permission is granted, a video-only preview appears without recording or microphone capture. Device selection is available while idle.
 
-The preview supports dragging and keyboard arrows when focused. Its ratio, centering, layering and visibility controls are in the bottom toolbar. “摄像头居中” aligns it beneath the laptop lens. “文字置顶” places it under readable, translucent text; turn that option off temporarily to drag a covered preview. The recording-bar camera icon hides/reveals the preview while capture continues on the same tracks.
+The default “靠近镜头” view keeps roughly three lines near the top-center lens position. Adjust “栏宽” to reduce horizontal eye movement, or turn this view off for the full script. Font and scrolling controls apply to both views.
 
-These reading and preview preferences are saved locally. They change neither the original footage nor the exported composition. Only the live preview is mirrored; the original keeps its camera orientation and dimensions.
+The preview supports dragging and keyboard arrows when focused. Ratio, centering, layering and visibility controls are in the bottom toolbar. “摄像头居中” aligns it beneath the laptop lens. “文字置顶” places it under readable, translucent text; turn that option off temporarily to drag a covered preview. The camera icon changes visibility only; turning off “摄像头” releases the preview stream.
+
+Reading and preview preferences are saved locally and affect neither original footage nor exported composition. Only the live preview is mirrored; the original keeps its camera orientation and dimensions.
+
+**Preview ready:** the intended camera picture is visible, its video track is live with no audio track, and the session has no new takes or chunks. Report any unverified condition or pending permission as pending. For preview-only requests, finish here and wait for the user's recording decision; a recorded take and handoff are unnecessary.
+
+## Recording
+
+When recording is requested, the user clicks “开始录音” to grant microphone access and begin one synchronized AV recorder. Pause, resume, saving and recovery share a timeline. Stopping releases recording tracks while the independent preview continues. For interrupted takes, inspect recovered picture and sound, especially the tail.
 
 **Submitted:** satisfy the main skill's submission gate, then verify that `handoff.json` also contains an existing `video` path for the selected take. Its `audio` and `video` intentionally name the same original AV container. `process_audio.py prepare --session ...` extracts its audio through the normal workflow. Preserve the container and chunks.
 
