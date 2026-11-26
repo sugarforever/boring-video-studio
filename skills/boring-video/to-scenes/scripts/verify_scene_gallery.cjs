@@ -10,7 +10,7 @@ const {chromium}=require(process.argv[2]||'playwright');
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(pathToFileURL(path.resolve(__dirname,'../assets/scene-patterns/gallery.html')).href);
   await page.addStyleTag({content:'nav,aside,#info,details,#work>p{display:none}#layout{display:block}#work{padding:0}#viewport{width:1920px;height:1080px}#stage{transform:none!important}'});
-  const ids=await page.evaluate(()=>SCENE_CATALOG.map(r=>r.id));assert.equal(ids.length,20);
+  const ids=await page.evaluate(()=>SCENE_CATALOG.map(r=>r.id));assert.equal(ids.length,25);
   let count=0;
   for(const theme of ['blockframe','swiss-minimalism','raycast-dark','claude-warm'])for(const mode of ['light','dark'])for(const id of ids){
    const result=await page.evaluate(async({id,theme,mode})=>{
@@ -31,6 +31,36 @@ const {chromium}=require(process.argv[2]||'playwright');
    let rejects=0;for(const [id,data]of [['rank-bars',{max:0}],['blind-pair',{votes:[-1,2]}],['demo-stage',{temperatures:[22]}]])try{render(id,data)}catch{rejects++}
    return {votes:votes.includes('75%')&&votes.includes('3 票')&&votes.includes('4'),hidden:!hidden.includes('社区设计组'),elapsed:elapsed.includes('60'),metrics:metrics.includes('+50%'),demo:demo.includes('现在 22 ℃'),rejects};
   });assert.deepEqual(dataChecks,{votes:true,hidden:true,elapsed:true,metrics:true,demo:true,rejects:3});
+  const codeChecks=await page.evaluate(()=>{
+   const host=document.querySelector('#stage');
+   const ids=['terminal-session','code-block','json-data','xml-data','vscode-editor'];
+   const source=()=>[...host.querySelectorAll('.code-text')].map(el=>el.textContent).join('\n');
+   const roundTrip=ids.every(id=>{
+    const scene=ScenePatterns.render(host,id,{copy:{return:'BROKEN'}},{time:4});
+    return source()===scene.props.data.source&&host.querySelector(`[data-code-line="${scene.props.data.highlightLine}"]`).style.borderLeftColor!=='transparent';
+   });
+   const safeSource='{"value":"<script>1</script> & {{x}}"}';
+   ScenePatterns.render(host,'json-data',{data:{source:safeSource,focusPath:['value'],highlightLine:1}});
+   const literal=source()===safeSource&&!host.querySelector('script,img');
+   let rejects=0;
+   for(const [id,data]of [['json-data',{source:'{"broken":}'}],['json-data',{focusPath:['missing']}],['xml-data',{source:'<garden>'}],['code-block',{highlightLine:99}],['code-block',{source:'x'.repeat(57)}],['code-block',{source:'x\n'.repeat(10)}],['vscode-editor',{files:['other.js']}]]){
+    try{ScenePatterns.render(host,id,{data})}catch{rejects++}
+   }
+   let namedError=false;try{
+    ScenePatterns.render(host,'xml-data',{data:{source:'<r><parsererror>ok</parsererror></r>',focusTag:'parsererror',highlightLine:1}});
+    namedError=source()==='<r><parsererror>ok</parsererror></r>';
+   }catch{}
+   let maxBounds=true;
+   for(const id of ['code-block','vscode-editor'])for(const theme of SceneThemes.ids)for(const mode of ['light','dark']){
+    ScenePatterns.render(host,id,{data:{source:Array(10).fill('X'.repeat(56)).join('\n'),language:'text',highlightLine:10,fileName:'sample.txt',...(id==='vscode-editor'?{files:['sample.txt']}:{})}},{theme,mode,time:4});
+    const bounds=host.getBoundingClientRect();
+    for(const el of host.querySelectorAll('.code-text')){
+     const range=document.createRange();range.selectNodeContents(el);const r=range.getBoundingClientRect();
+     if(r.right>bounds.right||r.bottom>bounds.top+920)maxBounds=false;
+    }
+   }
+   return {roundTrip,literal,rejects,namedError,maxBounds};
+  });assert.deepEqual(codeChecks,{roundTrip:true,literal:true,rejects:7,namedError:true,maxBounds:true});
   const mediaCheck=await page.evaluate(async()=>{
    const host=document.querySelector('#stage'),asset={src:'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450"><rect width="800" height="450" fill="orange"/></svg>'),alt:'测试图片'};
    for(const id of ['source-table','demo-stage','presenter-focus','blind-pair']){
@@ -58,7 +88,7 @@ const {chromium}=require(process.argv[2]||'playwright');
   const revealed=Object.hasOwn(edited.copy,'社区设计组')&&edited.copy['作者已隐藏']==='第二次替换';
   const literal=await page.evaluate(()=>{
    const host=document.createElement('div'),text="$& / $$ / $` / $' / $100";
-   ScenePatterns.render(host,'metric-scorecard',{copy:{'同为 100 单':text}});
+   ScenePatterns.render(host,'metric-scorecard',{copy:{'分区合单：更快、更近、更少错':text}});
    return [...host.querySelectorAll('div')].some(el=>el.textContent===text);
   });
   assert.deepEqual({originalKey,repeated,revealed,literal},{originalKey:true,repeated:true,revealed:true,literal:true});

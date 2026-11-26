@@ -33,6 +33,57 @@
     for(const child of [...template.content.childNodes])visit(child,context);
     return template.content;
   }
+  const codePatterns=new Set(['terminal-session','code-block','json-data','xml-data','vscode-editor']);
+  function codeData(n,t,id){
+    if(typeof n.source!=='string')throw Error('source must be text');
+    const source=n.source.replace(/\r\n?/g,'\n'),lines=source.split('\n');
+    const language={ 'terminal-session':'shell','code-block':n.language,'json-data':'json','xml-data':'xml','vscode-editor':n.language }[id];
+    if(!['javascript','text','json','xml','shell'].includes(language))throw Error('Unsupported code language');
+    if(!Number.isInteger(n.highlightLine)||n.highlightLine<1||n.highlightLine>lines.length)throw Error('highlightLine must identify an existing line');
+    let focusLabel='当前高亮',focusValue=lines[n.highlightLine-1].trim()||'（空行）';
+    if(language==='json'){
+      const data=JSON.parse(source);
+      if(id==='json-data'){
+        if(!Array.isArray(n.focusPath)||!n.focusPath.length)throw Error('Provide a JSON focusPath');
+        let target=data;for(const key of n.focusPath){if(target===null||typeof target!=='object'||!Object.hasOwn(target,key))throw Error('JSON focusPath does not exist');target=target[key];}
+        focusLabel=n.focusPath.join('.');focusValue=JSON.stringify(target);
+      }
+    }
+    if(language==='xml'){
+      const doc=new DOMParser().parseFromString(source,'application/xml');
+      if(doc.getElementsByTagNameNS('http://www.mozilla.org/newlayout/xml/parsererror.xml','parsererror').length)throw Error('Invalid XML source');
+      if(id==='xml-data'){
+        const node=doc.getElementsByTagName(n.focusTag)[0];if(!node)throw Error('XML focusTag does not exist');
+        focusLabel='<'+n.focusTag+'>';focusValue=node.textContent;
+      }
+    }
+    const tokens=line=>{
+      if(language==='text')return [{text:line,color:t.ink}];
+      const re=/("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\/\/.*$|#[^\n]*|\b(?:export|function|const|let|return|if|else|true|false|null)\b|\b\d+(?:\.\d+)?\b|[<>/=])/g;
+      const out=[];let offset=0;
+      for(const match of line.matchAll(re)){
+        if(match.index>offset)out.push({text:line.slice(offset,match.index),color:t.ink});
+        const text=match[0],color=/^["']/.test(text)?t.ac2:/^\d/.test(text)?t.ac3:/^(\/\/|#)/.test(text)?t.mu:t.ac;
+        out.push({text,color});offset=match.index+text.length;
+      }
+      if(offset<line.length)out.push({text:line.slice(offset),color:t.ink});return out;
+    };
+    let excerpt=false;
+    if(n.focusPreview!==undefined){
+      const original=focusValue.replace(/\s+/g,' ').trim();
+      if(typeof n.focusPreview!=='string'||!/(?:…|\.\.\.)$/.test(n.focusPreview))throw Error('focusPreview must be a prefix ending with an ellipsis');
+      const prefix=n.focusPreview.replace(/(?:…|\.\.\.)$/,'');
+      if(!prefix||!original.startsWith(prefix))throw Error('focusPreview must preserve the beginning of the original value');
+      focusValue=n.focusPreview;excerpt=true;
+    }
+    const code={excerpt,fileName:n.fileName,language,count:lines.length,highlight:String(n.highlightLine).padStart(2,'0'),focusLabel,focusValue,
+      lines:lines.map((line,k)=>({n:k+1,tokens:tokens(line),bg:k+1===n.highlightLine?t.s2:'transparent',edge:k+1===n.highlightLine?t.ac:'transparent'}))};
+    if(id==='vscode-editor'){
+      if(!n.files.includes(n.fileName))throw Error('files must include the active file');
+      code.files=n.files.map(name=>({name,bg:name===n.fileName?t.sf:'transparent',color:name===n.fileName?t.ac:t.mu,edge:name===n.fileName?t.ac:'transparent'}));
+    }
+    return code;
+  }
   function dataFor(id,p,t,revealed){
     const d={},n=p.data||{};
     const finite=x=>typeof x==='number'&&Number.isFinite(x);
@@ -64,14 +115,16 @@
       d.segs=n.segments.map(([name,v],k)=>({k:String(k+1).padStart(2,'0'),n:name,v:range(v,sum),c:[t.c2,t.c1,t.c3][k%3],f:v,pct:Math.round(v/sum*100)+'%'}));
       let offset=0;d.ruler=[{lab:'0',l:'0%',tx:'none'},...n.segments.map((v,k)=>{offset+=v[1];return {lab:offset+(k===n.segments.length-1?' 分钟':''),l:offset/sum*100+'%',tx:k===n.segments.length-1?'translateX(-100%)':'translateX(-50%)'};})];
     }
+    if(codePatterns.has(id))d.code=codeData(n,t,id);
     return d;
   }
+  function validate(id,props={},options={}){return SceneValidation.validate(id,props,options,dataFor);}
   function render(host,id,props={},options={}){
+    const report=validate(id,props,options);
+    if(!report.ok){const error=new Error('Scene content requires adjustment before rendering');error.name='SceneValidationError';error.report=report;throw error;}
+
     const record=window.SCENE_CATALOG.find(v=>v.id===id);
-    if(!record)throw Error('Unknown scene pattern: '+id);
     const theme=options.theme||'blockframe',mode=options.mode||'light';
-    if(!SceneThemes.keys[theme]||!['light','dark'].includes(mode))throw Error('Unknown theme or mode');
-    for(const key of Object.keys(props))if(!['title','copy','data','source','media'].includes(key))throw Error('Revision 3 uses title, copy and data props; keep the revision 2 implementation for older selections');
     const p={...record.example,...props,data:{...record.example.data,...props.data}};
     const t=SceneThemes.resolve(SceneThemes.keys[theme],mode);
     host.className='scene theme-'+theme;host.dataset.pattern=id;host.dataset.mode=mode;
@@ -96,7 +149,7 @@
       copySlots={};
       const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
       while(walker.nextNode()){
-        const text=walker.currentNode,key=text.textContent.trim();if(!key)continue;
+        const text=walker.currentNode,key=text.textContent.trim();if(!key||text.parentElement.closest('[data-code-source]'))continue;
         const replacement=Object.hasOwn(p.copy||{},key)?p.copy[key]:key;
         copySlots[key]=replacement;
         text.textContent=text.textContent.replace(key,()=>replacement);
@@ -118,5 +171,5 @@
     };
     setTime(options.time??4);return {setTime,getCopySlots:()=>({...copySlots}),record,props:p,theme,mode};
   }
-  window.ScenePatterns={render,revision:'3'};
+  window.ScenePatterns={render,validate,revision:'3'};
 })();
