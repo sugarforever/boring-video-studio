@@ -61,9 +61,11 @@ An article you approve as the content master can start at beats. Existing projec
 | [to-storyboard](skills/boring-video/to-storyboard/SKILL.md) | Plan scene placement, cuts, and boundary transitions. |
 | [to-video](skills/boring-video/to-video/SKILL.md) | Assemble scenes, master audio, review playback, and export. |
 | [record-terminal](skills/boring-video/record-terminal/SKILL.md) | Capture terminal, CLI, code-entry, and TUI demonstrations. |
-| [record-narration](skills/boring-video/record-narration/SKILL.md) *(optional)* | Record your voice with a teleprompter; review takes and prepare audio/subtitles. |
+| [record-narration](skills/boring-video/record-narration/SKILL.md) *(optional)* | Record voice and optional synchronized webcam with a teleprompter; review takes and prepare audio/subtitles. |
 | [minimax-tts](skills/boring-video/minimax-tts/SKILL.md) *(optional)* | Generate MiniMax narration and subtitles; requires API credentials. |
 | [learn-writing-taste](skills/boring-video/learn-writing-taste/SKILL.md) *(optional)* | Save writing preferences from your corrections after you approve them. |
 | [verysmallwoods-video](skills/verysmallwoods-video/SKILL.md) *(optional)* | Run the VerySmallWoods workflow for video, covers, platform copy, blog, and social posts. |
 
 Use an individual skill when its inputs are ready. Follow its linked instructions for dependencies and detailed commands. HyperFrames is required for production and is installed separately; paid voice services require their own credentials.
+
+For webcam framing, reading layouts and synchronized exports, see the [camera workflow](skills/boring-video/record-narration/references/camera.md).

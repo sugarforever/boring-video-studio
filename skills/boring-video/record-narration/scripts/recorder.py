@@ -15,7 +15,7 @@ import urllib.request
 import urllib.error
 
 ASSETS = Path(__file__).resolve().parents[1] / 'assets'
-MIMES = {'audio/webm': '.webm', 'audio/mp4': '.m4a', 'audio/ogg': '.ogg'}
+MIMES = {'audio/webm': '.webm', 'audio/mp4': '.m4a', 'audio/ogg': '.ogg', 'video/webm': '.webm', 'video/mp4': '.mp4'}
 MAX_CHUNK = 32 * 1024 * 1024
 
 
@@ -92,7 +92,7 @@ class Store:
                 raise FileExistsError('口播稿已更新，请确认新稿后重新开始录音')
             take = {'id': uuid.uuid4().hex, 'mime': mime, 'complete': False,
                     'capture': {key: value for key, value in (capture or {}).items()
-                                if key in ('sampleRate', 'channelCount', 'echoCancellation', 'noiseSuppression', 'autoGainControl')}}
+                                if key in ('sampleRate', 'channelCount', 'echoCancellation', 'noiseSuppression', 'autoGainControl', 'width', 'height', 'frameRate')}}
             (self.root / 'takes' / take['id']).mkdir(parents=True)
             atomic(self.root / 'takes' / take['id'] / 'script.txt',
                    current_script.encode('utf-8'))
@@ -150,6 +150,8 @@ class Store:
                 os.fsync(output.fileno())
             temp.replace(target)
             take.update(complete=True, audio=str(target.relative_to(self.root)))
+            if take['mime'].startswith('video/'):
+                take['video'] = take['audio']
             self.data['selected'] = take_id
             self.data['status'] = 'recorded'
             self.save()
@@ -167,6 +169,7 @@ class Store:
                               if (self.root / 'takes' / take_id / 'script.txt').exists()
                               else self.root / 'script.txt'),
                 'audio': str(self.root / take['audio']), 'take': take_id,
+                **({'video': str(self.root / take['video'])} if take.get('video') else {}),
             }, ensure_ascii=False, indent=2).encode())
             return {'status': 'ready'}
 
@@ -199,6 +202,7 @@ def make_server(store, port=8765):
             static = {'/': ('index.html', 'text/html; charset=utf-8'), '/recorder.js': ('recorder.js', 'text/javascript'),
                       '/ui.css': ('ui.css', 'text/css; charset=utf-8'),
                       '/ui.js': ('ui.js', 'text/javascript'),
+                      '/camera-monitor.js': ('camera-monitor.js', 'text/javascript'),
                       '/vendor/wavesurfer.min.js': ('vendor/wavesurfer.min.js', 'text/javascript'),
                       '/vendor/regions.min.js': ('vendor/regions.min.js', 'text/javascript')}
             if path in static:

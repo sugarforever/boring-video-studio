@@ -13,6 +13,17 @@
   <span id="menuBadge" class="badge" aria-hidden="true" hidden></span>
 </button>
 
+<aside id="cameraMonitor" class="camera-monitor" hidden aria-label="摄像头预览">
+  <div id="cameraDrag" class="camera-surface" tabindex="0" aria-label="摄像头预览，可用方向键移动">
+    <video id="cameraPreview" autoplay muted playsinline></video>
+  </div>
+  <div class="camera-toolbar select-wrap">
+    <select id="cameraAspect" aria-label="摄像头预览比例">
+      <option value="16:9">16:9</option><option value="4:3">4:3</option><option value="1:1">1:1</option><option value="9:16">9:16</option>
+    </select>
+    <span class="select-caret" aria-hidden="true"></span>
+  </div>
+</aside>
 <main class="app">
   <div id="script" class="script" tabindex="0" aria-label="口播稿">
     <div id="scriptInner" class="script-inner"><p class="para">正在读取口播稿…</p></div>
@@ -55,6 +66,9 @@
         <button id="record" class="btn btn-primary" type="button" disabled><span class="recdot" aria-hidden="true"></span><span class="lbl">开始录音</span></button>
       </div>
       <div class="aux">
+        <button id="toggleCameraPreview" class="icon-btn" type="button" aria-label="隐藏摄像头预览" aria-pressed="true" hidden>
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 6h11v9H2zM13 9l5-3v9l-5-3"/><path class="camera-hidden-mark" d="M2 2l16 16"/></svg>
+        </button>
         <button id="scroll" class="btn btn-quiet scroll-btn" type="button" aria-pressed="false">
           <svg class="ico-down" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.5v10M4 8.5l4 4 4-4"/></svg>
           <svg class="ico-pause" width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true"><rect x="2.5" y="2" width="3" height="10" rx="1"/><rect x="8.5" y="2" width="3" height="10" rx="1"/></svg>
@@ -74,9 +88,11 @@
     </button>
   </div>
   <div class="db">
-    <p id="lock" class="lock" hidden>录音进行中：阅读设置可随时调整；麦克风、试听和交接需要先停止并保存。</p>
+    <p id="lock" class="lock" hidden>录音进行中：阅读设置可随时调整；麦克风、摄像头、试听和交接需要先停止并保存。</p>
     <div class="sec">
       <h3 class="sec-h">阅读</h3>
+      <label class="field"><span>靠近镜头</span><input id="readingFocus" type="checkbox" checked></label>
+      <label class="field"><span>栏宽</span><input id="readingWidth" class="range" type="range" min="10" max="24" step="1" value="14"><output id="readingWidthOut" class="field-v" for="readingWidth">14 字</output></label>
       <label class="field"><span>字号</span><input id="font" class="range" type="range" min="20" max="60" step="1" value="34"><output id="fontOut" class="field-v" for="font">34 px</output></label>
       <label class="field"><span>滚动速度</span><input id="speed" class="range" type="range" min="5" max="80" step="1" value="24"><output id="speedOut" class="field-v" for="speed">24 px/秒</output></label>
       <div class="row-btns"><button id="top" class="btn btn-sm" type="button">回到开头</button></div>
@@ -86,13 +102,21 @@
       <div class="select-wrap"><select id="mic" class="select"><option value="">系统默认麦克风</option></select><span class="select-caret" aria-hidden="true"></span></div>
       <p class="hint">录制时请求关闭回声消除、降噪和自动增益，实际设置由浏览器与麦克风决定。</p>
     </div>
+    <div class="sec">
+      <h3 class="sec-h">摄像头</h3>
+      <label class="field"><span>文字置顶</span><input id="cameraBehind" type="checkbox" checked></label>
+      <div class="row-btns"><button id="cameraCenter" class="btn btn-sm" type="button">摄像头居中</button></div>
+      <label><input id="cameraEnabled" type="checkbox"> 同步录制摄像头</label>
+      <div class="select-wrap"><select id="camera" class="select" aria-label="摄像头设备" disabled><option value="">系统默认摄像头</option></select></div>
+      <p class="hint">开始录音时申请摄像头权限。摄像头与麦克风同步暂停、继续和保存；停止后释放设备。原始画面可用于后续画中画。</p>
+    </div>
     <div class="sec" id="takesSec">
       <h3 class="sec-h">录音版本<small id="takeCount"></small></h3>
       <div id="takes" class="takes"><div class="empty">还没有录音版本。关闭菜单，点击「开始录音」。</div></div>
     </div>
     <div class="sec" id="previewSec" hidden>
       <h3 class="sec-h">试听<small id="previewTitle"></small></h3>
-      <audio id="player" class="audio" controls preload="metadata"></audio>
+      <video id="player" class="audio audio-only" controls playsinline preload="metadata"></video>
       <div id="waveform" class="wave" aria-label="录音波形，拖动选择试听范围"></div>
       <div class="sel-row">
         <span id="selection" class="sel-txt">在波形上拖动，选择要试听的片段</span>
@@ -116,6 +140,7 @@
 <script src="/vendor/wavesurfer.min.js"></script>
 <script src="/vendor/regions.min.js"></script>
 <script src="/ui.js"></script>
+<script src="/camera-monitor.js"></script>
 <script src="/recorder.js"></script>
 </body>
 </html>

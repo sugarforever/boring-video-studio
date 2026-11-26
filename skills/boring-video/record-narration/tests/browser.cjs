@@ -50,9 +50,41 @@ const assert = require('node:assert/strict');
     await page.locator('#menu').click();
     await page.locator('#top').click();
     await page.locator('#closeMenu').click();
+    if (process.env.CAMERA_TEST) {
+      await page.locator('#menu').click();
+      await page.locator('#cameraEnabled').check();
+      await page.locator('#closeMenu').click();
+    }
     await page.locator('#record').click();
     await page.waitForFunction(() => !document.querySelector('#stop').disabled);
     assert.equal(await page.locator('#record').isVisible(), false);
+    if (process.env.CAMERA_TEST) {
+      await page.waitForFunction(() => document.querySelector('#cameraPreview').videoWidth > 0);
+      assert.equal(await page.locator('#cameraEnabled').isDisabled(), true);
+      await page.locator('#cameraAspect').selectOption('1:1');
+      const square = await page.locator('#cameraPreview').boundingBox();
+      assert.ok(Math.abs(square.width - square.height) < 2);
+      const monitor = page.locator('#cameraMonitor');
+      const beforeMove = await monitor.boundingBox();
+      const handle = await page.locator('#cameraDrag').boundingBox();
+      await page.mouse.move(handle.x + 20, handle.y + 10);
+      await page.mouse.down();
+      await page.mouse.move(400, 400, {steps: 10});
+      await page.mouse.up();
+      const moved = await monitor.boundingBox();
+      assert.ok(Math.abs(moved.x - beforeMove.x) > 100);
+      await page.setViewportSize({width: 390, height: 844});
+      await page.waitForTimeout(100);
+      const bounded = await monitor.boundingBox();
+      assert.ok(bounded.x >= 0 && bounded.x + bounded.width <= 391);
+      assert.ok(bounded.y >= 0 && bounded.y + bounded.height <= 845);
+      await page.setViewportSize({width: 1400, height: 1000});
+      await page.locator('#cameraAspect').selectOption('9:16');
+      const portrait = await page.locator('#cameraPreview').boundingBox();
+      assert.ok(Math.abs(portrait.width / portrait.height - 9/16) < .01);
+      await page.locator('#cameraAspect').selectOption('4:3');
+
+    }
     await page.waitForFunction(() => document.querySelector('#timer').textContent === '00:03');
     await page.locator('#pause').click();
     assert.equal(await page.locator('#pause').textContent(), '继续录音');
@@ -69,8 +101,9 @@ const assert = require('node:assert/strict');
     await page.locator('#retrySave').click();
     await page.waitForFunction(() => !document.querySelector('#finish').disabled);
     await page.locator('#menu').click();
-    assert.equal(await page.locator('audio').evaluate(el => el.src.startsWith('blob:')), true);
+    assert.equal(await page.locator('#player').evaluate(el => el.src.startsWith('blob:')), true);
     await page.waitForFunction(() => document.querySelector('#waveform').dataset.ready === 'true');
+    await page.locator('#waveform').scrollIntoViewIfNeeded();
     const box = await page.locator('#waveform').boundingBox();
     await page.mouse.move(box.x + box.width * .2, box.y + box.height / 2);
     await page.mouse.down();
@@ -79,10 +112,10 @@ const assert = require('node:assert/strict');
     await page.waitForFunction(() => !document.querySelector('#playSelection').disabled);
     assert.match(await page.locator('#selection').textContent(), /秒/);
     await page.locator('#playSelection').click();
-    await page.locator('audio').evaluate(el => el.pause());
-    await page.locator('audio').evaluate(el => { el.currentTime = 0; return el.play(); });
-    await page.waitForFunction(() => document.querySelector('audio').currentTime > .1);
-    await page.locator('audio').evaluate(el => el.pause());
+    await page.locator('#player').evaluate(el => el.pause());
+    await page.locator('#player').evaluate(el => { el.currentTime = 0; return el.play(); });
+    await page.waitForFunction(() => document.querySelector('#player').currentTime > .1);
+    await page.locator('#player').evaluate(el => el.pause());
     await page.locator('#finish').click();
     await page.waitForFunction(() => document.querySelector('#message').textContent.includes('已交接'));
     let state = JSON.parse(readFileSync(path.join(root, 'session/session.json')));
@@ -91,6 +124,23 @@ const assert = require('node:assert/strict');
     assert.equal(state.takes[0].capture.noiseSuppression, false);
     assert.equal(state.takes[0].capture.echoCancellation, false);
     const audio = path.join(root, 'session', state.audio);
+    if (process.env.CAMERA_TEST) {
+      const handoff = JSON.parse(readFileSync(path.join(root, 'session/handoff.json')));
+      assert.equal(handoff.video, handoff.audio);
+      assert.ok(state.takes[0].capture.width > 0);
+      assert.equal(await page.locator('#cameraPreview').evaluate(el => el.srcObject), null);
+      assert.ok(await page.locator('#player').evaluate(el => el.videoWidth > 0));
+      await page.locator('#menu').click();
+      assert.ok((await page.locator('#player').boundingBox()).height > 100, 'camera playback must show a reviewable video frame');
+      await page.locator('#closeMenu').click();
+      const probe = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-show_streams', '-of', 'json', audio]));
+      assert.deepEqual(probe.streams.map(s => s.codec_type).sort(), ['audio', 'video']);
+      const decoded = path.join(root, 'camera-audio.wav');
+      execFileSync('ffmpeg', ['-v', 'error', '-i', audio, '-vn', decoded]);
+      const duration = Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1', decoded]));
+      assert.ok(duration > 2 && duration < 5, `AV pause removed: ${duration}`);
+      execFileSync(python, [path.join(skill, 'scripts/export_camera.py'), '--video', audio, '--audio', decoded, '--output', path.join(root, 'author.mp4')]);
+    }
     // Streaming WebM often has no duration header. Decode before measuring.
     execFileSync('ffprobe', ['-v', 'error', audio]);
     if (!process.env.RECORDER_ONLY) {
@@ -108,6 +158,7 @@ const assert = require('node:assert/strict');
     assert.deepEqual(readdirSync(path.join(root, 'session/takes', interrupted.id)).filter(name => name.endsWith('.chunk')), ['000000.chunk']);
     await page.reload();
     await page.waitForFunction(() => document.querySelectorAll('#takes .take').length === 2);
+    if (process.env.CAMERA_TEST) assert.equal(await page.locator('#cameraAspect').inputValue(), '4:3');
     await page.locator('#menu').click();
     const recovery = page.locator('#takes button').filter({hasText: '恢复'});
     await recovery.click();
@@ -119,6 +170,13 @@ const assert = require('node:assert/strict');
     assert.equal(state.takes.length, 2);
     assert.equal(state.takes.every(take => take.complete), true);
     execFileSync('ffprobe', ['-v', 'error', path.join(root, 'session', state.audio)]);
+    if (process.env.CAMERA_TEST) {
+      assert.ok(state.takes[1].video);
+      const handoff = JSON.parse(readFileSync(path.join(root, 'session/handoff.json')));
+      assert.equal(handoff.video, handoff.audio);
+      await page.locator('#cameraEnabled').uncheck();
+    }
+    await page.unroute('**/api/takes/*/chunks/1');
     // A zero-chunk emptyTake take must not trap draft revisions.
     const auth = new URL(url).hash.slice(1);
     const emptyTake = await page.evaluate(async token => {
@@ -154,6 +212,34 @@ const assert = require('node:assert/strict');
     assert.equal(await page.locator('#scriptInner').getAttribute('data-source'), latest);
     assert.equal(JSON.parse(readFileSync(path.join(root, 'session/session.json'))).takes.length, 3);
     assert.equal(await page.locator('#record').isEnabled(), true);
+    if (process.env.CAMERA_TEST) {
+      await page.locator('#menu').click();
+      await page.locator('#cameraEnabled').check();
+      await page.locator('#closeMenu').click();
+      await page.evaluate(() => {
+        window.realGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+        navigator.mediaDevices.getUserMedia = async () => { throw new DOMException('Camera permission denied', 'NotAllowedError'); };
+      });
+      await page.locator('#record').click();
+      await page.waitForFunction(() => document.querySelector('#notice').textContent.includes('Camera permission denied'));
+      assert.equal(await page.locator('#record').isEnabled(), true);
+      assert.equal(JSON.parse(readFileSync(path.join(root, 'session/session.json'))).takes.length, 3);
+      await page.evaluate(() => { navigator.mediaDevices.getUserMedia = window.realGetUserMedia; });
+      await page.locator('#record').click();
+      await page.waitForFunction(() => document.querySelector('#cameraPreview').videoWidth > 0);
+      await page.waitForFunction(() => document.querySelector('#timer').textContent === '00:02');
+      const restored = await page.locator('#cameraMonitor').boundingBox();
+      assert.ok(restored.x < 600, 'dragged camera position survives reload');
+      if (process.env.CAMERA_SCREENSHOT) await page.screenshot({path: process.env.CAMERA_SCREENSHOT});
+      await page.evaluate(() => {
+        window.interruptedTracks = document.querySelector('#cameraPreview').srcObject.getTracks();
+        window.interruptedTracks.find(track => track.kind === 'video').dispatchEvent(new Event('ended'));
+      });
+      await page.waitForFunction(() => !document.querySelector('#finish').disabled);
+      assert.equal(await page.evaluate(() => window.interruptedTracks.every(track => track.readyState === 'ended')), true);
+      assert.equal(await page.locator('#notice').isVisible(), true);
+      assert.match(await page.locator('#notice').textContent(), /设备已断开/);
+    }
     assert.deepEqual(errors, []);
     if (process.env.SCREENSHOT) await page.screenshot({path: process.env.SCREENSHOT + '.desktop.png', fullPage: true});
     await page.setViewportSize({width: 390, height: 844});
