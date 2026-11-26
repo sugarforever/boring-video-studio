@@ -33,6 +33,50 @@
     for(const child of [...template.content.childNodes])visit(child,context);
     return template.content;
   }
+  const codePatterns=new Set(['terminal-session','code-block','json-data','xml-data','vscode-editor']);
+  function codeData(n,t,id){
+    if(typeof n.source!=='string')throw Error('source must be text');
+    const source=n.source.replace(/\r\n?/g,'\n'),lines=source.split('\n');
+    if(lines.length>10||lines.some(line=>line.length>56))throw Error('Split code into pages of at most 10 lines and 56 characters per line');
+    const language={ 'terminal-session':'shell','code-block':n.language,'json-data':'json','xml-data':'xml','vscode-editor':n.language }[id];
+    if(!['javascript','text','json','xml','shell'].includes(language))throw Error('Unsupported code language');
+    if(!Number.isInteger(n.highlightLine)||n.highlightLine<1||n.highlightLine>lines.length)throw Error('highlightLine must identify an existing line');
+    let focusLabel='当前高亮',focusValue=lines[n.highlightLine-1].trim()||'（空行）';
+    if(language==='json'){
+      const data=JSON.parse(source);
+      if(id==='json-data'){
+        if(!Array.isArray(n.focusPath)||!n.focusPath.length)throw Error('Provide a JSON focusPath');
+        let target=data;for(const key of n.focusPath){if(target===null||typeof target!=='object'||!Object.hasOwn(target,key))throw Error('JSON focusPath does not exist');target=target[key];}
+        focusLabel=n.focusPath.join('.');focusValue=JSON.stringify(target);
+      }
+    }
+    if(language==='xml'){
+      const doc=new DOMParser().parseFromString(source,'application/xml');
+      if(doc.getElementsByTagNameNS('http://www.mozilla.org/newlayout/xml/parsererror.xml','parsererror').length)throw Error('Invalid XML source');
+      if(id==='xml-data'){
+        const node=doc.getElementsByTagName(n.focusTag)[0];if(!node)throw Error('XML focusTag does not exist');
+        focusLabel='<'+n.focusTag+'>';focusValue=node.textContent;
+      }
+    }
+    const tokens=line=>{
+      if(language==='text')return [{text:line,color:t.ink}];
+      const re=/("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\/\/.*$|#[^\n]*|\b(?:export|function|const|let|return|if|else|true|false|null)\b|\b\d+(?:\.\d+)?\b|[<>/=])/g;
+      const out=[];let offset=0;
+      for(const match of line.matchAll(re)){
+        if(match.index>offset)out.push({text:line.slice(offset,match.index),color:t.ink});
+        const text=match[0],color=/^["']/.test(text)?t.ac2:/^\d/.test(text)?t.ac3:/^(\/\/|#)/.test(text)?t.mu:t.ac;
+        out.push({text,color});offset=match.index+text.length;
+      }
+      if(offset<line.length)out.push({text:line.slice(offset),color:t.ink});return out;
+    };
+    const code={fileName:n.fileName,language,count:lines.length,highlight:String(n.highlightLine).padStart(2,'0'),focusLabel,focusValue,
+      lines:lines.map((line,k)=>({n:k+1,tokens:tokens(line),bg:k+1===n.highlightLine?t.s2:'transparent',edge:k+1===n.highlightLine?t.ac:'transparent'}))};
+    if(id==='vscode-editor'){
+      if(!Array.isArray(n.files)||n.files.length>5||!n.files.includes(n.fileName))throw Error('Editor files must include the active file, with at most five entries');
+      code.files=n.files.map(name=>({name,bg:name===n.fileName?t.sf:'transparent',color:name===n.fileName?t.ac:t.mu,edge:name===n.fileName?t.ac:'transparent'}));
+    }
+    return code;
+  }
   function dataFor(id,p,t,revealed){
     const d={},n=p.data||{};
     const finite=x=>typeof x==='number'&&Number.isFinite(x);
@@ -64,6 +108,7 @@
       d.segs=n.segments.map(([name,v],k)=>({k:String(k+1).padStart(2,'0'),n:name,v:range(v,sum),c:[t.c2,t.c1,t.c3][k%3],f:v,pct:Math.round(v/sum*100)+'%'}));
       let offset=0;d.ruler=[{lab:'0',l:'0%',tx:'none'},...n.segments.map((v,k)=>{offset+=v[1];return {lab:offset+(k===n.segments.length-1?' 分钟':''),l:offset/sum*100+'%',tx:k===n.segments.length-1?'translateX(-100%)':'translateX(-50%)'};})];
     }
+    if(codePatterns.has(id))d.code=codeData(n,t,id);
     return d;
   }
   function render(host,id,props={},options={}){
@@ -96,7 +141,7 @@
       copySlots={};
       const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
       while(walker.nextNode()){
-        const text=walker.currentNode,key=text.textContent.trim();if(!key)continue;
+        const text=walker.currentNode,key=text.textContent.trim();if(!key||text.parentElement.closest('[data-code-source]'))continue;
         const replacement=Object.hasOwn(p.copy||{},key)?p.copy[key]:key;
         copySlots[key]=replacement;
         text.textContent=text.textContent.replace(key,()=>replacement);

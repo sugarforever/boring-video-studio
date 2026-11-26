@@ -484,6 +484,116 @@ window.SCENE_LIBRARY = {
         "data": {}
       },
       "direction": "判断结束后展示一个动作，保留目标入口。"
+    },
+    {
+      "id": "terminal-session",
+      "title": "Terminal · 终端窗口",
+      "category": "terminal",
+      "question": "命令、上下文和输出如何连起来？",
+      "inputs": "title?，copy{原文:替换文}，data.source / fileName / highlightLine（见案例）",
+      "constraints": "保留提示符与命令顺序；真实执行使用 record-terminal。",
+      "revision": "3",
+      "example": {
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {
+          "source": "$ node check-garden.js\n\n读取配置     garden.json\n土壤水分     41%\n浇水阈值     45%\n\n建议：检查土壤后浇水\n$",
+          "language": "shell",
+          "fileName": "garden · zsh",
+          "highlightLine": 7
+        }
+      },
+      "direction": "先环境与命令，再输出，最后停留在关键行。"
+    },
+    {
+      "id": "code-block",
+      "title": "代码块 · 逐行讲解",
+      "category": "code",
+      "question": "哪一段代码决定了这个行为？",
+      "inputs": "title?，copy{原文:替换文}，data.source / fileName / highlightLine（见案例）",
+      "constraints": "保留缩进与上下文；高亮行对应旁白，长代码拆页。",
+      "revision": "3",
+      "example": {
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {
+          "source": "export function shouldWater(reading) {\n  const { moisture, threshold } = reading;\n\n  if (moisture === null) {\n    return false;\n  }\n\n  return moisture < threshold;\n}",
+          "language": "javascript",
+          "fileName": "should-water.js",
+          "highlightLine": 8
+        }
+      },
+      "direction": "先完整代码，再聚焦关键行。"
+    },
+    {
+      "id": "json-data",
+      "title": "JSON · 结构化数据",
+      "category": "data",
+      "question": "这个值在 JSON 的哪一层？",
+      "inputs": "title?，copy{原文:替换文}，data.source / fileName / highlightLine（见案例）",
+      "constraints": "使用合法 JSON；区分字符串、数值与布尔值。",
+      "revision": "3",
+      "example": {
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {
+          "source": "{\n  \"plot\": \"east-balcony\",\n  \"sensor\": {\n    \"temperature\": 24,\n    \"moisture\": 41\n  },\n  \"threshold\": 45,\n  \"needsWater\": true\n}",
+          "language": "json",
+          "fileName": "garden.json",
+          "highlightLine": 5,
+          "focusPath": [
+            "sensor",
+            "moisture"
+          ]
+        }
+      },
+      "direction": "先整体结构，再字段路径与值。"
+    },
+    {
+      "id": "xml-data",
+      "title": "XML · 节点与属性",
+      "category": "data",
+      "question": "这个值属于哪个 XML 节点？",
+      "inputs": "title?，copy{原文:替换文}，data.source / fileName / highlightLine（见案例）",
+      "constraints": "使用合法 XML；区分节点、属性与文本。",
+      "revision": "3",
+      "example": {
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {
+          "source": "<garden id=\"east-balcony\">\n  <sensor unit=\"percent\">\n    <moisture>41</moisture>\n  </sensor>\n  <threshold>45</threshold>\n</garden>",
+          "language": "xml",
+          "fileName": "garden.xml",
+          "highlightLine": 3,
+          "focusTag": "moisture"
+        }
+      },
+      "direction": "先根节点，再嵌套关系与目标节点。"
+    },
+    {
+      "id": "vscode-editor",
+      "title": "VS Code · 编辑器",
+      "category": "editor",
+      "question": "这段代码位于哪个文件和项目上下文？",
+      "inputs": "title?，copy{原文:替换文}，data.source / fileName / highlightLine（见案例）",
+      "constraints": "标明编辑器示意；真实操作使用录屏或项目回放。",
+      "revision": "3",
+      "example": {
+        "source": "独立案例 · 虚构演示数据",
+        "copy": {},
+        "data": {
+          "source": "export function shouldWater(reading) {\n  const { moisture, threshold } = reading;\n\n  if (moisture === null) {\n    return false;\n  }\n\n  return moisture < threshold;\n}",
+          "language": "javascript",
+          "fileName": "should-water.js",
+          "highlightLine": 8,
+          "files": [
+            "garden.json",
+            "should-water.js",
+            "README.md"
+          ]
+        }
+      },
+      "direction": "先项目与文件位置，再活动文件和关键行。"
     }
   ],
   "preview": {
