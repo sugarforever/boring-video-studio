@@ -307,6 +307,34 @@ def prepare(source, output, suppress_background=False, background_threshold_db=-
     return target
 
 
+def initial_layout(data, max_chars=DEFAULT_MAX_CHARS, max_duration=5.0, pause_gap=.45):
+    """Keep raw ASR immutable; shared timed units let initial subtitles retain zero-time text."""
+    from audio_evidence import coalesce_zero_duration
+    working=copy.deepcopy(data)
+    working['words'],notes=coalesce_zero_duration(working['words'])
+    result=delivery(working,max_chars,max_duration,pause_gap)
+    result['input_timing_notes']=notes
+    return result
+
+
+def export_initial(data, output, max_chars=DEFAULT_MAX_CHARS, max_duration=5.0, pause_gap=.45):
+    """A subtitle-layout problem must not discard or repeat successful recognition."""
+    output=Path(output)
+    try:
+        initial=initial_layout(data,max_chars,max_duration,pause_gap)
+    except ValueError as error:
+        write_json(output/'initial-layout-status.json',{'status':'needs_alignment_or_layout_review',
+            'error':str(error),'recognition':'preserved in transcript.raw.json; continue audio review'})
+        print(f'Initial subtitle layout pending: {error}',flush=True)
+        return None
+    initial['segmentation']='initial-layout'
+    write_json(output/'transcript.initial.json',initial)
+    (output/'subtitles.initial.srt').write_text(srt(initial),encoding='utf-8')
+    write_json(output/'initial-layout-status.json',{'status':'exported','input_timing_notes':initial['input_timing_notes']})
+    print_subtitle_review(initial)
+    return initial
+
+
 def transcribe(audio, output, model='small', language='zh', max_chars=DEFAULT_MAX_CHARS, max_duration=5.0, pause_gap=.45):
     try:
         from faster_whisper import WhisperModel
@@ -335,11 +363,7 @@ def transcribe(audio, output, model='small', language='zh', max_chars=DEFAULT_MA
         raise ValueError('未识别出语音；请试听录音并检查麦克风或语言设置')
     subtitle = srt(data)
     (output / 'subtitles.raw.srt').write_text(subtitle, encoding='utf-8')
-    initial = delivery(data, max_chars, max_duration, pause_gap)
-    initial['segmentation'] = 'initial-layout'
-    write_json(output / 'transcript.initial.json', initial)
-    (output / 'subtitles.initial.srt').write_text(srt(initial), encoding='utf-8')
-    print_subtitle_review(initial)
+    export_initial(data, output, max_chars, max_duration, pause_gap)
     return data
 
 

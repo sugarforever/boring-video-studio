@@ -22,4 +22,12 @@ class ReviewPipelineTests(unittest.TestCase):
         self.assertTrue(all(g['end']-g['start']<=25 for g in groups))
         self.assertTrue(all(a['end']<=b['start'] for a,b in zip(groups,groups[1:])))
 
+    def test_long_technical_term_blocks_subtitle_layout_without_losing_alignment(self):
+        import narration_review as r
+        words=[{'word':'SessionRequestPermission','start':.5,'end':2.}]
+        result=r.layout_alignment(words,3.)
+        self.assertFalse(result['subtitle_exported'])
+        self.assertIn('layout_error',result)
+        self.assertEqual(words[0]['word'],'SessionRequestPermission')
+
 if __name__=='__main__':unittest.main()

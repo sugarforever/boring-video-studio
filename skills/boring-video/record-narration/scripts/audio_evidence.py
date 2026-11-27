@@ -66,7 +66,17 @@ def refine_cut(samples, rate, start, end, previous_word_start, next_word_start):
     after=[(max(a,end-.65,next_word_start-.65),min(b,next_word_start+.05))
            for a,b in runs if b>max(end-.65,next_word_start-.65) and a<next_word_start+.05]
     after=[(a,b) for a,b in after if b-a>=.08-1e-8]
-    evidence={'threshold_dbfs':threshold,'quiet_runs':runs,'proposed_start':start,'proposed_end':end}
+    # Prefer a uniquely dominant sustained pause over tiny breath/click gaps.
+    # Equal-sized competing pauses stay ambiguous; do not merely widen a magic tolerance.
+    broad=[(max(a,end-.65),min(b,next_word_start+.05))
+           for a,b in runs if b>end-.65 and a<next_word_start+.05]
+    broad=sorted([(a,b) for a,b in broad if b-a>=.08-1e-8],key=lambda r:r[1]-r[0],reverse=True)
+    selection='near kept onset'
+    if broad and (len(broad)==1 or
+                  (broad[0][1]-broad[0][0]>=.2 and
+                   broad[0][1]-broad[0][0]>=3*(broad[1][1]-broad[1][0]))):
+        after=[broad[0]];selection='uniquely dominant sustained pause'
+    evidence={'threshold_dbfs':threshold,'quiet_runs':runs,'proposed_start':start,'proposed_end':end,'pause_selection':selection}
     if not before or not after:
         return dict(evidence,status='unresolved',reason='no protected quiet boundary')
     if len(before)>1 or len(after)>1:
@@ -127,15 +137,21 @@ def align_text(audio, groups, model, language='zh'):
 
 def coalesce_zero_duration(words):
     """Keep zero-duration tokens as shared timed units; never invent their boundaries."""
-    result=[];notes=[];prefix=''
+    result=[];notes=[];prefix='';prefix_ids=[]
     for i,original in enumerate(words):
         w=dict(original)
+        w['source_word_indices']=list(w.get('source_word_indices',[i]))
         if w['end']==w['start']:
             notes.append({'word':i,'reason':'zero-duration token coalesced; no individual timing claimed'})
-            if result:result[-1]['word']+=w['word']
-            else:prefix+=w['word']
+            if result:
+                result[-1]['word']+=w['word']
+                result[-1]['source_word_indices']+=w['source_word_indices']
+            else:
+                prefix+=w['word'];prefix_ids+=w['source_word_indices']
         else:
-            if prefix:w['word']=prefix+w['word'];prefix=''
+            if prefix:
+                w['word']=prefix+w['word'];prefix=''
+                w['source_word_indices']=prefix_ids+w['source_word_indices'];prefix_ids=[]
             result.append(w)
     if prefix:raise ValueError('No timed unit for zero-duration text')
     return result,notes

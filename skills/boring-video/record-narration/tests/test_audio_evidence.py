@@ -53,4 +53,40 @@ class AcousticTests(unittest.TestCase):
         self.assertEqual((result[0]['start'],result[0]['end']),(1.,1.2))
         self.assertTrue(notes)
 
+    def test_initial_layout_retains_raw_zero_duration_evidence(self):
+        import copy
+        from process_audio import initial_layout
+        data={'words':[{'word':'应','start':.5,'end':1.},
+                       {'word':'用','start':1.,'end':1.},
+                       {'word':'运行','start':1.2,'end':2.}],
+              'segments':[{'id':1,'start':.5,'end':2.,'text':'应用运行'}]}
+        before=copy.deepcopy(data)
+        initial=initial_layout(data)
+        self.assertEqual(data,before)
+        self.assertEqual(''.join(x['text'] for x in initial['segments']),'应用运行')
+        self.assertTrue(initial['input_timing_notes'])
+
+    def test_dominant_long_pause_beats_tiny_breath_gaps(self):
+        e=self.engine();x=np.full(48000*5,10,dtype=np.int16)
+        for a,b in [(.2,.8),(1.,1.5),(3.3,3.5),(3.59,3.7),(3.79,4.5)]:
+            n=round((b-a)*48000)
+            x[round(a*48000):round(b*48000)]=(5000*np.sin(np.arange(n)*.1)).astype(np.int16)
+        r=e.refine_cut(x,48000,1.,1.5,.7,3.82)
+        self.assertEqual(r['status'],'ready')
+        self.assertGreater(r['end'],1.8)
+        self.assertLess(r['end'],3.3)
+
+    def test_initial_layout_failure_is_recorded_without_repeating_recognition(self):
+        import tempfile,json
+        from pathlib import Path
+        from process_audio import export_initial
+        data={'words':[{'word':'SessionRequestPermission','start':.5,'end':2.}],
+              'segments':[{'id':1,'start':.5,'end':2.,'text':'SessionRequestPermission'}]}
+        with tempfile.TemporaryDirectory() as tmp:
+            result=export_initial(data,Path(tmp))
+            self.assertIsNone(result)
+            status=json.loads((Path(tmp)/'initial-layout-status.json').read_text())
+            self.assertEqual(status['status'],'needs_alignment_or_layout_review')
+            self.assertFalse((Path(tmp)/'subtitles.initial.srt').exists())
+
 if __name__=='__main__':unittest.main()

@@ -12,7 +12,7 @@ python3 scripts/agent_edit.py prepare --audio /absolute/path/narration.wav \
   --output /absolute/path/agent-review-v1
 ```
 
-**Ready:** `agent-input.md` lists every raw word with a stable ID and source time; `bundle.json` binds the source, transcript and reference script. Each rerun uses a new directory.
+**Ready:** `agent-input.md` lists every raw word with a stable ID and source time; `bundle.json` binds the source, transcript and reference script. Zero-duration ASR tokens share an existing neighbouring timed unit, with original token indices and `input_timing_notes` retained. Each rerun uses a new directory.
 
 ## 2. Current agent writes decisions
 
@@ -51,7 +51,7 @@ It uses the Silero ONNX VAD bundled with faster-whisper to isolate speech near l
   --output /absolute/path/agent-edit-v1
 ```
 
-The default acoustic planner uses adaptive local 10-ms RMS, continuous quiet runs and neighbouring kept-word constraints. It moves ASR boundaries into quiet regions while retaining room tone. A sustained sound or competing candidate pauses leaves that cut unresolved and its speech intact. `boundary-report.json` records proposed/resolved times, measured threshold and quiet regions. These checks support a candidate boundary, not proof of no clipped phoneme. Quiet speech can resemble room tone.
+The default acoustic planner uses adaptive local 10-ms RMS, continuous quiet runs and neighbouring kept-word constraints. It moves ASR boundaries into quiet regions while retaining room tone. A uniquely dominant sustained pause can outrank tiny breath/click gaps; comparably sized alternatives remain ambiguous. A sustained sound or competing candidate pauses leaves that cut unresolved and its speech intact. `boundary-report.json` records proposed/resolved times, measured threshold and quiet regions. These checks support a candidate boundary, not proof of no clipped phoneme. Quiet speech can resemble room tone.
 
 `--boundary-mode word` reproduces the original raw-word timing for diagnostics only and creates pending boundary tasks. It cannot establish acoustic acceptance.
 
@@ -71,6 +71,16 @@ This recomputes the supplied retained text's timings against the actual edited a
 For display only, zero-duration tokens can share a neighbouring timed unit, preserving every character without inventing individual timestamps. Raw measurements and coalescing notes remain available. Invalid timing blocks SRT export. Structurally valid results use the existing `process_audio.word_cues` single-line layout, and warnings keep the subtitles at review-draft status. `alignment_review_required` / `draft_review_required` remain incomplete stages; an exported SRT alone does not clear them.
 
 Transcribe the final edited WAV separately with the normal `process_audio.py transcribe` command to check retained wording and possible residual restarts. Compare it with the planned retained text; recognition disagreement triggers local inspection, not silent replacement of corrected text. Source recognizer reruns cannot prove full cleanup.
+
+If subtitle layout fails after successful model alignment, preserve `transcript.aligned.json` and the QC failure. Resume into a new directory without running the model again:
+
+```bash
+/path/to/venv/bin/python scripts/narration_review.py resume \
+  --alignment /absolute/path/failed-alignment/transcript.aligned.json \
+  --result /absolute/path/agent-edit-v1 --output /absolute/path/resumed-review
+```
+
+Resume validates source bindings and produces an explicit review status even when a long technical term still cannot fit the subtitle policy. It does not relax the policy or certify the audio.
 
 **Alignment reviewed:** all structural errors are resolved, all timing/text warnings have evidence-backed dispositions, layout passes and all input bindings remain current. Full final speech listening and user acceptance are separate gates.
 

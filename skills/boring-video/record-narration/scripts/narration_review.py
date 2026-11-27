@@ -116,30 +116,59 @@ def realign(result,output,model,language='zh'):
              'unresolved_cuts':tx.get('unresolved_cuts',0),'provisional_corrections':'retained unchanged; require audio evidence'}
     if aligned['unresolved_cuts']:aligned['status']='draft_review_required'
     save(output/'transcript.aligned.json',aligned)
-    # Retain raw alignment, including failures; shared timed units avoid fabricating zero-token times.
-    layout_words,coalesced=coalesce_zero_duration(words)
-    structural=[x for x in alignment_issues(layout_words,report['duration_after']) if x['reason'].startswith('invalid')]
-    aligned['coalesced_units']=coalesced
-    aligned['subtitle_status']='review_draft'
-    if not structural:
-        from process_audio import word_cues,srt
-        segments=word_cues(layout_words,max_chars=16,max_duration=5.,pause_gap=.45)
-        aligned['segments']=segments
-        save(output/'transcript.aligned.json',aligned)
-        (output/'subtitles.aligned.srt').write_text(srt(aligned),encoding='utf-8')
+    return finalize_alignment(aligned,result,output)
+
+
+def layout_alignment(words,duration):
+    """Layout is a separate gate; an unrenderable term must not discard model alignment."""
+    try:
+        units,notes=coalesce_zero_duration(words)
+        structural=[x for x in alignment_issues(units,duration) if x['reason'].startswith('invalid')]
+        if structural:return {'subtitle_exported':False,'shared_timing_units':notes,'structural':structural}
+        from process_audio import word_cues
+        segments=word_cues(units,max_chars=16,max_duration=5.,pause_gap=.45)
+        return {'subtitle_exported':True,'shared_timing_units':notes,'structural':[],'segments':segments}
+    except ValueError as error:
+        return {'subtitle_exported':False,'shared_timing_units':[], 'structural':[], 'layout_error':str(error)}
+
+
+def finalize_alignment(aligned,result,output):
+    result,output=Path(result),Path(output);audio=Path(aligned['audio'])
+    input_bindings=aligned['bindings'];issues=aligned['issues']
     if any(digest(path)!=value for path,value in input_bindings.items()):
         raise ValueError('Alignment inputs changed while processing')
+    pcm,rate=read_pcm(audio);layout=layout_alignment(aligned['words'],len(pcm)/rate)
+    aligned['coalesced_units']=layout['shared_timing_units'];aligned['subtitle_status']='review_draft'
+    if layout['subtitle_exported']:
+        from process_audio import srt
+        aligned['segments']=layout['segments']
+        (output/'subtitles.aligned.srt').write_text(srt(aligned),encoding='utf-8')
+    else:
+        aligned['status']='subtitle_layout_review_required'
+        aligned['layout_error']=layout.get('layout_error',layout.get('structural'))
+    save(output/'transcript.aligned.json',aligned)
     save(output/'QC.json',{'status':aligned['status'],'alignment_issues':issues,
          'unresolved_cuts':aligned['unresolved_cuts'],'listening':'pending','user_acceptance':'pending',
-         'input_bindings':input_bindings,'subtitle_exported':not structural,'shared_timing_units':coalesced})
+         'input_bindings':input_bindings,**{k:v for k,v in layout.items() if k!='segments'}})
     links=f'<p><a href="{html.escape(os.path.relpath(result/"review.html",output))}">剪辑对比与原始证据</a></p>'
-    if not structural:links+='<p><a href="subtitles.aligned.srt">重新对齐的草稿字幕</a></p>'
+    if layout['subtitle_exported']:links+='<p><a href="subtitles.aligned.srt">重新对齐的草稿字幕</a></p>'
     page='<meta charset="utf-8"><title>Alignment review</title><style>body{max-width:960px;margin:32px auto;font:18px system-ui}audio{width:100%}</style><h1>对齐后待审版本</h1>'
     page+=f'<p>状态：{aligned["status"]}。{len(issues)} 条对齐提示；音频听审、文本校正和用户确认仍待完成。</p>'
     page+=f'<audio controls src="{html.escape(os.path.relpath(audio,output))}"></audio>'+links
     page+='<p><a href="QC.json">检查报告</a> · <a href="transcript.aligned.json">完整对齐数据与异常</a></p>'
     (output/'review.html').write_text(page,encoding='utf-8')
     return aligned
+
+
+
+def resume_alignment(source,result,output):
+    source,output=Path(source),Path(output)
+    aligned=json.loads(source.read_text(encoding='utf-8'))
+    aligned['bindings'][str(source.resolve())]=digest(source)
+    if any(digest(path)!=value for path,value in aligned['bindings'].items()):
+        raise ValueError('Saved alignment inputs changed')
+    output.mkdir(parents=True,exist_ok=False)
+    return finalize_alignment(aligned,Path(result),output)
 
 
 def main():
@@ -151,13 +180,18 @@ def main():
     for parser in (scan,align):
         parser.add_argument('--output',type=Path,required=True);parser.add_argument('--model',default='small')
         parser.add_argument('--language',default='zh')
+    resume=sub.add_parser('resume');resume.add_argument('--alignment',type=Path,required=True)
+    resume.add_argument('--result',type=Path,required=True);resume.add_argument('--output',type=Path,required=True)
+    resume.set_defaults(model='saved alignment',language='preserved')
     a=p.parse_args()
     if a.command=='inspect' and (a.max_windows<1 or a.start<0 or a.end<=a.start):p.error('Invalid inspection scope')
     try:
-        from faster_whisper import WhisperModel
-        model=WhisperModel(a.model,device='cpu',compute_type='int8')
-        if a.command=='inspect':result=inspect(a.review,a.output,model,a.language,a.start,a.end,a.max_windows)
-        else:result=realign(a.result,a.output,model,a.language)
+        if a.command=='resume':result=resume_alignment(a.alignment,a.result,a.output)
+        else:
+            from faster_whisper import WhisperModel
+            model=WhisperModel(a.model,device='cpu',compute_type='int8')
+            if a.command=='inspect':result=inspect(a.review,a.output,model,a.language,a.start,a.end,a.max_windows)
+            else:result=realign(a.result,a.output,model,a.language)
         from importlib.metadata import version
         save(a.output/'invocation.json',{'command':a.command,'model':a.model,'language':a.language,
               'engine':'faster-whisper CPU int8','faster_whisper_version':version('faster-whisper'),

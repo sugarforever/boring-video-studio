@@ -54,6 +54,16 @@ class AgentEditTests(unittest.TestCase):
         self.assertIn('看看工具怎样使用', (self.root/'result/subtitles.draft.srt').read_text())
         self.assertTrue((self.root/'result/review.html').exists())
 
+    def test_prepare_keeps_zero_duration_token_in_shared_timed_unit(self):
+        self.tx.write_text(json.dumps({'words':[
+          {'word':'应','start':.5,'end':1.}, {'word':'用','start':1.,'end':1.},
+          {'word':'运行','start':1.2,'end':2.}]}))
+        bundle=self.m.prepare(self.audio,self.tx,self.script,self.root/'zero-input')
+        self.assertEqual(''.join(w['raw_text'] for w in bundle['words']),'应用运行')
+        self.assertEqual(bundle['words'][0]['source_word_indices'],[0,1])
+        self.assertTrue(bundle['input_timing_notes'])
+        self.assertEqual(bundle['words'][0]['end'],1.)
+
     def test_stale_audio_and_transcript_rejected(self):
         self.tx.write_text('{}')
         with self.assertRaisesRegex(ValueError, 'changed'): self.apply_word(self.root/'review',self.plan(),self.root/'result')

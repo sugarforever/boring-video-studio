@@ -34,15 +34,18 @@ def prepare(audio, transcript, script, output):
             raise ValueError('Expected mono 48 kHz PCM16 WAV')
         duration=f.getnframes()/f.getframerate()
     data=json.loads(paths['transcript'].read_text(encoding='utf-8'))
+    from audio_evidence import coalesce_zero_duration
+    input_words,timing_notes=coalesce_zero_duration(data['words'])
     words=[]; previous=0.
-    for i,w in enumerate(data['words']):
+    for i,w in enumerate(input_words):
         start,end=float(w['start']),float(w['end'])
         if not all(math.isfinite(v) for v in (start,end)) or not previous <= start < end <= duration:
             raise ValueError(f'Invalid/overlapping word timing at index {i}; repair alignment first')
-        words.append({'id':f'w{i:06d}','start':start,'end':end,'raw_text':w['word'],'text':w['word']})
+        words.append({'id':f'w{i:06d}','start':start,'end':end,'raw_text':w['word'],'text':w['word'],
+                      'source_word_indices':w['source_word_indices']})
         previous=end
     if not words: raise ValueError('Word-level transcript is empty')
-    bundle={'version':1,'bindings':bindings,'duration':duration,'words':words,
+    bundle={'version':1,'bindings':bindings,'duration':duration,'words':words,'input_timing_notes':timing_notes,
             'alignment_status':'input timestamps; source association must be verified by agent'}
     bundle['bundle_id']=hashlib.sha256(json.dumps(bundle,sort_keys=True).encode()).hexdigest()
     output=Path(output);output.mkdir(parents=True,exist_ok=False)
@@ -153,6 +156,8 @@ def apply(review, decisions, output, boundary_mode='acoustic'):
                   for x in boundary_report if x['status']!='ready']
     review_tasks.extend({'kind':'recognition_correction','status':'pending','word':c['id'],
                          'reason':c['reason']} for c in decisions.get('corrections',[]))
+    review_tasks.extend({'kind':'input_shared_timing','status':'pending','evidence':note}
+                         for note in bundle.get('input_timing_notes',[]))
     review_tasks.extend([{'kind':'final_alignment','status':'pending'},
                          {'kind':'full_speech_listening','status':'pending'},
                          {'kind':'user_acceptance','status':'pending'}])
