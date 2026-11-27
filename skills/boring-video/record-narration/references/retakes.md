@@ -51,7 +51,7 @@ Transcribe the edited WAV without normalizing its level again:
   --output /absolute/path/edited-v2/final --language zh
 ```
 
-Create its final ledger using the source ledger and edit report. Carried candidates and reports need final-audio dispositions, including confirmation around fully removed passages. Compare retained content, then correct and lay out subtitles from this fresh transcript; source subtitle times are stale. With no cuts, continue using the existing audio, transcript and ledger.
+Create its final ledger using the source ledger and edit report. Carried candidates and reports need final-audio dispositions, including confirmation around fully removed passages. Compare fresh recognition with retained text and resolve discrepancies against the final audio. Use the reviewed final wording and timings measured on the edited WAV for subtitles; mapped source times remain provisional. With no cuts, continue using the existing audio, transcript and ledger.
 
 ## Verify and report
 

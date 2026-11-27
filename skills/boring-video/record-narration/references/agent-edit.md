@@ -1,49 +1,46 @@
-# Agent-directed edit draft
+# Agent-directed narration editing
 
-Use this branch to generate a testable narration cleanup from a word-level transcript and reference script, using the current agent's reasoning rather than a second LLM API. It produces a listening draft; the retake review and user acceptance gates still apply.
+Use the current agent to review timed words and the reference script, then execute its decisions locally. Speech-review requirements remain in [retakes.md](retakes.md); reporting and user acceptance remain in [processing.md](processing.md). Report audio readiness separately from subtitle readiness.
 
-## 1. Export bound evidence
+## 1. Bind the input
 
-Use a mono 48 kHz PCM16 WAV and a transcript aligned to that same timeline. A denoised derivative may reuse timings only when its sample count is unchanged. Check the source association: hashes detect later changes, not a wrong initial pairing.
+Use a mono 48-kHz PCM16 WAV and its matching word-level transcript. A denoised derivative can reuse timings only when its sample count and timeline are unchanged.
 
 ```bash
-python3 scripts/agent_edit.py prepare --audio /absolute/path/narration.wav \
-  --transcript /absolute/path/transcript.raw.json --script /absolute/path/script.txt \
-  --output /absolute/path/agent-review-v1
+/path/to/venv/bin/python scripts/agent_edit.py prepare \
+  --audio /absolute/path/narration.wav --transcript /absolute/path/transcript.raw.json \
+  --script /absolute/path/script.txt --output /absolute/path/agent-review-v1
 ```
 
-**Ready:** `agent-input.md` lists every raw word with a stable ID and source time; `bundle.json` binds the source, transcript and reference script. Zero-duration ASR tokens share an existing neighbouring timed unit, with original token indices and `input_timing_notes` retained. Each rerun uses a new directory.
+**Ready:** verify the audio/transcript association, then read `agent-input.md`. `bundle.json` binds the inputs by hash; word IDs are stable within that bundle. Zero-duration tokens retain their text and original indices in shared timed units. Use a new output directory for each revision.
 
-## 2. Current agent writes decisions
+## 2. Review and write decisions
 
-Read the full exported input. Reference the script for terms and intended progression while preserving actual speech, improvisations, repetitions and abandoned fragments. A text discrepancy alone does not prove an ASR error. Record contextual corrections as provisional until audio evidence supports them.
+Review the complete raw wording, using the script for context. Preserve coherent improvisation and deliberate emphasis. Copy `decisions.template.json`, retaining `bundle_id`:
 
-Copy `decisions.template.json` to a separate decision file. Keep `bundle_id`. Recognition corrections are `{id, text, reason}` on existing words, preserving `raw_text`. They change display text, never timing or the raw evidence. A correction must retain nonempty text; deletion belongs in a cut decision.
-
-Each cut uses inclusive source word IDs:
+- `corrections`: `{id, text, reason}`; nonempty recognition corrections preserve `raw_text` and timing. Mark context-only corrections provisional until audio evidence supports them.
+- `cuts`: ordered, disjoint ranges with a complete surviving replacement. IDs are inclusive:
 
 ```json
 {
   "first": "w000010", "last": "w000016",
   "replacement_first": "w000017", "replacement_last": "w000026",
-  "reason": "Abandoned opening; the complete replacement follows."
+  "reason": "Abandoned opening; retain the complete replacement."
 }
 ```
 
-Review every candidate against the raw words and context. Supply the complete kept replacement, not just its first repeated word. Keep intentional emphasis and unique information. This version supports retries with a retained replacement; unrelated shortening, filler removal and general pause compression are outside this protocol. Cuts must be ordered and disjoint, and all referenced replacements must survive every cut.
-
-Run the suspicious-window inspection command before deciding that an ASR gap is silent:
+For suspicious ASR gaps or long word spans, run:
 
 ```bash
 /path/to/venv/bin/python scripts/narration_review.py inspect \
   --review /absolute/path/agent-review-v1 --output /absolute/path/inspection-v1
 ```
 
-It uses the Silero ONNX VAD bundled with faster-whisper to isolate speech near long gaps/spans, then separately transcribes those windows with the local ASR. `--start` / `--end` constrain source seconds; `--max-windows` limits work (default 24). The result records its scope and every unprocessed window: a bounded run is partial evidence. Review results against the original transcript and reference script. Repeated ASR is correlated, not listening. Build a new source transcript with documented recovered words and their observed source times, then prepare a new bundle; never edit an existing bundle or invent times. Conflicts remain unresolved. This inspection proposes evidence, not automatic transcript patches or deletion decisions.
+The command uses local VAD and ASR to produce evidence. Check its scope and `unprocessed_windows`; finish or explicitly account for uncovered candidates. Recovered words require observed source times and a new transcript/bundle. Preserve conflicting evidence for review.
 
-**Decisions ready:** all text has been reviewed; each deletion has a reason and a surviving replacement; uncertain passages remain. Save review coverage and unresolved items in the project's review notes. Empty cuts are allowed and do not certify clean speech.
+**Decisions ready:** every proposed deletion has a reason and a retained replacement; uncertain speech remains. This branch handles abandoned retries, preserving unique content and normal pauses.
 
-## 3. Plan acoustic boundaries and execute
+## 3. Execute acoustic cuts
 
 ```bash
 /path/to/venv/bin/python scripts/agent_edit.py apply \
@@ -51,49 +48,35 @@ It uses the Silero ONNX VAD bundled with faster-whisper to isolate speech near l
   --output /absolute/path/agent-edit-v1
 ```
 
-The default acoustic planner uses adaptive local 10-ms RMS, continuous quiet runs and neighbouring kept-word constraints. It moves ASR boundaries into quiet regions while retaining room tone. A uniquely dominant sustained pause can outrank tiny breath/click gaps; comparably sized alternatives remain ambiguous. A sustained sound or competing candidate pauses leaves that cut unresolved and its speech intact. `boundary-report.json` records proposed/resolved times, measured threshold and quiet regions. These checks support a candidate boundary, not proof of no clipped phoneme. Quiet speech can resemble room tone.
+The planner seeks quiet boundaries constrained by kept neighbours. Ambiguous cuts remain unapplied. Review `boundary-report.json`, `review-tasks.json` and `review.html`; the latter provides A/B clips. `--boundary-mode word` is an unverified diagnostic mode.
 
-`--boundary-mode word` reproduces the original raw-word timing for diagnostics only and creates pending boundary tasks. It cannot establish acoustic acceptance.
+**Draft exported:** duration matches retained source samples and every proposal has a disposition. Check joins and neighbouring speech. Mapped word times and context-only corrections remain provisional; sources and edit mappings are retained.
 
-The command exports edited PCM audio, sample-accurate time mapping, retained raw/corrected words, mapped draft SRT, source bindings, `review-tasks.json` and `review.html` with relative-path A/B WAV excerpts. Intersections between acoustic cuts and old word times are marked for realignment. Each version uses a new directory; sources remain untouched.
-
-**Draft exported:** exact retained duration passes; every proposal has a boundary disposition; unresolved edits remain in the audio and `draft_review_required` stays explicit. Correction tasks, full listening and user acceptance remain pending. Inspect all joins and retained neighbours.
-
-## 4. Re-align and validate subtitles
+## 4. Align and check subtitles
 
 ```bash
 /path/to/venv/bin/python scripts/narration_review.py align \
   --result /absolute/path/agent-edit-v1 --output /absolute/path/alignment-v1
 ```
 
-This recomputes the supplied retained text's timings against the actual edited audio in local windows using the installed faster-whisper attention/DTW aligner. It uses neither an extra LLM endpoint nor a phoneme CTC model. Raw alignment, engine versions, input hashes, window text and warnings are retained. Attention alignment is not independent recognition or proof of word correctness; local probabilities are not calibrated timing confidence.
+This re-times the retained text against the edited WAV using local attention/DTW alignment, then applies the existing subtitle layout. Read `QC.json`: timing, probability and layout warnings require dispositions. Shared timed units preserve zero-duration text without inventing individual boundaries.
 
-For display only, zero-duration tokens can share a neighbouring timed unit, preserving every character without inventing individual timestamps. Raw measurements and coalescing notes remain available. Invalid timing blocks SRT export. Structurally valid results use the existing `process_audio.word_cues` single-line layout, and warnings keep the subtitles at review-draft status. `alignment_review_required` / `draft_review_required` remain incomplete stages; an exported SRT alone does not clear them.
-
-Transcribe the final edited WAV separately with the normal `process_audio.py transcribe` command to check retained wording and possible residual restarts. Compare it with the planned retained text; recognition disagreement triggers local inspection, not silent replacement of corrected text. Source recognizer reruns cannot prove full cleanup.
-
-If subtitle layout fails after successful model alignment, preserve `transcript.aligned.json` and the QC failure. Resume into a new directory without running the model again:
+To regenerate QC/review files from saved alignment without rerunning the model:
 
 ```bash
 /path/to/venv/bin/python scripts/narration_review.py resume \
-  --alignment /absolute/path/failed-alignment/transcript.aligned.json \
+  --alignment /absolute/path/alignment-v1/transcript.aligned.json \
   --result /absolute/path/agent-edit-v1 --output /absolute/path/resumed-review
 ```
 
-Resume validates source bindings and produces an explicit review status even when a long technical term still cannot fit the subtitle policy. It does not relax the policy or certify the audio.
+Separately transcribe the edited WAV with `process_audio.py transcribe`; reconcile wording under [retakes.md](retakes.md). Re-align any changed wording.
 
-**Alignment reviewed:** all structural errors are resolved, all timing/text warnings have evidence-backed dispositions, layout passes and all input bindings remain current. Full final speech listening and user acceptance are separate gates.
+Resume retries the same layout; unresolved errors remain pending. Changed wording returns to `align` rather than overwriting saved evidence.
 
-## 5. Compare versions and obtain acceptance
+**Subtitles ready for delivery review:** bindings are current, timing/layout errors are resolved and warnings have evidence-backed dispositions. A subtitle failure leaves the WAV available for audio review.
 
-```bash
-/path/to/venv/bin/python scripts/compare_audio_edits.py \
-  --baseline /absolute/path/old/edit-report.json \
-  --previous /absolute/path/previous-draft/edit-report.json \
-  --candidate /absolute/path/agent-edit-v1/edit-report.json \
-  --output /absolute/path/comparison-v1
-```
+## 5. Compare and hand off
 
-The comparison requires identical unchanged source audio. It verifies retained PCM interiors excluding the 6.25-ms join margins, measures source energy around actual cuts and exports matching source/old/previous/candidate listening windows. The `--previous` version is optional. Anchors inside another version's removed region fail explicitly; resolve the overlapping comparison scope rather than claiming a matched comparison.
+For versions derived from the same unchanged source, use `compare_audio_edits.py --help` to generate matched listening excerpts and retained-sample checks. This CLI requires identical source hashes; different denoising/gain sources need manual comparison after verifying a common timeline.
 
-**Accepted:** report unresolved issues, provisional text corrections, alignment/layout and listening coverage under processing.md. Obtain explicit acceptance of the delivered version before downstream production. Draft generation, quiet endpoints, identical retained samples, clean ASR and passing tests alone never establish production readiness.
+Deliver the WAV, review page and reports, identifying unresolved audio and subtitle tasks separately. Apply the speech-review and acceptance gates linked above before downstream production.

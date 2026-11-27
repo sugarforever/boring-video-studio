@@ -60,6 +60,9 @@ def prepare(audio, transcript, script, output):
             hints.append({'kind':'long_word_span','start':w['start'],'end':w['end'],'word':w['id'],
                           'interpretation':'possible pause/restart absorbed into ASR word timing'})
         previous=w['end']
+    if duration-previous>=1.2:
+        hints.append({'kind':'long_gap','start':previous,'end':duration,
+                      'previous_word':words[-1]['id'],'interpretation':'possible trailing silence OR omitted speech; inspect audio'})
     save(output/'inspection-hints.json',hints)
     lines=['# Agent review input','', 'Reference script (context, not spoken-word authority):',
            paths['script'].read_text(encoding='utf-8'),'',
@@ -121,7 +124,7 @@ def apply(review, decisions, output, boundary_mode='acoustic'):
         if boundary_mode=='word':
             boundary=dict(cut,status='unverified',reason='diagnostic raw word edges; acoustic validation skipped')
         else:
-            previous=words[a-1]['start'] if a else 0.
+            previous=words[a-1]['end'] if a else 0.
             following=words[b+1]['start'] if b+1<len(words) else bundle['duration']
             boundary=refine_cut(pcm,rate,cut['start'],cut['end'],previous,following)
         boundary['first']=words[a]['id'];boundary['last']=words[b]['id']

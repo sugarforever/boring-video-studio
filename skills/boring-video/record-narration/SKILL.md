@@ -52,11 +52,11 @@ Tell the user that first use may download model weights; audio processing and tr
 
 This uses ffmpeg-normalize to measure and apply a uniform gain, then transcribes `narration.wav`. Preserve the loudness report: peak headroom can require a quieter target. A dynamic fallback stops export rather than amplifying quiet passages separately. Normalization preserves relative levels; it does not remove noise. Optional background suppression is a separate preceding stage with its own review gate. Use `scripts/process_audio.py --help` and its subcommand help for alternate inputs or model settings.
 
-**Recognition saved:** `transcript.raw.json` preserves original ASR segments and word timings before subtitle export. **Ready for editing:** the WAV is decodable with positive duration, raw cues are nonempty and usable for locating speech, and the raw SRT exists. Successful initial layout writes `transcript.initial.json` and `subtitles.initial.srt`; otherwise `initial-layout-status.json` records the pending alignment/layout issue. Preserve raw zero-duration tokens; shared timed units retain their text without inventing individual timestamps. A subtitle-layout failure leaves successful recognition available for evidence-based editing. For other export failures, follow the saved-transcript branch in [recovery.md](references/recovery.md). Final subtitle delivery still requires step 6's alignment and layout checks.
+**Ready for editing:** the WAV is decodable, raw cues locate speech, and `transcript.raw.json` plus the raw SRT are saved. Initial subtitles either export or `initial-layout-status.json` records the pending issue. Retain raw zero-duration tokens and their shared-timing notes. Continue evidence-based editing from successful recognition; use [recovery.md](references/recovery.md) for other export failures. Final subtitle checks belong to step 6.
 
 ## 4. Resolve retakes before correcting subtitles
 
-For a transcript-first cleanup draft driven by the current agent, use [agent-edit.md](references/agent-edit.md). It defines bound evidence, word-ID decisions and local A/B previews; its output still requires the review below.
+For transcript-based decisions, acoustic cuts and local review previews, follow [agent-edit.md](references/agent-edit.md).
 
 Before subtitle correction, follow [retakes.md](references/retakes.md), even when transcription is fluent. Preserve raw recognition as evidence.
 

@@ -54,6 +54,32 @@ class AgentEditTests(unittest.TestCase):
         self.assertIn('看看工具怎样使用', (self.root/'result/subtitles.draft.srt').read_text())
         self.assertTrue((self.root/'result/review.html').exists())
 
+    def test_acoustic_cut_preserves_the_whole_previous_word(self):
+        import numpy as np
+        x=np.full(4*48000,10,dtype=np.int16)
+        for a,b in [(.1,.3),(.7,1.5),(2.65,3.2)]:
+            n=round((b-a)*48000)
+            x[round(a*48000):round(b*48000)]=(5000*np.sin(np.arange(n)*.1)).astype(np.int16)
+        with wave.open(str(self.audio),'wb') as f:
+            f.setparams((1,2,48000,0,'NONE','not compressed'));f.writeframes(x.tobytes())
+        self.tx.write_text(json.dumps({'words':[
+            {'word':'必须保留完整','start':.1,'end':.99},
+            {'word':'废弃','start':1.,'end':1.5},
+            {'word':'完整重说','start':2.65,'end':3.2}]}))
+        b=self.m.prepare(self.audio,self.tx,self.script,self.root/'protected')
+        plan={'bundle_id':b['bundle_id'],'corrections':[],'cuts':[{
+            'first':'w000001','last':'w000001','replacement_first':'w000002',
+            'replacement_last':'w000002','reason':'discard abandoned attempt'}]}
+        self.m.apply(self.root/'protected',plan,self.root/'result')
+        report=json.loads((self.root/'result/edit-report.json').read_text())
+        self.assertEqual(report['cuts'],[], 'Internal silence in a kept word must not authorize deleting its tail')
+
+    def test_trailing_gap_is_available_for_omitted_speech_inspection(self):
+        self.tx.write_text(json.dumps({'words':[{'word':'开头','start':.1,'end':1.}]}))
+        self.m.prepare(self.audio,self.tx,self.script,self.root/'trailing')
+        hints=json.loads((self.root/'trailing/inspection-hints.json').read_text())
+        self.assertTrue(any(h['start']==1. and h['end']==5. for h in hints))
+
     def test_prepare_keeps_zero_duration_token_in_shared_timed_unit(self):
         self.tx.write_text(json.dumps({'words':[
           {'word':'应','start':.5,'end':1.}, {'word':'用','start':1.,'end':1.},

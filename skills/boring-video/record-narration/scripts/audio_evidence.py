@@ -44,14 +44,14 @@ def quiet_runs(db, offset, threshold):
     return runs
 
 
-def refine_cut(samples, rate, start, end, previous_word_start, next_word_start):
+def refine_cut(samples, rate, start, end, previous_word_end, next_word_start):
     """Keep cuts in unambiguous quiet runs bounded by neighbouring kept speech.
 
-    previous_word_start bounds the search, not a claim about its actual end.
+    The previous kept word's full timed span is protected; uncertain boundaries stay unapplied.
     No valid run -> leave the proposed deletion unresolved, never force a cut.
     """
     duration=len(samples)/rate
-    if not 0<=previous_word_start<=start<end<=next_word_start<=duration:
+    if not 0<=previous_word_end<=start<end<=next_word_start<=duration:
         return {'status':'unresolved','reason':'invalid neighbour bounds'}
     db,offset=levels(samples,rate,max(0,start-1.5),min(duration,next_word_start+.7))
     if not len(db):return {'status':'unresolved','reason':'no samples'}
@@ -60,8 +60,8 @@ def refine_cut(samples, rate, start, end, previous_word_start, next_word_start):
         return {'status':'unresolved','reason':'insufficient speech/room contrast'}
     threshold=float(min(np.percentile(audible,20)+10,np.percentile(audible,95)-20))
     runs=quiet_runs(db,offset,threshold)
-    before=[(max(a,previous_word_start+.02,start-.65),min(b,start+.45))
-            for a,b in runs if b>max(previous_word_start+.02,start-.65) and a<start+.45]
+    before=[(max(a,previous_word_end+.02,start-.65),min(b,start+.45))
+            for a,b in runs if b>max(previous_word_end+.02,start-.65) and a<start+.45]
     before=[(a,b) for a,b in before if b-a>=.08-1e-8]
     after=[(max(a,end-.65,next_word_start-.65),min(b,next_word_start+.05))
            for a,b in runs if b>max(end-.65,next_word_start-.65) and a<next_word_start+.05]
