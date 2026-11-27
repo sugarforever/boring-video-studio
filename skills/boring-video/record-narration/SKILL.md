@@ -56,6 +56,8 @@ This uses ffmpeg-normalize to measure and apply a uniform gain, then transcribes
 
 ## 4. Resolve retakes before correcting subtitles
 
+For a transcript-first cleanup draft driven by the current agent, use [agent-edit.md](references/agent-edit.md). It defines bound evidence, word-ID decisions and local A/B previews; its output still requires the review below.
+
 Before subtitle correction, follow [retakes.md](references/retakes.md), even when transcription is fluent. Preserve raw recognition as evidence.
 
 **Supported edits exported:** cuts have an edit report and a fresh transcript; without cuts, reuse step 3's artifacts. The audio-review ledger accounts for candidates, user reports and remaining gaps; `REVIEW.md` summarizes its status. Correct only the final audio's transcript.
