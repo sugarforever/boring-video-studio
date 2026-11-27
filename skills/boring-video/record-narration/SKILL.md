@@ -5,7 +5,7 @@ description: Use for webcam framing, script-based narration recording with optio
 
 # Record Narration
 
-Produce human-recorded narration and reviewed, timed subtitles from an existing UTF-8 script. Resolve bundled paths relative to this skill's directory; run the commands below there with absolute project paths. Treat recorded speech as the content authority and the script as context for recognition and progression. Preserve original takes, coherent improvisation and speaking speed. Remove abandoned retries when a complete replacement is identifiable. General pause compression and TTS are outside this workflow; optional low-level background suppression is defined in step 3.
+Produce human-recorded narration and reviewed, timed subtitles from an existing UTF-8 script. Resolve bundled paths relative to this skill's directory; run the commands below there with absolute project paths. Treat recorded speech as the content authority and the script as context for recognition and progression. Preserve original takes, coherent improvisation and speaking speed. Remove abandoned retries when a complete replacement is identifiable. General pause compression and TTS are outside this workflow; recording-handoff processing and acceptance are defined in [processing.md](references/processing.md).
 
 For webcam preview or capture, a handoff containing `video`, or camera export, read [camera.md](references/camera.md) before session setup or processing.
 
@@ -40,13 +40,13 @@ Leave the service running and yield the chat while they record. Explain that the
 
 Use an existing compatible environment when available. Recording needs Python 3.10+; processing needs `ffmpeg` and `ffprobe`, plus this skill’s `requirements.txt` installed in a Python 3.11/3.12 virtual environment outside the skill directory. If dependencies are missing, or only part of processing succeeded, read [recovery.md](references/recovery.md).
 
-When the user requests noise reduction or reports background voices, read [background.md](references/background.md) before preparation. It defines optional low-level suppression, reference exports and a listening gate; it does not promise separation of overlapping speakers.
+On recording handoff, read [processing.md](references/processing.md) and complete its noise-reduction stage before normalization, transcription and retake editing. Use the treated candidate with `--audio` in the command below, retaining its session and script association. For quieter pauses or distant background voices, [background.md](references/background.md) defines an optional suppression helper.
 
 Tell the user that first use may download model weights; audio processing and transcription run locally. Choose the spoken language (`zh` for Chinese, `auto` when uncertain) and a new output directory:
 
 ```bash
 /path/to/venv/bin/python scripts/process_audio.py prepare \
-  --session /absolute/path/session --output /absolute/path/processed-v1 \
+  --audio /absolute/path/new-version/denoised.wav --output /absolute/path/processed-v1 \
   --transcribe --language zh
 ```
 
@@ -85,6 +85,6 @@ python3 scripts/process_audio.py correct \
 
 Read [subtitles.md](references/subtitles.md) and generate delivery subtitles from the corrected transcript. This required pass defines the single-line policy, natural boundary review, reading-speed checks and timing provenance. Follow its acceptance criteria before claiming subtitle delivery is complete. Record its results in `REVIEW.md` alongside the audio review defined in the retake reference.
 
-Deliver clickable absolute paths to the final WAV, final subtitle SRT and corresponding transcript JSON, script snapshot and review notes; include the edit report when cuts were made. If cues were merged, link the delivery exports and retain the reviewed originals as provenance. Keep original takes and chunks available. Pass these artifacts to the next production step; replacing an existing project's audio requires the user's requested scope to cover that change.
+Deliver clickable absolute paths to the final WAV, final subtitle SRT and corresponding transcript JSON, script snapshot and review notes; include the edit report when cuts were made. If cues were merged, link the delivery exports and retain the reviewed originals as provenance. Keep original takes and chunks available. Follow [processing.md](references/processing.md) to deliver the processing report and obtain explicit acceptance of this audio version before downstream production. Replacing an existing project's audio requires the user's requested scope to cover that change.
 
 **Delivery status:** report the audio-review result under the retake reference's completion criteria alongside subtitle verification. Unfinished speech review remains incomplete work in both `REVIEW.md` and the final response.
