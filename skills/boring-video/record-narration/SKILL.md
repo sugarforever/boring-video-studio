@@ -52,9 +52,11 @@ Tell the user that first use may download model weights; audio processing and tr
 
 This uses ffmpeg-normalize to measure and apply a uniform gain, then transcribes `narration.wav`. Preserve the loudness report: peak headroom can require a quieter target. A dynamic fallback stops export rather than amplifying quiet passages separately. Normalization preserves relative levels; it does not remove noise. Optional background suppression is a separate preceding stage with its own review gate. Use `scripts/process_audio.py --help` and its subcommand help for alternate inputs or model settings.
 
-**Recognition saved:** `transcript.raw.json` preserves the ASR's original segments and word timings before SRT export. Raw cues may exceed delivery limits; `transcript.initial.json` and `subtitles.initial.srt` apply the selected limits immediately after recognition. **Ready for editing:** the WAV is decodable with positive duration, raw cues are nonempty and usable for locating speech, and both raw and initial SRT exports exist. If export fails after recognition is saved, follow the saved-transcript branch in [recovery.md](references/recovery.md); retain the evidence and repair its timing rather than repeating successful recognition. Final subtitle layout is a separate gate in step 6.
+**Ready for editing:** the WAV is decodable, raw cues locate speech, and `transcript.raw.json` plus the raw SRT are saved. Initial subtitles either export or `initial-layout-status.json` records the pending issue. Retain raw zero-duration tokens and their shared-timing notes. Continue evidence-based editing from successful recognition; use [recovery.md](references/recovery.md) for other export failures. Final subtitle checks belong to step 6.
 
 ## 4. Resolve retakes before correcting subtitles
+
+For transcript-based decisions, acoustic cuts and local review previews, follow [agent-edit.md](references/agent-edit.md).
 
 Before subtitle correction, follow [retakes.md](references/retakes.md), even when transcription is fluent. Preserve raw recognition as evidence.
 

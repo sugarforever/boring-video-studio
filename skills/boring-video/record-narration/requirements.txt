@@ -1,4 +1,7 @@
 # Processing dependencies. The Python standard library alone can run the recorder.
 ffmpeg-normalize==1.45.2
-faster-whisper>=1.1,<2
+faster-whisper>=1.2.1,<2
 jieba==0.42.1
+
+# Acoustic planning and PCM comparisons use NumPy directly.
+numpy>=1.24,<3

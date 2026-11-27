@@ -132,11 +132,10 @@ class ProcessingTests(unittest.TestCase):
         engine = SimpleNamespace(transcribe=lambda *a, **kw: (iter([segment]), SimpleNamespace(language='zh')))
         module = SimpleNamespace(WhisperModel=lambda *a, **kw: engine)
         with tempfile.TemporaryDirectory() as tmp, patch.dict('sys.modules', {'faster_whisper': module}):
-            with patch.object(p, 'word_cues', side_effect=ValueError('layout failed')) as layout:
-                with self.assertRaises(ValueError):
-                    p.transcribe('fixture.wav', tmp)
-                layout.assert_called_once()
-                result = json.loads((Path(tmp)/'transcript.raw.json').read_text())
+            result = p.transcribe('fixture.wav', tmp)
+            status=json.loads((Path(tmp)/'initial-layout-status.json').read_text())
+            self.assertEqual(status['status'],'needs_alignment_or_layout_review')
+            self.assertFalse((Path(tmp)/'subtitles.initial.srt').exists())
             raw = Path(tmp)/'transcript.raw.json'
             self.assertEqual(json.loads(raw.read_text())['words'][0]['word'], word.word)
             self.assertEqual(result['segments'][0]['end'], 8)
