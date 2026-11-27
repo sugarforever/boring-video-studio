@@ -42,7 +42,7 @@ Tell the user that first use may download model weights; audio processing and tr
 
 ```bash
 /path/to/venv/bin/python scripts/process_audio.py prepare \
-  --session /absolute/path/session --output /absolute/path/processed-v1 \
+  --audio /absolute/path/new-version/denoised.wav --output /absolute/path/processed-v1 \
   --transcribe --language zh
 ```
 
