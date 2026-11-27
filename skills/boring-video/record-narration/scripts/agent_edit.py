@@ -85,7 +85,7 @@ def srt(words):
     return '\n\n'.join(f"{i}\n{stamp(g[0]['start'])} --> {stamp(g[-1]['end'])}\n{''.join(w['text'] for w in g).strip()}" for i,g in enumerate(groups,1))+'\n'
 
 
-def apply(review, decisions, output):
+def apply(review, decisions, output, boundary_mode='acoustic'):
     review,output=Path(review),Path(output)
     bundle=json.loads((review/'bundle.json').read_text(encoding='utf-8'))
     expected=bundle.copy(); identity=expected.pop('bundle_id')
@@ -110,22 +110,54 @@ def apply(review, decisions, output):
         cuts.append({'start':words[a]['start'],'end':words[b]['end'],'reason':c['reason']})
     for r,t in replacements:
         if any(a<=t and r<=b for a,b in ranges): raise ValueError('A replacement would be deleted')
-    # ASR boundaries are only a draft: never expand into neighbouring words.
-    # Require a clean, positive gap or explicit user listening of the exported joins.
+    if boundary_mode not in ('acoustic','word'): raise ValueError('Unknown boundary mode')
+    from audio_evidence import read_pcm, refine_cut
+    pcm,rate=read_pcm(bundle['bindings']['audio']['path'])
+    boundary_report=[]; approved=[]; approved_ranges=[]
+    for cut,(a,b) in zip(cuts,ranges):
+        if boundary_mode=='word':
+            boundary=dict(cut,status='unverified',reason='diagnostic raw word edges; acoustic validation skipped')
+        else:
+            previous=words[a-1]['start'] if a else 0.
+            following=words[b+1]['start'] if b+1<len(words) else bundle['duration']
+            boundary=refine_cut(pcm,rate,cut['start'],cut['end'],previous,following)
+        boundary['first']=words[a]['id'];boundary['last']=words[b]['id']
+        if boundary['status'] in ('ready','unverified'):
+            proposal=dict(cut,start=boundary['start'],end=boundary['end'])
+            if approved and proposal['start']<approved[-1]['end']:
+                boundary.update(status='unresolved',reason='refined cuts overlap')
+            else:
+                approved.append(proposal);approved_ranges.append((a,b))
+        boundary_report.append(boundary)
+    cuts,ranges=approved,approved_ranges
     result_audio=edit(bundle['bindings']['audio']['path'],cuts,output)
     report=json.loads((output/'edit-report.json').read_text())
-    final=[]
+    final=[]; mapping_issues=[]
     for i,w in enumerate(words):
         if any(a<=i<=b for a,b in ranges): continue
-        for kept in report['kept']:
-            if kept['source_start']-1e-5<=w['start'] and w['end']<=kept['source_end']+1e-5:
-                shift=kept['source_start']-kept['output_start']
-                final.append(dict(w,source_start=w['start'],source_end=w['end'],
-                                  start=w['start']-shift,end=w['end']-shift));break
-        else: raise ValueError('Retained word crosses cut; inspect alignment')
+        overlaps=[(max(w['start'],k['source_start']),min(w['end'],k['source_end']),k)
+                  for k in report['kept'] if w['start']<k['source_end'] and w['end']>k['source_start']]
+        if not overlaps: raise ValueError('Retained word has no surviving audio; inspect cut')
+        start,end,kept=max(overlaps,key=lambda item:item[1]-item[0])
+        if abs(start-w['start'])>1e-5 or abs(end-w['end'])>1e-5:
+            mapping_issues.append({'id':w['id'],'reason':'source timestamp intersects acoustic edge; realignment required'})
+        shift=kept['source_start']-kept['output_start']
+        final.append(dict(w,source_start=w['start'],source_end=w['end'],
+                          start=start-shift,end=end-shift))
     result={'audio':str(result_audio),'bundle_id':identity,'words':final,
-            'status':'awaiting_audio_approval','alignment':'mapped source ASR times; not retranscribed',
+            'status':'draft_review_required','boundary_mode':boundary_mode,
+            'unresolved_cuts':sum(x['status']=='unresolved' for x in boundary_report),
+            'mapping_issues':mapping_issues,'alignment':'mapped source ASR times; not retranscribed',
             'review':'text-based edit draft; full speech and cut-boundary listening pending'}
+    review_tasks=[{'kind':'boundary','status':'pending','word':x['first'],'reason':x['reason']}
+                  for x in boundary_report if x['status']!='ready']
+    review_tasks.extend({'kind':'recognition_correction','status':'pending','word':c['id'],
+                         'reason':c['reason']} for c in decisions.get('corrections',[]))
+    review_tasks.extend([{'kind':'final_alignment','status':'pending'},
+                         {'kind':'full_speech_listening','status':'pending'},
+                         {'kind':'user_acceptance','status':'pending'}])
+    save(output/'review-tasks.json',review_tasks)
+    save(output/'boundary-report.json',boundary_report)
     save(output/'transcript.draft.json',result);save(output/'decisions.json',decisions)
     save(output/'source-bundle.json',bundle);save(output/'retake-cuts.json',cuts)
     (output/'subtitles.draft.srt').write_text(srt(final),encoding='utf-8')
@@ -138,9 +170,9 @@ def apply(review, decisions, output):
         edited=f'after-{i+1}.wav'
         excerpt(result_audio, output/edited, max(0,seam-3), min(report['duration_after'],seam+3))
         rows.append(f'<section><h2>{i+1}. {html.escape(c["reason"])}</h2><p>Source {c["start"]:.3f}–{c["end"]:.3f}s</p>Before <audio controls src="{html.escape(source)}"></audio> After <audio controls src="{html.escape(edited)}"></audio></section>')
-    page='<meta charset="utf-8"><title>Narration edit review</title><style>body{max-width:960px;margin:40px auto;font:18px system-ui}section{border-top:1px solid #ccc;padding:20px 0}audio{display:block;width:100%}</style><h1>待试听的剪辑草稿</h1><p>当前 agent 基于文字决策；未声称完成全片听审。字幕使用映射后的原始词时间。请检查是否漏剪、误删、伤字或接缝不自然。</p><p><a href="subtitles.draft.srt">草稿字幕</a> · <a href="REVIEW.md">处理报告</a> · <a href="decisions.json">剪辑决策</a></p><h2>完整处理版本</h2><audio controls src="'+html.escape(result_audio.name)+'"></audio>'+''.join(rows)
+    page='<meta charset="utf-8"><title>Narration edit review</title><style>body{max-width:960px;margin:40px auto;font:18px system-ui}section{border-top:1px solid #ccc;padding:20px 0}audio{display:block;width:100%}</style><h1>待试听的剪辑草稿</h1><p>当前 agent 基于文字决策；未声称完成全片听审。字幕使用映射后的原始词时间。请检查是否漏剪、误删、伤字或接缝不自然。</p><p><a href="boundary-report.json">切点证据</a> · <a href="review-tasks.json">未完成检查</a></p><p><a href="subtitles.draft.srt">草稿字幕</a> · <a href="REVIEW.md">处理报告</a> · <a href="decisions.json">剪辑决策</a></p><h2>完整处理版本</h2><audio controls src="'+html.escape(result_audio.name)+'"></audio>'+''.join(rows)
     (output/'review.html').write_text(page,encoding='utf-8')
-    (output/'REVIEW.md').write_text(f'# Audio processing review\n\nStatus: awaiting_audio_approval\n\n{len(cuts)} text-supported cuts; removed {sum(c["end"]-c["start"] for c in cuts):.3f}s.\n\nOriginal: {bundle["bindings"]["audio"]["path"]}\n\nOutput: {result_audio}\n\nNoise treatment: inherited from input, not performed by this command.\n\nAll original files retained. Text corrections preserve raw_text. Full speech review, boundary listening and fresh subtitle alignment remain pending. Source/transcript correspondence is supplied by caller; hashes prevent later changes, not wrong initial pairing.\n',encoding='utf-8')
+    (output/'REVIEW.md').write_text(f'# Audio processing review\n\nStatus: draft_review_required\n\n{len(cuts)} text-supported cuts; removed {sum(c["end"]-c["start"] for c in cuts):.3f}s.\n\nOriginal: {bundle["bindings"]["audio"]["path"]}\n\nOutput: {result_audio}\n\nNoise treatment: inherited from input, not performed by this command.\n\nAll original files retained. Text corrections preserve raw_text. Full speech review, boundary listening and fresh subtitle alignment remain pending. Source/transcript correspondence is supplied by caller; hashes prevent later changes, not wrong initial pairing.\n',encoding='utf-8')
     return result
 
 
@@ -159,10 +191,11 @@ def main():
     for key in ('audio','transcript','script','output'):init.add_argument('--'+key,type=Path,required=True)
     run=sub.add_parser('apply')
     for key in ('review','decisions','output'):run.add_argument('--'+key,type=Path,required=True)
+    run.add_argument('--boundary-mode',choices=['acoustic','word'],default='acoustic')
     a=p.parse_args()
     try:
         if a.command=='prepare': result=prepare(a.audio,a.transcript,a.script,a.output)
-        else: result=apply(a.review,json.loads(a.decisions.read_text(encoding='utf-8')),a.output)
+        else: result=apply(a.review,json.loads(a.decisions.read_text(encoding='utf-8')),a.output,a.boundary_mode)
         print(json.dumps({'bundle_id':result['bundle_id'],'output':str(a.output)},ensure_ascii=False))
     except (ValueError,KeyError,OSError,TypeError,wave.Error) as e:
         print(f'Error: {e}',file=sys.stderr);return 1
